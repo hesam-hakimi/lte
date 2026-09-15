@@ -1,0 +1,28 @@
+{
+  "format": "etl-documentation-handoff-v1",
+  "purpose": "Inputs for internal team test kit preparation; no VSIX included",
+  "algorithm": "SHA-256",
+  "hash_scope": "Exact bytes of listed content entries; HASHES.json and ZIP container excluded",
+  "source_contract": {
+    "version": "1.2",
+    "bytes": 23684,
+    "sha256": "5387aa5c42940eceb2ffcd4d68d732ad3d57f1c69c2288c66bd0f32455e6f75b"
+  },
+  "files": [
+    {
+      "path": "README_FIRST.md",
+      "bytes": 2109,
+      "sha256": "945a163bd30d3192ce945ebde2a4da30fa853e9879f0d38b66c3f7713a6d6647"
+    },
+    {
+      "path": "PROMPT.md",
+      "bytes": 13049,
+      "sha256": "126fe9f0a072115483c2228623255d3f95905a6ec39bd37df51c017a462d9631"
+    },
+    {
+      "path": "references/09_AGILE_REPAIR_AND_VERIFICATION_CONTRACT.md",
+      "bytes": 23684,
+      "sha256": "5387aa5c42940eceb2ffcd4d68d732ad3d57f1c69c2288c66bd0f32455e6f75b"
+    }
+  ]
+}
