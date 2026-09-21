@@ -1,73 +1,80 @@
-Continue the existing CLUE project. Verify whether the current input mapping, Symcor/Tungsten enrichment, and actual generated Excel test outputs match the supplied business workbook column by column. Complete the focused audit and local verification; do not stop at a plan or rely on earlier test counts.
+Continue the existing CLUE project and implement the scoped fixes identified by the Excel conformance audit.
 
-All responses, reports and test artifacts must be in English. Use native filesystem, Git and workbook-reading tools; no screenshots, OCR or browser automation.
+USER CLARIFICATION — AUTHORITATIVE FOR THIS WORKFLOW
 
-1. Establish the current code and workbook
+Columns A:W already exist in the input file. They are supplied input transaction data, not fields to retrieve from Symcor or Tungsten. Preserve them in the corresponding output rows and append the enrichment. Do not continue treating their source ownership as an unresolved business question.
 
-Start with C:\repos\W001CLUEinitialRepo. Verify the repository, branch, HEAD and uncommitted state. Read applicable AGENTS.md and docs\handoff\clue\START_NEW_SESSION.txt, then its referenced current handoff and input/output mapping decisions. Reconcile newer evidence forward. Preserve other sessions’ work and existing staging.
+For the workbook inspected in the audit, the target is 41 columns, A:AO:
 
-Locate and read the actual supplied .xlsx workbook, shown in the screenshots as All Transactions_ip_op_template.xlsx. Confirm its absolute path, relevant worksheet, header row, version/provenance and SHA-256. Do not silently select an older or ambiguous copy. Read cells and styles programmatically, using an existing workbook library such as openpyxl.
+* A:W: 23 existing input columns, preserved in order.
+* X:Y: the two Symcor front/back image outputs.
+* Z:AO: eight Tungsten field/confidence pairs, in the exact template order.
 
-The user-defined target is:
+AP and AQ are absent from that workbook. Do not invent additional fields.
 
-* A:W, positions 1-23: 23 yellow input/base transaction columns.
-* X:Y, positions 24-25: 2 purple Symcor front/back cheque-image output columns.
-* Z:AQ, positions 26-43: 18 Tungsten OCR output columns, including the confidence columns defined in the workbook.
-* The transaction table must contain exactly these 43 columns in this order.
+This authorizes scoped implementation changes, focused offline tests and documentation updates. Complete all work supported by the confirmed contract without repeatedly asking for routine approval. All responses, code, comments and artifacts must be in English. Use native filesystem, Git and workbook tools; no screenshots, OCR or browser automation.
 
-Use the workbook for exact headers, positions and presentation. Screenshots are context only: several headers are clipped and AP/AQ cannot be established from them. Never invent missing headers or provider mappings. If the workbook conflicts with the user’s ranges, report the discrepancy explicitly.
+1. Resume the current checkout and reuse the audit
 
-If the .xlsx is unavailable, complete whatever code/output inspection is possible, identify the missing evidence and request the actual workbook. Do not claim full conformity or reconstruct an authoritative template from screenshots.
+Start at C:\repos\W001CLUEinitialRepo. Verify branch, HEAD and working-tree/index state. Read applicable AGENTS.md, docs\handoff\clue\START_NEW_SESSION.txt and the current referenced handoff/task register. Preserve other sessions’ changes and staging.
 
-2. Trace the real data path
+Locate and read CLUE_BUSINESS_TEMPLATE_CONFORMANCE_AUDIT_2026-09-21.md, verify_business_template_conformance.py, the audited workbook and relevant current input/output contracts. Reuse the audit evidence; do not repeat the broad audit or restart the project. Record the actual input/template paths and template identity used.
 
-Inspect the configured input reader, normalization, Symcor request/response mapping and cheque association, Tungsten response mapping, and final Excel writer. Record the relevant code/configuration locations without exposing credentials.
+2. Implement input preservation and request mapping
 
-Distinguish the established upstream DAT input contract from the Excel business/enrichment template. Do not assume this workbook replaces DAT ingestion. Explain how each A:W value reaches the final report through the current pipeline, including upstream-supplied fields and missing mappings.
+Inspect the actual supplied input file and choose or minimally extend the appropriate input profile. Do not assume its serialization solely from the Excel screenshot, and do not use the legacy DAT_CSV_V1 schema to override the user’s confirmed A:W input contract. Preserve existing DAT support where required by the accepted project scope.
 
-Verify:
+Read the exact 23 input headers and carry each source row through enrichment without losing or renaming its A:W data. Preserve leading zeros, values, blanks, date/time and amount representation, and relevant formatting. Keep the original input file unchanged.
 
-* A:W retain the corresponding source-row values and intended representation. Check leading-zero identifiers, dates/times, amounts, blanks and row order. Identify approved transformations and unintended changes separately.
-* X:Y contain the correct front/back result for the correct transaction and cheque. Establish the required representation from the accepted contract: image, file reference/hyperlink, encoded content, or another defined representation. Column labels alone do not settle this.
-* Z:AQ map each OCR value and its confidence to the exact intended position. Preserve repeated header labels such as “Confidence level”; use column position and associated field to disambiguate them. Do not silently deduplicate, rename, shift or overwrite these columns.
-* Confidence scale, numeric/text representation, missing values, and zero confidence follow the documented provider/business contract. Flag unresolved rules rather than inventing them.
-* Multiple matches, missing image sides, OCR failures and non-cheque rows follow the existing accepted behavior. Prove row/cheque association; account plus date alone must not be assumed unique. Do not invent a new row-expansion policy.
+Map the subset of input fields required for Symcor requests into the existing internal request model using documented field meanings. Preserve all remaining input fields for output. Do not invent aliases or equate fields merely because their names look similar. Report any specific unresolved request-field meaning after completing the unblocked work.
 
-Treat unresolved provider field meanings and image representation as explicit business-contract gaps, even when the workbook layout is clear.
+Handle the actual supplied file shape, including blank X:AO output placeholders if present. Enrichment columns must not be required populated input fields. Keep legend/SLA/example annotations out of transaction processing. Validate missing or ambiguous required input headers with actionable errors.
 
-3. Build an independent column mapping
+Preserve established transaction/cheque association and RETURN_ALL_CHEQUES behavior. When an accepted multi-cheque result expands a row, copy the correct original A:W values to each related output row. Do not use account plus date as a unique key or introduce a new row-expansion policy.
 
-Create a 43-row comparison table, one row for each column A through AQ, containing:
+If the actual input file is unavailable, implement and test against a clearly identified synthetic input derived from the verified template headers. Report real-input validation as pending; do not reopen the confirmed source ownership of A:W.
 
-Column letter/index | Exact workbook header | Input/Symcor/Tungsten | Expected source and type/format | Actual code mapping | Actual generated output | PASS/FAIL/BLOCKED | Evidence or precise gap.
+3. Implement the business output layout
 
-Derive expected headers and order directly from the supplied workbook, independently of the application’s output constants. Cite repository-relative files, relevant symbols/lines and generated workbook cells. Do not use the implementation itself as the only source of expected results.
+Make the normal configured pipeline for this business workflow generate the template-compatible workbook. Do not create a separate test-only writer or manually reshape a generated workbook to make verification pass.
 
-Compare worksheet/header placement, header group fills, relevant cell formats and other material template formatting. Identify which sample, legend and SLA cells are explanatory, and keep them out of the transaction data. Do not convert an annotation into a new performance requirement.
+Use the template’s exact worksheet/header placement, 41 column positions, header text, group colors and material number/cell formats. Preserve repeated Confidence level headers positionally without deduplication or suffixes. Include no extra index, status or debug columns in the business table; retain diagnostics through the existing logging/sidecar mechanism.
 
-Check that no status, error, debug or index columns are silently inserted into A:AQ or appended to the business table. Report any conflict with an existing approved output contract instead of deleting fields automatically.
+Replace the current six-column-per-OCR-field layout in this business output with the required value/confidence pairs. Use the existing eight documented metadata fields whose names/order already match the template. Update stale documented input-column definitions, including missing T:W, and record eight confidence columns for this template in the contract.
 
-4. Verify actual generated output locally
+4. Resolve the remaining representation questions from evidence
 
-Inspect existing output artifacts and their generating command/revision. Where that evidence is insufficient, run a focused offline check through the real configured application mapping and Excel writer. Reuse existing offline adapters, sanitized provider fixtures and test helpers; do not build another simulator or use a test-only writer.
+Review existing accepted decisions, provider contracts and sanitized samples for:
 
-Use synthetic input and distinctive field/confidence values so swapped fields and wrong-row associations are detectable. Cover a successful enriched result and the relevant existing cases for repeated account/date transactions, missing images and partial/missing OCR. Reuse existing coverage where it already proves the contract; do not repeat the entire suite.
+* CP-D05: the required X:Y image representation, such as an image, file reference or hyperlink.
+* Confidence: each provider’s source scale and the required business output scale.
 
-Save a fresh synthetic output .xlsx through the application, then reopen it and compare its actual headers, positions, values, types and required formatting against the independent expectation. Verify all 43 columns, including AP and AQ. A workbook opening successfully or an old suite passing is not evidence of full conformity.
+Apply an already documented decision directly. A test fixture alone does not establish the business contract. Do not infer confidence scale from numeric magnitude or silently choose a production default. Preserve missing confidence distinctly from valid zero.
 
-Record exact commands, exit results, test counts, code revision and output paths. If verification is blocked by an unresolved mapping or missing fixture, explain exactly what was not tested. Offline conformity does not establish live Symcor/Tungsten connectivity or integration success.
+If either decision genuinely remains unresolved, complete the input preservation, layout, status fixes and all other supported changes. Isolate and report the precise unresolved representation; do not claim full conformance. Clearly label any test-only representation used in a synthetic workbook. Ask only the remaining concrete question after reviewing the available evidence, rather than stopping the whole task upfront.
 
-5. Scope and deliverables
+5. Fix the field-status defect
 
-This task authorizes inspection, focused offline verification, and creation of a reusable verification script/test, audit report and synthetic sample output where needed. Leave application behavior and configuration unchanged; list minimal proposed fixes for mismatches. Do not change the original workbook, credentials, CI/CD or .github content, commit/push, run live provider calls, or alter the separate DEV/F5 connectivity work.
+Inspect the reported app.py status fallback and fix it based on the individual field entry, not whether any other field was returned. A returned field must not be labeled not_returned_by_provider. Preserve authoritative provider statuses and distinguish missing values from valid zero or empty values according to the established contract.
 
-Keep raw customer data and populated business workbooks out of Git and reports. Store only safe schema evidence and synthetic artifacts in appropriate existing project locations. Update the current handoff/task register with demonstrated findings without creating competing “latest” documents.
+Add focused regression coverage for a mixed response containing returned and absent fields, including zero confidence. Avoid unrelated refactoring.
+
+6. Verify through the real pipeline and deliver
+
+Reuse existing sanitized fixtures, offline adapters and helpers. Generate a fresh synthetic .xlsx using the same input reader, mapping and writer used by the configured application, then reopen and compare it with expectations derived independently from the supplied template.
+
+Verify all 41 headers/positions, A:W value preservation, image-to-row association, all eight OCR value/confidence pairings and required formatting. Use distinct synthetic values to detect swapped fields. Reuse relevant coverage for repeated account/date transactions, accepted row expansion, missing image sides and partial OCR. Test the changed input validation and status behavior. Run only relevant regression checks; do not rerun the entire suite or build another simulator.
+
+Reuse the existing conformance checker, keeping its expected schema anchored to the verified 41-column template. Report structural/header equality and semantic mapping separately. Count PASS, FAIL and BLOCKED separately; define extra-column counts clearly. Do not weaken assertions to accommodate the current implementation.
+
+Update the existing audit/handoff/task register with the user’s input clarification, actual changes, commands/results and any remaining decisions. Do not modify CI/CD, .github content, credentials or the original workbook; do not commit/push, run live provider calls or alter the separate DEV/F5 work.
 
 Return:
 
-1. A clear overall verdict: MATCH, MISMATCH, or INCOMPLETE, with separate status for A:W, X:Y, Z:AQ and workbook layout.
-2. The complete 43-column mapping, exact mismatches and any unresolved business decisions.
-3. Absolute paths to the audit report, verification script/test and actual generated synthetic .xlsx, where produced.
-4. The verification commands/results and the smallest recommended fixes, with code locations.
+1. What changed and the exact affected files.
+2. A:W, X:Y, Z:AO and layout status, with remaining gaps clearly identified.
+3. Actual verification commands/results and the code revision/uncommitted state tested.
+4. Absolute paths to the generated synthetic output, updated mapping/report and verification tool.
+5. Only the business decisions or missing evidence that still prevent complete conformity.
 
-Claim MATCH only when the actual workbook and generated output support every required column and representation. If evidence is missing, name it precisely.
+Claim complete conformance only when the generated output and verified contracts support it. Keep offline file conformance separate from live Symcor/Tungsten integration status.
