@@ -1,15 +1,43 @@
-Continue the current CLUE session. Investigate and fix the mismatch between the embedded cheque images and the corresponding Tungsten metadata.
+Continue the current CLUE session. Perform a focused live verification after the reported F5 changes. Execute the tests using the existing project tools and provide actual results. All responses and artifacts must be in English.
 
-The observed workbook contains images showing mostly a document ID and front/back labels, while metadata contains “synthetic:” values and repeated confidence 93. Treat these as symptoms, not a confirmed diagnosis.
+New evidence:
 
-1. Reproduce the output using the existing application command. Identify the effective Symcor and Tungsten provider modes separately: fixtures, local simulator, or real service.
-2. Trace two distinct cheques from input row through document identity, image generation/retrieval, conversion, Tungsten request payload, raw response, parsed metadata, and final Excel image anchors and cells. Find exactly where the image content and metadata diverge. Provide code references and execution evidence.
-3. Implement the correction after establishing the cause:
-    * If synthetic images and responses are generated independently, create coherent fixtures from one deterministic cheque record. Images must visibly contain the fictional field values returned by the simulated response.
-    * If images, requests, responses, or workbook rows are associated incorrectly, fix the association using the actual cheque/document identity.
-    * Never replace real Tungsten results with expected fixture values or silently fall back to simulated responses.
-4. Preserve the accepted workbook contract: original A:W input fields, actual embedded front/back images in X:Y, and the eight metadata/confidence pairs in Z:AO. Preserve leading zeros, missing-image behavior, and multiple-cheque handling.
-5. Run the existing application pipeline and regenerate the workbook. Verify both content and row association. Include different cheques sharing the same account/date. Deliberately swap an image or response and confirm that the verification detects the mismatch. Reuse existing helpers and focused tests.
-6. Report the confirmed root cause, changes, executed checks, and regenerated workbook path. Report simulated consistency separately from real Tungsten OCR validation. If the real service was not called, explicitly mark real OCR validation NOT RUN.
+* The infrastructure team reports that F5 changes have been applied.
+* A colleague’s log shows a completed TLS 1.2 handshake and “SSL certificate verify ok” for penhubpat.td.com.
+* HEAD /aws/services/AwsService returned HTTP 404.
+* The source environment of that test is not established by the shared evidence.
+* Tungsten connectivity is reported working, but successful Symcor API execution remains unconfirmed.
 
-Complete the diagnosis, implementation, and local verification. Do not stop at a proposed fix. Preserve unrelated changes; do not modify infrastructure or CI/CD, deploy, commit, or push.
+1. Recover the existing test setup.
+    Read the current local handoff, endpoint configuration, previous failing test command, and relevant API contract/WSDL. Reuse the configured credentials, certificate, trust store, and existing test scripts without displaying secrets.
+
+Confirm the effective hostname, port, service path, proxy settings, and provider modes. Do not assume penhubpat.td.com, penhubsys.td.com, and sys.symcorF5.easyweb.td.com are interchangeable. Use the documented endpoint for the selected environment.
+
+2. Repeat the previous failing connection test.
+    Run from my laptop. If DEV is accessible through the existing configured access, run the equivalent test there separately.
+
+Record the source environment, UTC timestamp, resolved destination IP, TCP outcome, TLS outcome, certificate-verification setting/result, and HTTP status. Do not infer the remote-observed source IP from the local IP.
+
+Keep certificate verification enabled for a verified TLS result. Do not introduce –insecure, verify=False, or other bypasses. Report any existing bypass explicitly. A successful handshake alone does not establish client-certificate authentication or application authorization.
+
+3. Test a real Symcor operation through the application.
+    Use the actual CLUE client and its normal HTTP/TLS stack, not only a standalone curl probe. Run the documented SOAP request using the correct service path, operation, headers, and existing approved test input.
+
+Follow the implemented authentication/search/document/image retrieval sequence as required by the contract. Do not invent operations or guess endpoint paths.
+
+A HEAD response, HTTP 200 alone, or an empty result does not prove successful cheque retrieval. Inspect SOAP faults and application status. If a known cheque is retrieved, verify the returned document identity and that the image payload decodes successfully.
+
+Do not use fixtures or silently fall back to a simulator during this live test.
+
+4. Continue one minimal integration case if retrieval succeeds.
+    Pass the retrieved image or image pair through the existing real Tungsten integration and generate the Excel output through the normal pipeline.
+
+Verify that embedded images in X:Y and metadata in Z:AO belong to that same cheque, with A:W preserved. Save the actual provider confidence values. Do not claim OCR accuracy unless the extracted values are compared with the image content.
+
+5. Report the exact outcome.
+    Provide a compact table by environment:
+    DNS | TCP | TLS verification | Symcor operation | Image retrieval | Tungsten processing | Excel output.
+
+Use PASS, FAIL, BLOCKED, or NOT RUN with evidence. Identify the first failing stage, sanitized error, executed command, and local evidence paths. If TLS succeeds but SOAP fails, describe the remaining application/routing/authentication issue rather than continuing to label it a TLS failure.
+
+Use bounded timeouts and attempts. Preserve unrelated work and existing infrastructure/configuration. Do not run a broad regression suite, deploy, commit, or push. If blocked, finish all available checks and state precisely what is missing.
