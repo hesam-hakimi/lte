@@ -1,6 +1,3 @@
-اول باید منشأ خروجی مشخص شود؛ هنوز ثابت نشده که این مقادیر را Tungsten واقعی تولید کرده است. در عکس، تصاویر تقریباً خالی‌اند و خروجی‌ها synthetic: دارند؛ تولید مستقل تصویر و پاسخ ساختگی یک احتمال جدی است.
-
-این پرامپت را در همان سشن Copilot بفرست:
 
 Continue the current CLUE session. Investigate and fix the mismatch between the embedded cheque images and the corresponding Tungsten metadata.
 
