@@ -1,109 +1,98 @@
-Prepare this CLUE session for continuation in a new GitHub Copilot chat on the same Windows laptop.
+Continue the existing CLUE project. Check in the latest completed CLUE work, then transfer it to the destination repository and publish a reviewable pull request.
 
-Update the existing on-disk project documentation now, then generate the exact startup prompt for the new session. Complete the handoff rather than only proposing a plan.
+Destination repository:
+https://github.com/TD-Universe/W001CLUEinitialRepo
 
-All responses, documents and prompts must be in English. Use native text and filesystem tools; no screenshots, OCR, vision or browser automation.
+This instruction authorizes the scoped source commits, destination branch creation and push, and PR creation. It supersedes earlier documentation-only or “no commit/push” restrictions for this task. Complete the work rather than stopping at a plan or repeatedly requesting routine confirmation.
 
-1. Establish the actual checkpoint
+All responses, code comments, documentation and PR text must be in English. Use native filesystem, Git and authenticated repository tools; no screenshots, OCR or browser automation.
 
-Verify these previously used locations:
+1. Inspect the actual source and destination
 
-* Application repository: C:\repos\fcrm_clue
-* Existing handoff directory: C:\repos\fcrm_clue\docs\handoff\clue
-* External references: C:\repos\FCRM
-* Local configuration: C:\repos\FCRM.env
-* Symcor reference material: C:\repos\FCRM\symcore
+The previously used source repository is C:\repos\fcrm_clue. Verify its actual location, current branch, HEAD, remotes and staged/unstaged/untracked changes.
 
-Use the actual current locations if they differ. Do not recreate missing directories or assume the new session can access ChatGPT Library links.
+Read applicable AGENTS.md instructions, the latest local CLUE handoff and current task register. Reconcile newer evidence forward. Do not reset to a historical checkpoint.
 
-Inspect the current branch, HEAD, working-tree changes and known active operations. The latest report mentioned HEAD 22046c1; treat that as historical evidence to compare, never a revision to restore.
+Identify completed CLUE changes, unfinished work and changes owned by another active session. Preserve unrelated staging, including the previously reported .github/workflows/ci.yml deletion unless its ownership and inclusion are explicitly established.
 
-Preserve all application changes, untracked files and other sessions’ work, including the previously reported staged .github/workflows/ci.yml deletion. Do not reset, stash, clean, switch branches, stage, commit, push or create a PR.
+Verify access to the exact destination repository, its default branch, existing files, repository instructions and required checks. Do not assume it is empty or that access mentioned in a chat is effective write access.
 
-2. Update the existing authoritative documents
+2. Prepare and commit the latest CLUE work
 
-Locate and update the current equivalents of:
+Review the actual changes and include the completed application code, tests, required configuration templates, reusable tools and current handoff documentation.
 
-* CLUE_HANDOFF.md
-* START_NEW_SESSION.txt
-* Project/reference index
-* Current task and blocker register
-* Symcor authentication/connectivity notes
+Use explicit staging or an isolated index so unrelated staged changes cannot enter the commit. Preserve all unrelated working-tree and index state. Do not use a blanket git add, destructive cleanup, stash or reset.
 
-Use the established handoff structure. The latest report mentioned section 28; verify the actual latest content before editing. Preserve historical evidence while marking superseded conclusions clearly.
+Inspect the content to be committed and transferred for secrets and sensitive data. Exclude:
 
-Record:
+* .env files and real credential values.
+* JKS/P12/PFX stores, private keys and exported runtime identity material.
+* Raw customer data, cheque images and sensitive provider captures.
+* Virtual environments, caches, local runtime outputs and unrelated generated files.
 
-* Checkpoint timestamp with timezone, repository, branch and HEAD.
-* Current task, completed work, outstanding work and parked items.
-* Relevant changed files and known ownership boundaries.
-* Exact paths to source documents, scripts, configuration references and diagnostic reports.
-* Which required artifacts are tracked, ignored, untracked or outside the repository.
-* What was actually tested, where, against which target and with what result.
-* The next action, its prerequisites and the responsible role when known.
+Retain safe placeholder configuration examples and synthetic test fixtures. Preserve excluded runtime files locally. Do not rewrite repository history or expose secret values in reports.
 
-Do not overwrite a document another session is actively editing. If ownership cannot be resolved, save a clearly identified supplemental checkpoint and report the limitation.
+Commit the reviewed CLUE changes in the source repository. Record the resulting source commit SHA and the exact scope. Existing unresolved PAT connectivity does not prevent committing the current development state; document that limitation accurately.
 
-3. Carry forward the latest corrected findings
+3. Import into a separate destination checkout
 
-Reconcile these points with the existing reports and source documents:
+Use a separate checkout of the destination repository. Reuse an existing checkout only after confirming its remote and preserving any local work.
 
-* The JKS password is available, the keystore opens and the private key was reported usable. “Obtain the JKS password” is no longer an open task.
-* Client-certificate support was added to the Symcor application transport, including a correction for SSLContext replacement involving pip-system-certs.
-* Local tests demonstrated certificate transmission to a loopback server. Keep that separate from live PenHub evidence.
-* A client identity was configured for the live PAT attempts. PenHub receiving or accepting that identity remains unconfirmed.
-* Live DNS/TCP checks succeeded, but TLS failed. No successful live HTTP/SOAP result was established.
-* The 15:01:48Z certificate-verification failure must remain recorded with its exact date, configuration and evidence. Preserve its distinction from the later connection resets.
-* Do not restore the retracted claims “provably transmitted to PenHub” or “no longer a CLUE-side gap.”
-* The current client_certificate_sent flag does not independently establish wire transmission. Preserve the limitation identified in the evidence review.
-* SASE inspection, source allow-listing, certificate registration and trust-chain issues remain hypotheses or questions unless supported by new evidence.
-* TDBBASIC was found in existing documentation associated with Production/CAT. Its applicability to PAT remains unresolved unless a newer authoritative source answers it.
-* componentName is caller-chosen according to the reviewed contract. Document examples and predecessor configuration are not automatically active PAT settings.
-* Preserve the distinction between prepared and sent communications. GATEWAY_OWNER_MESSAGE_DRAFT.md was reported prepared, not sent.
+Create a descriptive import branch from the current destination default branch, such as feature/clue-import-YYYYMMDD. Use the actual date and avoid taking over another person’s branch.
 
-Document the configuration names the application actually consumes, including the current CLUE_SYMCOR_* TLS settings. The legacy JKS variable was reported inert; do not describe it as effective application configuration.
+Import a reviewed snapshot of the recorded source commit. Preserve destination history and required destination files. Do not push the source repository’s entire history, use –mirror, force-push, or copy .git directories.
 
-Retain test counts with their command, scope, revision and evidence. Do not combine the reported 189-test run, focused loopback checks and earlier acceptance results into an invented current total.
+Inspect overlapping paths before changing them. Reconcile application files with the destination’s layout and instructions. Preserve required workflows and repository configuration; make only adaptations necessary for the import.
 
-4. Preserve the wider project context
+Record the source repository, branch and commit as import provenance. List intentional adaptations and exclusions. Keep existing source remotes intact and publish this transfer only to the specified destination.
 
-Retain existing decisions covering the DAT input contract, staged Symcor retrieval, cheque/image association, Tungsten processing, Excel output, recovery behavior and concurrency limits.
+4. Verify the transferred result
 
-Carry forward unresolved business-template mapping and DEV/runtime validation separately from laptop connectivity. Preserve the latest execution-path decision and conditional status of any Rahona migration.
+Compare the destination content with the intended source snapshot and confirm that all required application files, tests, dependencies and safe configuration templates are present.
 
-Update only demonstrated changes; do not reopen settled requirements or perform another broad project audit.
+Use the existing documented validation commands and run the focused checks necessary for the import, plus required repository checks. Reuse valid prior evidence where applicable and identify its scope and revision.
 
-5. Generate the exact new-session startup prompt
+Do not rerun unrelated acceptance suites, rebuild simulators or make live provider calls merely to publish this code. Do not disable hooks, required checks or repository protections.
 
-Write START_NEW_SESSION.txt using verified paths, with no unresolved placeholders.
+Preserve the current qualified status:
 
-It must be self-contained and include:
+* Client-certificate transmission was demonstrated locally.
+* Successful TLS/HTTP/SOAP access to PenHub PAT remains unverified.
+* PenHub receiving the configured certificate remains unconfirmed.
+* TDBBASIC exists in prior documentation; its PAT applicability requires confirmation.
+* componentName is caller-chosen under the reviewed contract, subject to any documented PAT-specific rules.
 
-* A statement that this continues the existing CLUE project.
-* The checkpoint, actual repository location, branch/HEAD and relevant uncommitted state.
-* Exact reading order and paths for the main handoff, current tasks, source index, latest connectivity reconciliation and necessary supporting references.
-* An instruction to read those files fully and reconcile any newer changes forward.
-* English-only, native-text-tool and secret-handling requirements.
-* Known ownership boundaries and parked work.
-* The next authorized action and its completion evidence.
+Do not describe the imported code as production-ready or live integration as complete.
 
-The next session should restore context and continue the existing gateway/network and PAT-configuration follow-up. If the needed external response is still unavailable, it should identify the precise blocker without inventing another development task or repeating the handshake matrix.
+5. Commit, push and open the PR
 
-Any subsequent live retry must remain within the previously authorized bounded test scope and follow the applicable prerequisites. Do not launch one during this handoff.
+Commit the destination import, verify the push target, and push the new branch using existing authorized credentials.
 
-The startup prompt must work without access to this conversation or the previous agent’s memory.
+Open a draft PR against the destination’s actual default branch. If this task already has a matching branch or PR, update it safely instead of creating duplicates. Do not merge the PR.
 
-6. Validate and deliver
+The PR description must explain:
 
-Read back the final files. Verify every required path or explicitly mark it unavailable. Check that the handoff, task register and startup prompt agree.
+* Why the CLUE implementation is being imported.
+* The source commit and included functionality.
+* Any destination-specific adaptations.
+* What validation actually ran and its results.
+* Remaining integration and environment limitations.
 
-Keep secrets and sensitive payloads out of documentation. Record safe paths and configuration names, never .env contents, passwords, private keys or raw customer data.
+Use a structured PR body or a UTF-8 body file to preserve formatting.
+
+If authentication, permissions or a repository rule blocks publication, complete the safe local preparation and report the exact blocking operation and error. Do not bypass the control or claim publication succeeded.
+
+6. Finish with a concrete handoff
+
+Record the migration outcome in the existing handoff structure without inventing future commit hashes or creating competing “latest” documents.
 
 Return:
 
-1. Exact absolute paths of all documents updated or created.
-2. The complete START_NEW_SESSION.txt contents, read from disk, in one copyable text block.
-3. A short statement of what the new session should do first.
-4. Any unresolved ownership or file-access limitation.
+* Source repository, branch and committed SHA.
+* Destination checkout, branch and final commit SHA.
+* Push outcome and PR URL.
+* Validation performed and results.
+* Any excluded or still-uncommitted work and its reason.
+* Remaining access, ownership or integration blockers.
 
-This task authorizes documentation updates and read-only inspection. Leave application code, configuration and credentials unchanged. Do not run provider calls, repeat test suites or rebuild release packages.
+Confirm success only from actual Git and repository responses. Preserve the original working copy and all unrelated work.
