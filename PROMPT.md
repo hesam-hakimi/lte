@@ -1,8 +1,24 @@
-We have reviewed the available documentation and integration guidance. We would appreciate clarification on these three remaining points:
+Continue from the completed mTLS work. Prepare the evidence needed to resolve the remaining TLS failure, using the existing code and saved reports. Keep this bounded; do not repeat the handshake matrix or the successful test suite.
 
-1. Front and back image identification
-    We understand the AvailableSegments values and how Content-ID links SOAP references to attachments. For our TIFF/multipart getDocs response, which documented field or rule identifies each image or TIFF page as the front or back of the cheque? An annotated response example would help confirm the mapping.
-2. Retrieving all results when a limit is reached
-    We understand the count-only and over-limit outcomes. When a search or item-enumeration response withholds identifiers because a limit has been reached, what supported procedure should we use to retrieve every relevant UTI, item and document? If continuation is unavailable, how should we subdivide the request without losing results, particularly when a single date or transaction exceeds the limit?
-3. SOAP timeStamp representation
-    The specification defines timeStamp as milliseconds since the Unix epoch, but some examples appear inconsistent with that definition. For our active interface, should we follow the epoch-millisecond definition and treat those examples as illustrative, or is another representation required? Please point us to the applicable rule or an accepted request example.
+1. Reconcile the conclusions with the evidence.
+    Distinguish:
+
+* Client-certificate transmission verified by the local test server.
+* Client identity configured for the live PenHub attempt.
+* Any direct evidence that PenHub received that identity.
+
+Identify the existing log or trace supporting each claim. If live certificate transmission is not directly demonstrated, mark it unconfirmed. Do not conclude that all client-side issues are excluded.
+
+2. Review the certificate-verification failure recorded at 15:01:48Z.
+    From existing logs, identify the runtime, transport, effective CA bundle, proxy route and verification error details. Compare them with the later reset attempts. Report what explains the difference and what remains unknown. Keep TLS and hostname verification enabled; do not add trust anchors without an authoritative source.
+3. Prepare a concise message for the internal PenHub/gateway owner.
+    Include the endpoint, exact UTC attempt timestamps, resolved destination IP, known source/egress information, public client-certificate SHA-256 fingerprint and observed errors. Mark unavailable fields explicitly.
+
+Ask the owner to confirm whether the gateway received this certificate, whether its registration and trust configuration are correct for PAT, and what the correlated logs show as the failure reason. Request the expected server certificate chain/CA reference as needed.
+
+Prepare the message only; do not send it. Include only the relevant sanitized evidence files.
+
+4. Reconcile the SOAP configuration separately.
+    Search the existing native provider documents, shared examples, configuration and handoff for the assigned clientID and applicable componentName. Record source references and distinguish documented examples from assigned PAT values. Do not invent values or describe them as never supplied solely because they are absent locally.
+
+Return the short gateway message, evidence paths, unresolved client-side findings and any exact configuration question still requiring an owner. Preserve current changes and update the existing local handoff with this qualified status.
