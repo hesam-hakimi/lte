@@ -1,24 +1,19 @@
-Continue the current CLUE implementation. The user has resolved CP-D05: the business Excel output must display the actual cheque images embedded in the workbook.
+اول باید منشأ خروجی مشخص شود؛ هنوز ثابت نشده که این مقادیر را Tungsten واقعی تولید کرده است. در عکس، تصاویر تقریباً خالی‌اند و خروجی‌ها synthetic: دارند؛ تولید مستقل تصویر و پاسخ ساختگی یک احتمال جدی است.
 
-Requirements:
+این پرامپت را در همان سشن Copilot بفرست:
 
-* Column X: front cheque image.
-* Column Y: back cheque image.
-* Embed the image bytes in the .xlsx. File paths, hyperlinks, encoded text, and externally linked images do not satisfy this requirement.
-* Make embedded images the default for this business workflow. Reuse and verify the existing embedded-image implementation where possible.
-* Anchor each image to its correct row and column. Preserve aspect ratio and adjust row heights and X:Y widths so images are visible without overlapping adjacent rows.
-* Preserve A:W values, the 41-column layout, and the eight Tungsten value/confidence pairs in Z:AO.
-* Preserve correct transaction/cheque association, including multiple cheques expanding one input row.
-* For missing or invalid images, leave the corresponding image position empty and record the reason through existing diagnostics. Do not substitute a path or an unrelated image.
+Continue the current CLUE session. Investigate and fix the mismatch between the embedded cheque images and the corresponding Tungsten metadata.
 
-Verify through the normal application pipeline:
+The observed workbook contains images showing mostly a document ID and front/back labels, while metadata contains “synthetic:” values and repeated confidence 93. Treat these as symptoms, not a confirmed diagnosis.
 
-1. Use valid, distinct synthetic front/back image fixtures. Inspect the current .img fixture contents; do not assume they contain decodable images or merely rename their extensions.
-2. Generate a fresh synthetic workbook using the production writer.
-3. Inspect the saved workbook’s embedded media, drawing relationships and anchors to verify image contents, front/back placement and row association.
-4. Verify that a copied workbook remains self-contained without access to the original image directory.
-5. Run focused regression tests for successful embedding, multiple-cheque rows, and missing/invalid images. Use native file/workbook tools; no screenshots, OCR or browser automation.
+1. Reproduce the output using the existing application command. Identify the effective Symcor and Tungsten provider modes separately: fixtures, local simulator, or real service.
+2. Trace two distinct cheques from input row through document identity, image generation/retrieval, conversion, Tungsten request payload, raw response, parsed metadata, and final Excel image anchors and cells. Find exactly where the image content and metadata diverge. Provide code references and execution evidence.
+3. Implement the correction after establishing the cause:
+    * If synthetic images and responses are generated independently, create coherent fixtures from one deterministic cheque record. Images must visibly contain the fictional field values returned by the simulated response.
+    * If images, requests, responses, or workbook rows are associated incorrectly, fix the association using the actual cheque/document identity.
+    * Never replace real Tungsten results with expected fixture values or silently fall back to simulated responses.
+4. Preserve the accepted workbook contract: original A:W input fields, actual embedded front/back images in X:Y, and the eight metadata/confidence pairs in Z:AO. Preserve leading zeros, missing-image behavior, and multiple-cheque handling.
+5. Run the existing application pipeline and regenerate the workbook. Verify both content and row association. Include different cheques sharing the same account/date. Deliberately swap an image or response and confirm that the verification detects the mismatch. Reuse existing helpers and focused tests.
+6. Report the confirmed root cause, changes, executed checks, and regenerated workbook path. Report simulated consistency separately from real Tungsten OCR validation. If the real service was not called, explicitly mark real OCR validation NOT RUN.
 
-Update the existing contract, audit and handoff: CP-D05 is resolved by the user’s decision; mark implementation verified only after the checks pass. Keep unresolved confidence scale and Symcor request mappings separate.
-
-Preserve current changes. Do not commit/push, run live provider calls or change DEV/F5 settings. Return the generated workbook’s absolute path, affected files, actual test results and any remaining limitations. All responses and artifacts must be in English.
+Complete the diagnosis, implementation, and local verification. Do not stop at a proposed fix. Preserve unrelated changes; do not modify infrastructure or CI/CD, deploy, commit, or push.
