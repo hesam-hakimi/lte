@@ -1,4 +1,3 @@
-
 Continue the current CLUE session. Investigate and fix the mismatch between the embedded cheque images and the corresponding Tungsten metadata.
 
 The observed workbook contains images showing mostly a document ID and front/back labels, while metadata contains “synthetic:” values and repeated confidence 93. Treat these as symptoms, not a confirmed diagnosis.
