@@ -1,6 +1,5 @@
-date -u '+%Y-%m-%dT%H:%M:%SZ'
-hostname -f
+date -u
 id
-ls -ld /etc/certs/
-ls -l /etc/certs/
-
+ls -ld /etc/pki /etc/ssl
+find /etc /opt -maxdepth 4 -iname '*clue*' -print
+find /etc /opt -maxdepth 4 -iname '*.jks' -print
