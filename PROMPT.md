@@ -1,57 +1,49 @@
-Continue the current CLUE session. Finish the existing DEV acceptance run, download the output workbooks to my Windows laptop for visual review, and then address the separate run-status classification defect.
+Continue the current CLUE session. The completed DEV workbooks do not demonstrate conformance to the business output template I previously supplied. Correct the normal application output against that existing template.
 
-Keep all responses, code, tests and reports in English. Archive lifecycle investigation remains deferred.
+Preserve the getDocs and run-status fixes, completed provider work, original workbooks and evidence. Keep all responses and engineering artifacts in English. Archive work remains deferred.
 
-1. Check the existing run
+1. Recover the authoritative output contract
 
-Inspect the current process, durable queue, logs and output artifacts under:
+Locate the original supplied business output/template in the existing project files, requirements and prior mapping references. Search the available sources before asking me to resend anything.
+
+The recorded meeting instruction was to preserve the supplied layout and naming, with the output section starting at column X. Inspect the actual native workbook programmatically to establish exact headers, column positions, worksheets, formatting and image placement. Do not infer a complete schema from that meeting statement alone.
+
+Record the template path, worksheet and checksum. Distinguish the input workbook Test Data_TDB.xlsx from the business output template. If the authoritative template cannot be located, report the precise missing source instead of inventing a replacement.
+
+2. Identify and correct the mismatch
+
+Trace the downloaded workbook back to its output profile, configuration and writer. Determine whether the wrong export was selected or the business writer does not implement the supplied template. Use code/history evidence before attributing the mismatch to a recent change.
+
+Compare expected and actual columns by name and position. Apply the smallest necessary correction to the normal export path.
+
+Preserve the template’s business headers, original input values, formats and image locations. Exclude unapproved internal fields, server paths and diagnostic explanations from the business workbook. Retain diagnostic information in separate evidence files; hiding extra columns is not schema compliance.
+
+Investigate the UNAGREED/front-first field-selection annotation against existing documentation. Do not conceal unresolved mapping, invent confidence values, replace missing values with zero, or change image-side labels without supporting evidence.
+
+Preserve every legitimate source-row/document association, including shared documents and unavailable/no-match outcomes.
+
+3. Regenerate using saved results
+
+Use the completed results under:
 
 /home/tag5916/clue_private/e2e_fixed_20260922/
 
-The last report showed the remaining Credit extraction still running, with 58 of 341 extraction items completed. Treat that as a historical snapshot and establish the current status.
+Regenerate the business workbooks through the corrected application export path using saved results and committed artifacts. Do not repeat Symcor or Tungsten calls, reset workspaces, or modify historical run evidence.
 
-Preserve the active process and its workspace. Do not start a duplicate batch. If it has stopped unexpectedly, diagnose the cause and use the application’s supported recovery mechanism without repeating completed provider work.
+Keep the previously downloaded files in:
 
-2. Download available workbooks now
+C:\Users\tag5916\Downloads\CLUE_DEV_Review_20260922\
 
-Locate the completed XLSX outputs for pilot_debit, pilot_credit and remaining_debit. Copy them from DEV to a new folder on my Windows laptop, outside Git, such as:
+Save corrected outputs in a separate clearly named review folder.
 
-%USERPROFILE%\Downloads\CLUE_DEV_Review_\
+4. Validate and deliver
 
-Use the existing authorized connection and transfer method. Resolve the actual Windows user path.
+Add focused output-contract tests whose expected headers and positions come from the supplied template, independently of the writer implementation.
 
-Preserve the original workbook contents and use separate subfolders to distinguish runs. Keep the DEV originals in place. Verify file sizes and SHA-256 hashes on both sides.
+Check exact column order, absence of unapproved extra columns, original-value preservation, source/document associations, image anchors and supported missing-value behavior.
 
-Check programmatically that the XLSX files are readable and contain the reported worksheets, rows and embedded images. I will inspect their contents visually in Excel.
+Download the corrected workbooks, verify transfer checksums and open their local folder for my visual review.
 
-Give me the exact local paths as soon as these downloads are ready, without waiting for the remaining Credit extraction.
+Report the root cause, template used, before/after mapping, changed files, validation results and exact local workbook paths. Keep unresolved mapping questions explicit. Preserve the overall PARTIAL acceptance finding unless new evidence changes it.
 
-3. Complete the remaining acceptance evidence
-
-Continue monitoring the existing remaining_credit run. When it finishes, verify that its output files are finalized, then download its XLSX and accompanying CSV/JSON results into the same review folder.
-
-Reconcile all 17 original source rows: 5 Debit and 12 Credit. Report source-row outcomes, document associations, unique documents, retrieval/cache reuse, unavailable images, completed extraction, unresolved work and output counts separately.
-
-Account explicitly for the four Debit NO_MATCH cases and the previously reported eight provider-unavailable Credit associations. Verify the final counts from evidence rather than carrying forward interim totals.
-
-Do not infer success from exit code 0 alone. Distinguish technical completion, retrieval completeness, populated OCR fields and independently validated OCR accuracy.
-
-4. Correct run-status classification separately
-
-After capturing the current run’s final evidence, implement a focused correction to classify_run and its necessary callers/reporting.
-
-Review the existing status and exit-code contract first. Ensure required-image failures or unresolved work cannot disappear behind completed item states and produce an unqualified COMPLETE result.
-
-Keep legitimate NO_MATCH outcomes, provider-confirmed image unavailability and technical failures distinguishable.
-
-Add focused regression coverage for successful processing, NO_MATCH, all images unavailable, mixed successful/unavailable outcomes, pending technical work and unfinished extraction. Validate this change locally without repeating the full live provider batch merely to test reporting.
-
-Preserve the original DEV results. Record any corrected interpretation separately.
-
-5. Deliver the review package and final report
-
-Include a short manifest mapping each downloaded workbook to its source run, source-sheet rows, counts and checksum. Open the local review folder in Windows Explorer and list the exact workbook paths for me.
-
-Report the tested revision, final run status, remaining defects and classification-test results. Retain the Python 3.9.25 versus declared Python >=3.10 limitation.
-
-Preserve the getDocs correction and prior evidence. Keep shared deployments, credentials, TLS settings, dependencies and scheduled jobs unchanged. Do not merge these changes.
+Do not merge changes or alter providers, credentials, TLS, dependencies, scheduled jobs or shared deployments.
