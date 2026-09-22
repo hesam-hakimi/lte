@@ -1,115 +1,57 @@
-Implement the focused CLUE getDocs correction and validate it through the real application pipeline on Linux DEV.
+Continue the current CLUE session. Finish the existing DEV acceptance run, download the output workbooks to my Windows laptop for visual review, and then address the separate run-status classification defect.
 
-I authorize the application changes, focused regression tests, and isolated DEV staging needed for this correction. This supersedes the earlier “test only, no application changes” restriction for this specific task. Proceed without asking again for permission to make this correction.
+Keep all responses, code, tests and reports in English. Archive lifecycle investigation remains deferred.
 
-All responses, code, tests, and documentation must be in English.
+1. Check the existing run
 
-1. Establish the current source and preserve existing work.
+Inspect the current process, durable queue, logs and output artifacts under:
 
-Read repository instructions, the latest handoff, and the current branch/diff. Preserve unrelated changes and all previous test evidence. Work on a feature branch, using an isolated worktree if necessary.
+/home/tag5916/clue_private/e2e_fixed_20260922/
 
-Reuse the completed investigation:
+The last report showed the remaining Credit extraction still running, with 58 of 341 extraction items completed. Treat that as a historical snapshot and establish the current status.
 
-* AWSSpecRelease6.1 (2021.05.03).docx, Appendix D, Get Document Samples.
-* The saved PAT WSDL/XSD.
-* Successful diagnostic evidence under:
-    /home/tag5916/clue_private/getdocs_diag_20260922/
+Preserve the active process and its workspace. Do not start a duplicate batch. If it has stopped unexpectedly, diagnose the cause and use the application’s supported recovery mechanism without repeating completed provider work.
 
-The diagnostic retrieved two images for one Debit document and one Credit document. It did not validate the application’s complete Credit pipeline.
+2. Download available workbooks now
 
-2. Correct the actual application request and metadata propagation.
+Locate the completed XLSX outputs for pilot_debit, pilot_credit and remaining_debit. Copy them from DEV to a new folder on my Windows laptop, outside Git, such as:
 
-Update build_get_docs_envelope and its necessary callers/models to reproduce the validated request:
+%USERPROFILE%\Downloads\CLUE_DEV_Review_\
 
-* Use the correct SOAP namespace, operation wrapper, and element order.
-* Replace documentList with docIDList.
-* Remove documentFolder from getDocs.
-* Include both siteSpecificDocID and universalDocID for the same document.
-* Preserve both identifiers through search/searchTransaction parsing, document selection, and retrieval.
-* Preserve their exact values; do not truncate, fabricate, or double-encode them.
-* Supply imageFormat=0, deliveryMethod=ONLINE, deliveryDetail=NOTHING, schedulePolicy=SCHEDULE_OFFLINE, and schedulePriorityLevel=1, as used in the successful diagnostic.
-* Derive imageMask from the selected document’s documented AvailableSegments value and any existing supported selection rules. Do not hardcode the successful sample’s mask 10 for every document.
-* Keep the configured clientID, tracing, TLS, and secret-loading behavior.
+Use the existing authorized connection and transfer method. Resolve the actual Windows user path.
 
-If required identity or mask information is absent or invalid, return an explicit diagnostic outcome before sending an invalid request. Do not substitute another document’s metadata.
+Preserve the original workbook contents and use separate subfolders to distinguish runs. Keep the DEV originals in place. Verify file sizes and SHA-256 hashes on both sides.
 
-Document the compatibility values and their source. Remove or update comments that still describe the old malformed request as an intentional workaround.
+Check programmatically that the XLSX files are readable and contain the reported worksheets, rows and embedded images. I will inspect their contents visually in Excel.
 
-3. Keep retrieval behavior focused.
+Give me the exact local paths as soon as these downloads are ready, without waiting for the remaining Credit extraction.
 
-Retain one document per getDocs request, as successfully tested. Do not add batching or parallel retrieval as part of this fix.
+3. Complete the remaining acceptance evidence
 
-Preserve the existing Debit/Credit routing and the documented Credit inline-child-document handling. Process every returned in-scope child document without silently imposing a 10-document limit.
+Continue monitoring the existing remaining_credit run. When it finishes, verify that its output files are finalized, then download its XLSX and accompanying CSV/JSON results into the same review folder.
 
-Reuse the existing HTTP transport and SOAP/MTOM parser. Make additional integration changes only where necessary to carry identifiers, associate the returned images correctly, or complete this corrected retrieval path.
+Reconcile all 17 original source rows: 5 Debit and 12 Credit. Report source-row outcomes, document associations, unique documents, retrieval/cache reuse, unavailable images, completed extraction, unresolved work and output counts separately.
 
-Do not redesign the pipeline, change search criteria, or broaden this task into unrelated status or OCR fixes. Preserve provider-unavailable outcomes such as sorryFlag rather than presenting them as successful retrieval.
+Account explicitly for the four Debit NO_MATCH cases and the previously reported eight provider-unavailable Credit associations. Verify the final counts from evidence rather than carrying forward interim totals.
 
-4. Add meaningful regression coverage.
+Do not infer success from exit code 0 alone. Distinguish technical completion, retrieval completeness, populated OCR fields and independently validated OCR accuracy.
 
-Use authoritative schema validation and synthetic or sanitized fixtures to verify:
+4. Correct run-status classification separately
 
-* The application-generated getDocs XML conforms to the saved PAT XSD; the previous malformed shape is rejected.
-* Both document identifiers and document-specific masks survive the normal parsing-to-retrieval path for Debit and Credit.
-* Multiple child documents retain their own identifiers, masks, and source-row associations.
-* Missing required metadata is handled before sending a malformed request.
-* A representative getDocs MTOM response is associated with the requested document through the existing parser.
+After capturing the current run’s final evidence, implement a focused correction to classify_run and its necessary callers/reporting.
 
-Keep real identifiers, images, credentials, and live captures outside Git. Do not add a runtime dependency solely for schema testing.
+Review the existing status and exit-code contract first. Ensure required-image failures or unresolved work cannot disappear behind completed item states and produce an unqualified COMPLETE result.
 
-Run the relevant focused tests and repository-required gates. Do not weaken tests or repeat unrelated suites without a concrete reason.
+Keep legitimate NO_MATCH outcomes, provider-confirmed image unavailability and technical failures distinguishable.
 
-5. Stage the corrected application privately on DEV.
+Add focused regression coverage for successful processing, NO_MATCH, all images unavailable, mixed successful/unavailable outcomes, pending technical work and unfinished extraction. Validate this change locally without repeating the full live provider batch merely to test reporting.
 
-Use the established connection:
-tag5916@crcluesbdzwnk0.dev.vmc2.td.com
+Preserve the original DEV results. Record any corrected interpretation separately.
 
-Prepare a new private staging directory for the corrected application, preserving the previous deployed tree. Record the source revision plus patch/artifact hash so the executed code is identifiable.
+5. Deliver the review package and final report
 
-Reuse the existing working environment and secure configuration. Keep TLS and hostname verification enabled, including:
-CLUE_TUNGSTEN_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
+Include a short manifest mapping each downloaded workbook to its source run, source-sheet rows, counts and checksum. Open the local review folder in Windows Explorer and list the exact workbook paths for me.
 
-Keep requires-python >=3.10 unchanged. Record the actual DEV interpreter; a diagnostic execution on Python 3.9.25 does not establish supported deployment compatibility.
+Report the tested revision, final run status, remaining defects and classification-test results. Retain the Python 3.9.25 versus declared Python >=3.10 limitation.
 
-Use fresh run-specific workspaces, state, outputs, and captures. Do not clear or modify the previous pending_technical cases.
-
-6. Execute the standard application end to end.
-
-Reuse the already-converted CSV records without changing their values.
-
-First run:
-
-* Debit Items, Excel row 3.
-* Credit Items, Excel row 2, including all child documents returned for that row.
-
-Use the normal batch entry point. The diagnostic helper must not substitute for the application under test.
-
-For the Debit pilot, use the existing supported configuration that exercises getDocs, including docsFetchLimit=0 where applicable. Confirm from captures that the corrected builder was actually called.
-
-Validate the complete path:
-CSV → normal routing → Symcor discovery → corrected getDocs → images → real Tungsten processing → final CSV/JSON/XLSX outputs.
-
-If the pilots establish the corrected path works, continue with the remaining source rows so all 5 Debit and 12 Credit rows have an accounted-for result for this candidate. Preserve duplicate source rows and their associations. Avoid repeating completed pilot rows unless a subsequent code change invalidates their results.
-
-Use bounded retries and polling. If a common technical failure reappears, stop repetitive calls and identify affected remaining cases as blocked. Fix directly related integration defects within this scope; report unrelated failures separately.
-
-Do not alter the four previously zero-hit Debit cases to manufacture matches.
-
-7. Return a reviewable change and an evidence-based result.
-
-Include:
-
-* Branch, source revision, changed files, and focused diff summary.
-* Regression checks and actual results.
-* Exact DEV launch commands and staging identity.
-* Per-source-row outcomes and separate Debit/Credit totals.
-* Documents discovered/retrieved, image counts, Tungsten jobs completed, output verification, and evidence paths.
-* Any remaining failure and its first observed stage.
-
-Distinguish NO_MATCH, provider image unavailability, technical failure, blocked/not-run cases, and successful technical completion. Exit 0 or COMPLETE alone is insufficient.
-
-Keep OCR accuracy NOT EVALUATED without independent expected values. Keep front/back labels identified as assumptions unless supported by documented mapping or provider evidence.
-
-Update the relevant handoff with the implemented correction and observed validation. Preserve the remaining status-classification issue separately.
-
-Complete the correction and available DEV validation in this task. Do not merge, activate scheduled jobs, change shared infrastructure, or send messages to other teams.
+Preserve the getDocs correction and prior evidence. Keep shared deployments, credentials, TLS settings, dependencies and scheduled jobs unchanged. Do not merge these changes.
