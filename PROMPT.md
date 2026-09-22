@@ -1,32 +1,18 @@
-Continue the current Python live-test task. First inspect and reproduce the method that already worked on this laptop.
+Hi Nitasha,
 
-The JKS password was previously provided in this project’s .env, and you were instructed to use it. Check that existing configuration before requesting manual password entry.
+For the current CLUE DEV verification, we packaged a specific Git commit as a .tar.gz source archive using git archive. An application wheel/sdist build was not part of this delivery. I need to verify the build backend configured in pyproject.toml before confirming whether it uses setuptools.
 
-1. Trace the successful laptop execution.
-    Locate the saved successful SymcorCoreAdapter.get_criterion_rules() run, including symcor_pat_normal_client_criterion_rules.json and its runner.
+The manual deployment steps performed were:
 
-Inspect the actual application configuration loader, provider construction, and certificate preparation code. Determine:
+1. Create the source archive and collect Linux-compatible dependency wheels.
+2. Transfer them from the laptop to DEV using SSH/SCP and verify SHA-256 checksums.
+3. Extract the source into a separate directory for that release.
+4. Create a Python virtual environment and install dependencies offline using pip --no-index --find-links.
+5. Run the source-tree tests using:
+    PYTHONPATH=src .venv/bin/python -m pytest tests/clue
 
-* Which .env file and configuration variable supplied the password.
-* Whether the JKS password and exported PEM passphrase were the same or separately configured.
-* How the working Python transport loaded the private key.
-* Which certificate chain, CA bundle, and effective TLS settings were used.
+Environment-specific settings and mTLS credentials are handled separately from the application archive. Authenticated live-service verification is still pending.
 
-Read secrets programmatically without displaying their values. Report variable names and file paths only. Use saved evidence first; avoid unnecessarily repeating the laptop service call.
+One prerequisite needs resolving for the CADP template: the project declares Python 3.10+, while the current DEV interpreter is 3.9.25. The source-tree test execution does not establish a supported package installation.
 
-2. Reproduce that configuration on DEV.
-    Use the already-transferred files under:
-    /home/tag5916/clue_private/tls/run-20260922T1400Z/
-
-Reuse the working application’s credential-loading mechanism. Supply the required existing secret to the remote Python process through private configuration or another established secure mechanism. Do not assume the laptop’s .env is automatically available on DEV.
-
-Adapt filesystem paths and check configuration precedence. Keep TLS verification enabled. Reuse the existing encrypted-key handling before considering transport changes.
-
-Validate that the configured secret loads the transferred private key and that it matches the certificate, without exposing private material.
-
-3. Execute the real application test.
-    Run the normal Python Symcor adapter on DEV and validate getCriterionRules(ALL1). Then continue the previously requested one-row Symcor → images → Tungsten → Excel test using the existing application pipeline.
-
-Do not stop at a comparison report or a curl check. If the existing secret works, proceed without asking me to re-enter it.
-
-Return a short laptop-versus-DEV configuration comparison and actual live-test results. Request additional input only if the relevant secret is genuinely absent or fails validation after checking the original working configuration.
+We also need to confirm the application execution command, runtime account, configuration paths, and logging locations for the template. No scheduled job or service activation has been performed.
