@@ -1,58 +1,70 @@
-Continue the CLUE DEV test-only task. Use the existing inline-image retrieval option to test whether the supplied cases can progress to Tungsten and final output. Do not modify application code, dependencies, deployment, or credentials.
+Before asking Symcor for a getDocs example, thoroughly check whether the existing project documentation already contains the example or field definitions we need.
 
-All responses and artifacts must be in English.
+Continue the current CLUE session. This is a documentation review only. Do not modify application code, configuration, dependencies, deployment, or runtime state. Do not make live service calls or contact anyone. All responses and artifacts must be in English.
 
-1. Preserve the diagnosis.
-    The saved evidence shows a getDocs request/XSD mismatch. The earlier successful run retrieved images inline through search with docsFetchLimit=10; it did not validate getDocs.
+Context:
 
-Keep the previous 17-row results and the two pending_technical cases unchanged.
+* The diagnosis reported a mismatch between CLUE’s getDocs request and the saved PAT XSD.
+* The successful Debit execution obtained images through search with docsFetchLimit=10; it did not validate getDocs.
+* Credit remains blocked at getDocs.
+* Before requesting additional information from Symcor, we must establish what our existing documents already answer.
 
-2. Start with a bounded comparison.
-    Reuse the existing converted CSVs and select:
+1. Locate and inventory the available sources.
 
-* The Debit row that previously returned one document.
-* One Credit row that previously returned nine child documents.
+Start from the current workspace, previously shown as:
+C:\repos\fcrm_clue
 
-Use fresh, private run-specific input/workspace/state/output/capture directories. Reuse the established DEV application and secure configuration, with TLS verification enabled.
+Read the documentation index and follow references to the original Symcor guides, specifications, appendices, attachments, sample XML, SOAP/Postman collections, sample client code, and saved WSDL/XSD files.
 
-Run through the normal application entry point, changing only:
-–symcor-docs-fetch-limit 10
-plus paths needed for isolation.
+Inspect relevant document tables, code blocks, embedded attachments, and archives where accessible. Use programmatic text/document extraction; no screenshots, OCR, or vision.
 
-Do not change search criteria, identifiers, dates, routing, or segment-order assumptions. Record the exact commands and effective configuration.
+List the actual filenames, versions/dates, and locations reviewed. Identify inaccessible, image-only, or missing referenced documents explicitly.
 
-3. Inspect the actual retrieval behavior.
-    For each case, establish:
+2. Search for the operation and its field semantics.
 
-* Whether search/searchTransaction returns image MIME parts.
-* How many documents and images are returned and correctly associated.
-* Whether the application still attempts getDocs.
-* Whether Tungsten is called and completes.
-* Whether final outputs faithfully reflect provider results.
+Search case-insensitively, including naming variations:
 
-If the known malformed getDocs path is reached again, preserve the evidence and avoid repeating it across the entire dataset. Do not patch or bypass application logic.
+* getDocs / AwsGetDocsRequest
+* getDocsWithSuppData
+* docIDList / AwsDocID
+* siteSpecificDocID / universalDocID
+* imageFormat / imageMask
+* deliveryMethod / deliveryDetail
+* schedulePolicy / schedulePriorityLevel
+* synchronous retrieval / delivery / scheduling
 
-4. Continue only where the comparison supports it.
-    If inline retrieval works, test the remaining source rows using the same supported configuration, without repeating completed cases.
+Read surrounding sections, footnotes, tables, and cross-references. A search result alone is not sufficient.
 
-Before running Credit cases with more than 10 documents, inspect the documented docsFetchLimit semantics and supported maximum. Use a larger value only if existing documentation and CLI support establish that it is valid for the observed scope; record this additional configuration change explicitly.
+Prioritize provider-supplied documentation and samples. Clearly distinguish them from CLUE-generated requests, mocks, tests, and handoff summaries. Our own known-invalid request is not an authoritative example.
 
-Do not silently truncate retrieval, invent pagination, or describe a partial image subset as full end-to-end success. If complete retrieval is not achievable using supported configuration, report partial coverage and the exact remaining blocker.
+3. Determine what is actually documented.
 
-If the initial comparison fails in both directions, stop broad repetition and report the observed first failing stages.
+For each required field, find:
 
-5. Report evidence without overclaiming.
-    Provide per-source-row results and separate totals for:
+* Supported values and their meanings.
+* Any documented default.
+* Whether empty, nil, omitted, and explicit values are treated differently.
+* Applicability to synchronous image retrieval.
+* The exact document/page/section or XML location supporting the finding.
 
-* Source rows attempted.
-* Documents discovered.
-* Documents with images retrieved.
-* Tungsten jobs completed.
-* Final outputs verified.
-* Failed, blocked, partial, and not-run cases.
+Check whether examples match the saved PAT namespace/schema and service version. Distinguish an old or related-operation example from a directly applicable getDocs example.
 
-Distinguish technical completion, complete retrieval, case/image association, and OCR accuracy. OCR accuracy remains NOT EVALUATED unless independently established expected values are available.
+If getDocsWithSuppData explains shared fields, identify which semantics are explicitly shared; do not assume its entire request can be reused.
 
-Successful inline retrieval does not repair or validate getDocs. Failure to retrieve inline images does not by itself prove retention or a provider outage.
+Do not invent values or treat an XSD type declaration as proof of the correct operational value.
 
-Return exact commands, evidence paths, the comparison with the previous run, and the next evidence-supported action. No code fixes, commits, deployments, or messages to other teams.
+4. Return a focused evidence report.
+
+Provide:
+A. Whether a provider-supplied getDocs example was found, with its exact location.
+B. A table:
+Field | Documented value/meaning | Source/version/page | PAT applicability | Remaining uncertainty
+C. A sanitized excerpt or path to the applicable example.
+D. Any conflict between the guide, sample, and saved PAT XSD.
+E. Only the specific information still missing after this review.
+
+If no complete example is found but the field definitions are sufficient, state that clearly. A complete example is not automatically required if authoritative documentation already resolves the request.
+
+Do not claim “the documentation has no example” unless the inventory supports that conclusion. Otherwise say “not found in the accessible sources reviewed” and identify the coverage gaps.
+
+Finish by stating whether the existing documentation is sufficient to prepare a corrected request in a later task, or exactly which unresolved question requires Symcor clarification. Preserve the current test-only boundary; do not implement or execute a correction.
