@@ -1,20 +1,30 @@
-Continue the current CLUE checkout. Finalize the versioned DEV deployment changes and prepare the CADP handoff using the saved successful Linux run. All responses and artifacts must be in English.
+Continue the active CLUE checkout. The user authorizes completing the remaining changes, pushing them, and merging the feature PR when repository requirements are satisfied. All responses and artifacts must be in English.
 
-1. Review the current branch, working-tree changes, pyproject.toml, requirements files, README, deployment scripts, and latest run evidence. Preserve existing work.
-2. Review and commit the reusable deploy/*.sh scripts, the CA configuration change in .env.example, and the relevant deployment documentation. The user has already authorized committing and pushing the completed CLUE DEV setup changes. Use the existing feature branch and a normal push; verify the remote commit afterward. Stage explicit reviewed files only. Exclude real environment files, secrets, certificates/private keys, cheque data, captures, and generated outputs.
-3. Preserve the successful DEV Tungsten configuration:
-    CLUE_TUNGSTEN_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
-    Keep the override and readability check. Confirm that configuration precedence preserves the intended CA path and keeps TLS verification enabled, without displaying secret values.
-4. Produce a concise CADP handoff from the actual repository:
-    * Configured build backend, including whether setuptools is used.
-    * Current delivered artifact and packaging command.
-    * Exact installation and application execution commands, with working directory.
-    * Configuration, credential-path, input/output, and log requirements.
-    * Runtime-account requirements and unresolved deployment prerequisites.
-    Distinguish the Git source archive, dependency wheels, and any application wheel/sdist. Label commands as executed, documented-only, or blocked. Do not present a proposed packaging process as already verified.
-5. Keep the declared Python >=3.10 requirement unchanged. Record the successful Python 3.9.25 run as evidence for that scenario only. Do not bypass installation checks or remove dependencies based on this single execution.
-6. Correct the validation wording: live integration succeeded; positive OCR accuracy remains NOT EVALUATED. Treat the Tungsten profile/configuration concern as unresolved until supported by configuration or contract evidence. Equal workbook sizes alone do not establish identical contents.
+1. Read the repository instructions and latest handoff. Confirm the actual repository, branch, remote, working-tree changes, and existing PR. Reuse the current feature branch and PR. Preserve unrelated work.
 
-Use focused checks for the changed scripts and configuration, plus any required repository gate. Reuse the saved live evidence; do not repeat service calls for this handoff.
+2. Review and commit the relevant completed CLUE changes, including deployment scripts, the DEV Tungsten CA-bundle configuration, configuration examples, and CADP handoff. Stage explicit files. Exclude credentials, real .env files, private keys, keystores, live provider captures, cheque images, and generated outputs.
 
-Return the changed files, checks performed, published commit, and a short build/deployment summary suitable for Nitasha and the CADP team.
+3. Preserve the verified behavior:
+   - TLS and hostname verification remain enabled.
+   - DEV can use /etc/pki/tls/certs/ca-bundle.crt for Tungsten, with the documented override and readability check.
+   - Keep the declared Python >=3.10 requirement. The successful Python 3.9 execution does not establish general support.
+   - Describe the successful live test accurately: one-row Symcor search, two images, Tungsten processing, and CSV/JSON/XLSX output.
+   - Keep positive OCR accuracy, provider-confirmed image-side ordering, and full live Credit-path validation explicitly unverified.
+
+4. Verify the final candidate commit using the repository’s required gates and relevant focused checks. Investigate the previously reported flaky TLS test if it affects the gate; do not disable, skip, or weaken it to obtain a pass. Include any genuinely required test dependency in the appropriate dependency declaration. Do not make new live provider calls solely for this merge.
+
+5. Push normally and verify the remote SHA. Create or update the PR against the repository’s established target branch. Describe the changes, validation, and remaining limitations clearly. Do not invent the target branch or claim production readiness.
+
+6. Inspect required CI checks, review approvals, unresolved review threads, and mergeability for the latest PR commit. Resolve routine conflicts while preserving intended behavior, then rerun affected checks. Do not bypass branch protection, dismiss required reviews, self-approve, force-push, or use administrator overrides.
+
+7. When all requirements are satisfied, merge using the repository’s permitted merge method. The user has already authorized this action; do not ask again. If required approval or a failing check prevents merging, complete all available preparation and report the exact blocker. Do not report a queued or pending merge as completed.
+
+8. Return a concise receipt:
+   - PR URL and target branch
+   - Final source commit
+   - Checks and approval status
+   - Merged / blocked status
+   - Merge commit SHA, if merged
+   - Remaining validation and deployment work
+
+Do not deploy, activate scheduled jobs, or change shared infrastructure as part of this merge.
