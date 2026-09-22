@@ -1,30 +1,45 @@
-Configure CLUE on DEV using the attached delivery receipt. The user has successfully connected VS Code to DEV and authorizes application setup and bounded verification. All responses and artifacts must be in English.
+Continue CLUE from the laptop session. Copilot is unavailable inside VDI, so perform DEV preparation and testing through SSH/SCP from this laptop. Do not require Copilot on DEV.
 
-1. Confirm that commands execute on DEV: hostname, user, OS, working directory, Python, and permissions. Read the latest repository instructions and deployment references. Use this working remote session; do not treat the earlier laptop BatchMode SSH failure as a current access failure.
-2. Retrieve the exact published commit from the delivery receipt through the established DEV workflow. Verify its SHA. Preserve existing deployments and dirty working trees; record the prior state for rollback. Do not guess a revision if the receipt is missing.
-3. Prepare the project’s declared Python/dependency environment. Configure the application’s input, processing, output, log, and capture directories. Verify read/write access using the actual execution account. Resolve Windows-specific paths and laptop-only localhost settings.
-4. Configure Symcor and Tungsten using the current code and environment references. Reuse provisioned credentials, client certificates/keys or keystore references, and the trusted CA bundle. Verify their readability without exposing secrets. Keep TLS and hostname verification enabled for HTTPS.
+The delivery receipt reports:
 
-DEV is the source machine; PAT has been the verified nonproduction Symcor destination at penhubpat.td.com. Use the documented DEV-to-PAT route. Do not require a separate Symcor DEV hostname solely because execution is on DEV. Do not substitute another endpoint or production configuration without supporting evidence.
+* Repository: https://github.com/TD-Universe/W001CLUEinitialRepo.git
+* Branch: feature/clue-import-20260921
+* Published commit prefix: f7491a8
+* Laptop tests: 537 passed, 2 skipped.
+* DEV terminal shown as tag5916@crcluesbdzwnk0.
 
-5. Verify from DEV itself: configuration loading, DNS/TCP, verified TLS/client-certificate use, and a real Symcor operation through the normal application client. Reuse existing helpers and bounded timeouts.
-6. When configuration and connectivity permit, run one real end-to-end smoke test using the existing user-authorized case:
+Verify these against the actual checkout and connection configuration. All responses and artifacts must be in English.
 
-* documentFolder: ALL1
-* ProcessingDate: “20260717”
-* ItemSequenceNumber: “4850040005”
-* Account: “05224026”
-* DebitCreditIndicator: “D”
-* Equality operator 1 for the four search criteria.
+1. Establish SSH from THIS laptop using the existing connection settings and authentication method. Confirm the remote hostname and user. A successful connection inside VDI does not prove laptop access. The earlier BatchMode authentication failure does not prove interactive login is unavailable.
 
-Reuse the existing one-row input and case-specific date mapping. Preserve leading zeros. Do not broaden the search or substitute fixtures/replayed responses.
+If password/MFA interaction is required, let the user complete it in the terminal. Do not store credentials in scripts or assume subsequent connections are authenticated automatically. Reuse an already configured authentication agent/key where available. Preserve host-key verification.
 
-7. Execute normal ingestion → live Symcor retrieval → real Tungsten → Excel. Enable captures and verify that Symcor responses/image parts and Tungsten responses were actually saved for this run. Correlate document IDs, image hashes, and job IDs.
+2. Resolve the full published commit SHA. Package that exact committed tree with git archive, using –output rather than a PowerShell binary pipeline. Verify the archive contains the application, dependency definitions, tests, and required synthetic fixtures. Record the commit and archive SHA-256.
 
-Verify A:W preservation, the 41-column A:AO layout, embedded X/Y images, and all eight value/confidence pairs against this run’s raw responses. Do not force zeros to match the previous run.
+Do not recursively copy the laptop working directory, virtual environment, .env, private keys, or outputs directory.
 
-The existing case is suitable for DEV integration verification. Positive OCR accuracy remains NOT EVALUATED; missing human-reviewed positive data must not block this smoke test. Keep front/back identification marked as configured order unless independently confirmed.
+3. Reuse existing deployment/verification helpers. If a remote runner is missing, create a small Bash script with LF line endings and explicit error handling. Transfer the archive and runner using SCP into a user-owned staging location. Verify the transferred archive hash before extraction. Preserve existing deployments and dirty directories.
+4. On DEV, inspect the actual Python environment and project requirements. The receipt states Python >=3.10. Prepare an isolated environment using the configured package source and declared dependencies.
 
-8. Report the actual deployed SHA, host/user, environment and non-secret configuration paths, stage-by-stage outcomes, capture completeness, output paths, and a reproducible invocation without secrets. Update the DEV handoff.
+Run the documented test command on DEV:
+PYTHONPATH=src .venv/bin/python -m pytest tests/clue
 
-Complete independent checks if one stage is blocked. Distinguish manual execution under the current account from future service-account/AutoSys/TIBCO readiness. Do not enable scheduled jobs, modify shared infrastructure, or change production. Publish any necessary source fixes through the same feature-branch workflow and record the final deployed SHA.
+Capture the real exit status and a test report. Do not translate PowerShell stderr output alone into failure or success. Report actual results rather than assuming the laptop count will repeat.
+
+5. Continue the already authorized DEV configuration and one-case integration smoke test when prerequisites are available. Read current repository configuration and handoff instructions first.
+
+Important details from the delivery receipt:
+
+* Real input files were excluded from Git. Transfer only the existing authorized one-row test input separately if needed.
+* Reuse provisioned DEV certificate/secret locations and keep HTTPS verification enabled.
+* Preserve the working laptop’s positive –symcor-docs-fetch-limit setting. The receipt states the default getDocs path remains incompatible with live PAT; do not accidentally switch back to it.
+* Preserve the explicit –symcor-segment-order setting, while retaining its configured-order evidence status.
+* Check effective settings: the receipt says –env-file values override process environment values.
+
+Use the normal application pipeline and real providers. No fixture fallback. Record the Symcor and Tungsten exchanges from this DEV run, correlate document/image/job identities, and validate the generated workbook against the raw responses.
+
+6. Retrieve the test report and appropriate output artifacts to the laptop. Report the deployed source SHA, remote host/user, environment paths, test exit status, integration results, and remaining blockers. Positive OCR accuracy remains NOT EVALUATED for the existing blank-field case.
+
+If direct laptop SSH is unavailable, identify whether the failure is name resolution, network access, or authentication. Use an existing documented jump host only if available; do not assume the VDI is an SSH jump host. Otherwise prepare the same runner for manual execution through the working VDI terminal.
+
+No production changes, shared infrastructure changes, or scheduled-job activation.
