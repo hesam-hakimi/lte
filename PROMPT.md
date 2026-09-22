@@ -1,119 +1,93 @@
-Continue the existing CLUE session. The current priority is a real end-to-end DEV test of ALL supplied Debit and Credit cases. Pause unrelated packaging work.
+Continue the CLUE DEV investigation. Diagnose the failed getDocs calls using saved evidence and the actual Symcor contract. This remains a diagnosis-only task: do not modify application code, dependencies, deployment, credentials, or runtime state. All responses and artifacts must be in English.
 
-This is a TEST AND DIAGNOSIS task only. Do not fix application code, change dependencies, rebuild/deploy the application, commit, or merge anything. All responses and artifacts must be in English.
+Reported baseline—verify from saved artifacts:
 
-1. Read the actual test data and existing input contract.
+* All 17 source rows were attempted: 5 Debit and 12 Credit.
+* Four Debit searches returned no matches.
+* One Debit case and the Credit cases reached getDocs, with repeated INTERNAL_ERROR SOAP faults.
+* No images were retrieved and Tungsten was not called.
+* Two Credit cases remain pending_technical.
+* The earlier successful one-row DEV run retrieved two images, but its exact retrieval operation must be established.
 
-The workbook shown is:
-C:\repos\fcrm_clue\test_data\Test Data_TDB.xlsx
+1. Select representative evidence.
+    Locate the previous run under:
+    /home/tag5916/clue_private/e2e_tdb_20260922/
 
-It contains:
+Reuse the local evidence copy if available. Select:
 
-* Debit Items
-* Credit Items
+* The Debit case that found a document but failed at getDocs.
+* One Credit case that returned items but failed at getDocs.
+* The earlier successful one-row execution.
 
-Verify the actual filename and sheets from the filesystem. Read the workbook programmatically, not through screenshots, OCR, or manually transcribed values. If the actual inputs are two separate files, use those and record their exact paths.
+Read original request/response captures and logs programmatically. Do not use screenshots, OCR, or reconstructed XML. Preserve originals and record evidence paths, UTC timestamps, correlation IDs, and source revisions.
 
-Inspect the current application’s CSV parser, documented input schema, routing rules, and existing runner before converting anything. Do not assume the workbook columns already match the application input contract.
+2. Establish how the earlier successful run retrieved images.
+    Determine whether images arrived inline in search, through getDocs, or through another operation. Compare effective retrieval mode, docsFetchLimit, folder, endpoint, request structure, and identifier mapping.
 
-2. Prepare two complete CSV inputs.
+Do not describe the earlier run as proof that getDocs works unless a successful getDocs request/response exists.
 
-Create debit_items.csv and credit_items.csv in a dedicated run-specific input directory using the actual supported CSV schema.
+3. Validate the two failed getDocs requests against the contract.
+    Read the relevant current local Symcor specifications, WSDL/XSD files, approved examples, and existing notes about the previously reported schema mismatch. Record document versions and exact section/schema references.
 
-* Include every populated data row from both sheets, including duplicate-looking rows.
-* Preserve identifiers, leading zeros, dates, debit/credit indicators, and decimal amounts.
-* Do not invent missing values, pad identifiers without documented rules, or silently replace source values.
-* Verify how the application selects Debit versus Credit processing; do not assume a filename selects the route.
-* Record source-to-input column mappings and any documented transformations.
-* Keep a separate manifest linking every CSV record to its workbook, sheet, and original row number. Do not add unsupported columns to the application input.
-* Reconcile source row counts with converted row counts.
-* Validate the CSVs using the existing parser without making service calls.
+Check:
 
-If a row cannot be converted faithfully, record its exact missing or ambiguous field and mark it BLOCKED. Continue preparing other valid rows. Never silently drop a case.
+* SOAP version, action, namespaces, operation wrapper, element order, required fields, and types.
+* Client/folder/context fields.
+* How document, transaction, item, image, and segment identifiers are derived.
+* Whether identifiers retain their exact source values, leading zeros, and parent-child associations.
+* Whether the request uses identifiers of the correct kind from the immediately preceding response.
+* Whether omitted or empty fields differ from the documented contract.
 
-Preserve the original workbook. Keep test data, manifests, captures, and outputs outside Git.
+Use existing offline schema-validation tooling where available. Schema validity alone does not prove semantic correctness. If the authoritative contract or imported schemas are missing, identify the precise missing evidence instead of declaring compliance.
 
-3. Reuse the established Linux DEV application and configuration.
+Produce a field-level comparison with:
+contract requirement | actual request | source response field | verdict | evidence reference.
 
-Use the existing connection:
-tag5916@crcluesbdzwnk0.dev.vmc2.td.com
+4. Reconcile the Credit flow.
+    Trace one Credit case through the actual code and captures:
+    searchTransaction → inline items or getTransactionItems → getDocs.
 
-Inspect the current deployed revision, interpreter, runner, and private configuration. Reuse the previously successful Python application execution method, Symcor client identity, secret-loading mechanism, and Tungsten configuration.
+The report says getTransactionItems was skipped because items arrived inline. Verify:
 
-Keep TLS and hostname verification enabled. Preserve the successful Tungsten CA configuration:
-CLUE_TUNGSTEN_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
+* What was actually returned.
+* Whether the contract supports retrieving documents directly from those inline items.
+* Whether transactionContext or another required value was lost.
+* Whether the returned items represent the intended scope for that source row.
 
-Use existing secrets securely without displaying them or requesting them again when already available. Do not alter shared credentials or infrastructure.
+Do not infer that skipping getTransactionItems is correct merely because the application does it.
 
-Record the actual source revision and Python version. If DEV still runs Python 3.9.25, label the run as diagnostic execution below the declared >=3.10 requirement; do not change or bypass package requirements.
+5. Separate other unresolved issues.
+    For the four zero-hit Debit rows, verify the saved Account/ProcessingDate criteria against the original workbook and the documented search-field meanings. Do not change identifiers or dates to manufacture a match.
 
-Transfer the prepared inputs into a private run-specific DEV directory and verify integrity. Use separate output, capture, log, and state locations for Debit and Credit so earlier successful runs or deduplication state cannot silently suppress these cases. Do not clear existing shared state.
+Check the documented retention rules and their applicability to this PAT environment. Successful metadata search does not establish image retention or availability.
 
-4. Provide the exact commands, then execute the tests.
+Absence of truncation indicators alone does not prove complete retrieval; assess the documented limit behavior.
 
-Derive commands from the actual installed/deployed CLI and its supported options. Do not invent flags.
+Review the Debit COMPLETE/exit-0 outcome against the application’s documented status contract. Report any mismatch separately from the retrieval failure; do not fix it.
 
-Show the exact working directory, input paths, and copy-paste commands for running:
+6. Correct the causal conclusion.
+    The evidence establishes that Symcor returned an error during getDocs. It does not, by itself, establish that CLUE is defect-free.
 
-* All Debit input rows.
-* All Credit input rows.
+Classify findings as:
 
-Commands must contain no secrets. Execute both runs now using the existing Python application, real Symcor services, and real Tungsten services. Do not stop after producing commands or CSV files.
+* Confirmed request/contract mismatch.
+* Confirmed provider response.
+* Supported hypothesis.
+* Unresolved because specific evidence is missing.
 
-The objective is the full path:
-CSV ingestion → routing → Symcor retrieval → cheque images → Tungsten processing → final application output.
+If you identify a code defect, report its file/function and the required conceptual correction without editing it.
 
-For Credit cases, observe whether the actual application executes the required searchTransaction → getTransactionItems → getDocs sequence. Do not substitute the simpler Debit/search flow, manually fetch images to bypass a failing stage, or implement a separate service client.
+7. Prepare the next actionable handoff.
+    Return:
 
-Use existing bounded timeouts, polling, and retry behavior. Check for fetch limits or truncation; a limited subset must not be reported as complete retrieval.
+* A concise explanation of what failed and what remains unknown.
+* The failed-versus-successful retrieval comparison.
+* The request/contract validation table.
+* Whether the Credit inline-item path is documented.
+* A minimal Symcor support draft with operation, environment, UTC timestamps, correlation IDs, fault, and focused questions.
 
-5. Cover every case without modifying the application.
+Prepare sanitized request/response examples for the draft. Keep original account data, identifiers, captures, and secrets private and outside Git. Do not send anything to another person.
 
-A failure in Debit must not prevent testing Credit, or vice versa.
+Do not repeat the 17-row run or issue new live service calls during this investigation. If a live comparison is necessary after the offline review, propose one narrowly scoped test and explain what uncertainty it would resolve.
 
-If a batch aborts before processing all rows, preserve its failure evidence. Where supported by the existing runner, prepare isolated input subsets for the unattempted rows and run them separately. Avoid resubmitting cases that already completed successfully.
-
-If a shared prerequisite blocks all remaining cases, record those cases as BLOCKED with the common cause instead of repeatedly making identical failing calls.
-
-Do not patch code, weaken validation, change provider routing, or introduce mocks to obtain a pass. Input conversion and test orchestration helpers are permitted; replacement application logic is not.
-
-6. Verify results and identify failure points.
-
-For each original source row, report:
-
-* Debit/Credit and source sheet/row.
-* Input parsing and selected route.
-* Symcor operations attempted and observed results.
-* Transaction/item/document counts and any retrieval limits.
-* Images retrieved and their association with the source case.
-* Tungsten submission, completion status, and returned fields.
-* Final output generation and provider-to-output fidelity.
-* PASS / FAIL / BLOCKED / NOT RUN, elapsed time, first failing stage, and evidence paths.
-
-Use source row references in the summary rather than exposing account numbers or raw customer data. Keep detailed captures private.
-
-Do not infer front/back identity solely from image order. Record whether it is provider-confirmed or based on the existing configured assumption.
-
-Distinguish:
-
-* Technical end-to-end completion.
-* Complete retrieval and correct case/image correlation.
-* OCR accuracy against known expected values.
-
-A successful exit code alone is insufficient. Empty provider OCR fields do not establish positive OCR accuracy. If expected values are unavailable, mark accuracy NOT EVALUATED.
-
-7. Return a concise test report.
-
-Include:
-
-* Source workbook/sheets and actual row counts.
-* Both generated CSV paths and conversion reconciliation.
-* Exact DEV launch commands.
-* Host/user, revision, Python version, and run timestamps.
-* Separate Debit and Credit totals: passed, failed, blocked, not run.
-* A result for every source row.
-* Output and private evidence paths.
-* Observed failure points, separating proven causes from hypotheses.
-* Confirmation that application code and deployment were not changed.
-
-Proceed with conversion and real DEV execution. The goal is to establish what works and where the current application fails across all supplied cases, without fixing it during this task.
+Finish with the single recommended next action, supported by the evidence. Preserve the existing pending_technical cases and all prior run results.
