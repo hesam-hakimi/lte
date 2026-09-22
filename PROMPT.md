@@ -1,49 +1,34 @@
-Continue the current CLUE session. The completed DEV workbooks do not demonstrate conformance to the business output template I previously supplied. Correct the normal application output against that existing template.
+Continue the CLUE session. Fix the missing source transaction data in business-output columns A:W through the normal application pipeline. This is an implementation task, including regeneration and download of the corrected workbooks.
 
-Preserve the getDocs and run-status fixes, completed provider work, original workbooks and evidence. Keep all responses and engineering artifacts in English. Archive work remains deferred.
+The previous export corrected the layout but left 22 input columns empty. Matching the template’s headers alone is insufficient.
 
-1. Recover the authoritative output contract
+1. Establish the source-to-output mapping.
+    * Read the authoritative template: C:\repos\FCRM\data\All Transactions_ip_op_template.xlsx, sheet in.
+    * Inspect the actual TDB input workbook, converted CSVs, existing Rahona inputs, mapping code and project documentation.
+    * For every A:W column, identify its meaning, source field, any documented transformation and supporting evidence.
+    * Different column names do not establish that the data is unavailable. Check semantic mappings.
+    * Do not guess account roles, date ranges, customer information or other missing values. Distinguish genuinely absent source data from data lost during processing.
+2. Fix source-data preservation and mapping.
+    * Trace the original input through parsing, stored source records, document associations and workbook export. Identify exactly where available values are omitted.
+    * Implement supported mappings and preserve original business-input values, including leading zeros, identifiers and date meaning.
+    * When one input row produces several document rows, copy that input row’s transaction context to every associated output row.
+    * Preserve duplicate source rows and their identities. Do not associate records solely by account/date or output row position.
+    * Keep genuinely unavailable fields empty and explain them in the companion report. Do not fabricate values or use OCR to replace missing transaction context.
+3. Preserve the approved output contract.
+    * Exactly 41 columns A:AO, sheet in.
+    * A:W: source transaction data.
+    * X/Y: cheque_front / cheque_back.
+    * Z:AO: the existing eight field/confidence pairs.
+    * Preserve all existing associations, images, extraction results and unavailable/no-match outcomes. Keep technical diagnostics outside the business workbook.
+4. Validate actual values.
+    * Add focused regression tests comparing known source values with exported cells, including multiple documents per input row, duplicate source rows and leading-zero identifiers.
+    * Test supported Rahona input preservation and verified TDB mappings separately.
+    * If the TDB fixture cannot supply every business field, complete the supported correction and identify the exact remaining data requirements. Do not describe the workbook as fully populated or business-complete.
+5. Regenerate and deliver.
+    * Re-export all four existing runs from copies of saved workspaces using the corrected application code. Do not repeat Symcor or Tungsten calls.
+    * Preserve previous evidence and downloads.
+    * Download the corrected workbooks to a new Windows review folder, verify transfer checksums and open that folder for visual inspection.
 
-Locate the original supplied business output/template in the existing project files, requirements and prior mapping references. Search the available sources before asking me to resend anything.
+Report the root cause, implemented mappings, remaining source-data gaps, tests and local workbook paths. Include a small before/after comparison showing populated A:W values and reconcile all 363 output rows.
 
-The recorded meeting instruction was to preserve the supplied layout and naming, with the output section starting at column X. Inspect the actual native workbook programmatically to establish exact headers, column positions, worksheets, formatting and image placement. Do not infer a complete schema from that meeting statement alone.
-
-Record the template path, worksheet and checksum. Distinguish the input workbook Test Data_TDB.xlsx from the business output template. If the authoritative template cannot be located, report the precise missing source instead of inventing a replacement.
-
-2. Identify and correct the mismatch
-
-Trace the downloaded workbook back to its output profile, configuration and writer. Determine whether the wrong export was selected or the business writer does not implement the supplied template. Use code/history evidence before attributing the mismatch to a recent change.
-
-Compare expected and actual columns by name and position. Apply the smallest necessary correction to the normal export path.
-
-Preserve the template’s business headers, original input values, formats and image locations. Exclude unapproved internal fields, server paths and diagnostic explanations from the business workbook. Retain diagnostic information in separate evidence files; hiding extra columns is not schema compliance.
-
-Investigate the UNAGREED/front-first field-selection annotation against existing documentation. Do not conceal unresolved mapping, invent confidence values, replace missing values with zero, or change image-side labels without supporting evidence.
-
-Preserve every legitimate source-row/document association, including shared documents and unavailable/no-match outcomes.
-
-3. Regenerate using saved results
-
-Use the completed results under:
-
-/home/tag5916/clue_private/e2e_fixed_20260922/
-
-Regenerate the business workbooks through the corrected application export path using saved results and committed artifacts. Do not repeat Symcor or Tungsten calls, reset workspaces, or modify historical run evidence.
-
-Keep the previously downloaded files in:
-
-C:\Users\tag5916\Downloads\CLUE_DEV_Review_20260922\
-
-Save corrected outputs in a separate clearly named review folder.
-
-4. Validate and deliver
-
-Add focused output-contract tests whose expected headers and positions come from the supplied template, independently of the writer implementation.
-
-Check exact column order, absence of unapproved extra columns, original-value preservation, source/document associations, image anchors and supported missing-value behavior.
-
-Download the corrected workbooks, verify transfer checksums and open their local folder for my visual review.
-
-Report the root cause, template used, before/after mapping, changed files, validation results and exact local workbook paths. Keep unresolved mapping questions explicit. Preserve the overall PARTIAL acceptance finding unless new evidence changes it.
-
-Do not merge changes or alter providers, credentials, TLS, dependencies, scheduled jobs or shared deployments.
+Preserve the getDocs and classification fixes. Keep the blank Debit OCR investigation open separately. Do not merge, push, change shared deployments or resume unrelated packaging/archive work.
