@@ -1,97 +1,115 @@
-Continue the CLUE session. Execute a focused live getDocs diagnostic from Linux DEV using the provider-supplied example found in our existing documentation.
+Implement the focused CLUE getDocs correction and validate it through the real application pipeline on Linux DEV.
 
-This authorizes preparing and sending diagnostic requests for one Debit document and one Credit document. Preserve the test-only boundary: do not modify application code, dependencies, deployment, shared configuration, credentials, or existing runtime state. All responses and artifacts must be in English.
+I authorize the application changes, focused regression tests, and isolated DEV staging needed for this correction. This supersedes the earlier “test only, no application changes” restriction for this specific task. Proceed without asking again for permission to make this correction.
 
-1. Reuse the authoritative contract and existing environment.
+All responses, code, tests, and documentation must be in English.
 
-Use the original document under:
-C:\repos\fcrm_clue\existing code\symcor\
+1. Establish the current source and preserve existing work.
 
-Locate:
-AWSSpecRelease6.1 (2021.05.03).docx
-Appendix D → Get Document Samples → Request XML
+Read repository instructions, the latest handoff, and the current branch/diff. Preserve unrelated changes and all previous test evidence. Work on a feature branch, using an isolated worktree if necessary.
 
-Reuse the extracted document text and saved PAT WSDL/XSD from the completed review. Do not repeat the full documentation investigation or transcribe XML from screenshots.
+Reuse the completed investigation:
 
-Execute through the established connection:
+* AWSSpecRelease6.1 (2021.05.03).docx, Appendix D, Get Document Samples.
+* The saved PAT WSDL/XSD.
+* Successful diagnostic evidence under:
+    /home/tag5916/clue_private/getdocs_diag_20260922/
+
+The diagnostic retrieved two images for one Debit document and one Credit document. It did not validate the application’s complete Credit pipeline.
+
+2. Correct the actual application request and metadata propagation.
+
+Update build_get_docs_envelope and its necessary callers/models to reproduce the validated request:
+
+* Use the correct SOAP namespace, operation wrapper, and element order.
+* Replace documentList with docIDList.
+* Remove documentFolder from getDocs.
+* Include both siteSpecificDocID and universalDocID for the same document.
+* Preserve both identifiers through search/searchTransaction parsing, document selection, and retrieval.
+* Preserve their exact values; do not truncate, fabricate, or double-encode them.
+* Supply imageFormat=0, deliveryMethod=ONLINE, deliveryDetail=NOTHING, schedulePolicy=SCHEDULE_OFFLINE, and schedulePriorityLevel=1, as used in the successful diagnostic.
+* Derive imageMask from the selected document’s documented AvailableSegments value and any existing supported selection rules. Do not hardcode the successful sample’s mask 10 for every document.
+* Keep the configured clientID, tracing, TLS, and secret-loading behavior.
+
+If required identity or mask information is absent or invalid, return an explicit diagnostic outcome before sending an invalid request. Do not substitute another document’s metadata.
+
+Document the compatibility values and their source. Remove or update comments that still describe the old malformed request as an intentional workaround.
+
+3. Keep retrieval behavior focused.
+
+Retain one document per getDocs request, as successfully tested. Do not add batching or parallel retrieval as part of this fix.
+
+Preserve the existing Debit/Credit routing and the documented Credit inline-child-document handling. Process every returned in-scope child document without silently imposing a 10-document limit.
+
+Reuse the existing HTTP transport and SOAP/MTOM parser. Make additional integration changes only where necessary to carry identifiers, associate the returned images correctly, or complete this corrected retrieval path.
+
+Do not redesign the pipeline, change search criteria, or broaden this task into unrelated status or OCR fixes. Preserve provider-unavailable outcomes such as sorryFlag rather than presenting them as successful retrieval.
+
+4. Add meaningful regression coverage.
+
+Use authoritative schema validation and synthetic or sanitized fixtures to verify:
+
+* The application-generated getDocs XML conforms to the saved PAT XSD; the previous malformed shape is rejected.
+* Both document identifiers and document-specific masks survive the normal parsing-to-retrieval path for Debit and Credit.
+* Multiple child documents retain their own identifiers, masks, and source-row associations.
+* Missing required metadata is handled before sending a malformed request.
+* A representative getDocs MTOM response is associated with the requested document through the existing parser.
+
+Keep real identifiers, images, credentials, and live captures outside Git. Do not add a runtime dependency solely for schema testing.
+
+Run the relevant focused tests and repository-required gates. Do not weaken tests or repeat unrelated suites without a concrete reason.
+
+5. Stage the corrected application privately on DEV.
+
+Use the established connection:
 tag5916@crcluesbdzwnk0.dev.vmc2.td.com
 
-Reuse the existing Python transport/session, encrypted client identity, secure secret loader, and verified CA configuration. Keep TLS and hostname verification enabled. Do not request passwords already available through the working configuration.
+Prepare a new private staging directory for the corrected application, preserving the previous deployed tree. Record the source revision plus patch/artifact hash so the executed code is identifiable.
 
-Use the established Symcor PAT endpoint:
-https://penhubpat.td.com/aws/services/AwsService
+Reuse the existing working environment and secure configuration. Keep TLS and hostname verification enabled, including:
+CLUE_TUNGSTEN_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
 
-2. Select exactly two documents from saved evidence.
+Keep requires-python >=3.10 unchanged. Record the actual DEV interpreter; a diagnostic execution on Python 3.9.25 does not establish supported deployment compatibility.
 
-Debit:
-Use the document associated with Debit Excel row 3, whose images were successfully retrieved through inline search.
+Use fresh run-specific workspaces, state, outputs, and captures. Do not clear or modify the previous pending_technical cases.
 
-Credit:
-Select one child document from Credit Excel row 2. Prefer a document with image availability indicated and without sorryFlag=1. Record the actual availability metadata.
+6. Execute the standard application end to end.
 
-For each document, extract its matching siteSpecificDocID and universalDocID from the same saved provider response. Preserve their exact values and association. Do not use the example’s IDs, a UTI, a parent document ID, or identifiers reconstructed from the workbook.
+Reuse the already-converted CSV records without changing their values.
 
-Keep original identifiers private. Use source sheet/row references in the summary.
+First run:
 
-3. Prepare valid diagnostic XML outside the application.
+* Debit Items, Excel row 3.
+* Credit Items, Excel row 2, including all child documents returned for that row.
 
-Create a small reusable diagnostic helper and request files in a private run-specific directory outside Git. Reuse the existing transport to send the prepared XML. Do not edit or monkey-patch build_get_docs_envelope or implement another batch pipeline.
+Use the normal batch entry point. The diagnostic helper must not substitute for the application under test.
 
-Follow the provider example and saved PAT schema:
+For the Debit pilot, use the existing supported configuration that exercises getDocs, including docsFetchLimit=0 where applicable. Confirm from captures that the corrected builder was actually called.
 
-* Correct SOAP envelope, namespace, operation wrapper, and element order.
-* The configured clientID and existing tracing mechanism.
-* docIDList containing exactly one docID.
-* Both siteSpecificDocID and universalDocID.
-* No documentFolder element.
-* imageFormat = 0.
-* deliveryMethod = ONLINE.
-* deliveryDetail = NOTHING, following the provider sample; record the prose/sample difference.
-* schedulePolicy = SCHEDULE_OFFLINE, the documented compatibility value.
-* schedulePriorityLevel = 1.
+Validate the complete path:
+CSV → normal routing → Symcor discovery → corrected getDocs → images → real Tungsten processing → final CSV/JSON/XLSX outputs.
 
-For imageMask, inspect the selected document’s availability metadata and the documented mask semantics. Use the available mask if the documentation establishes that it uses the same encoding. Otherwise use the provider sample’s value 15 and explicitly record that choice. Do not invent individual bit mappings or interpret the mask as an image count.
+If the pilots establish the corrected path works, continue with the remaining source rows so all 5 Debit and 12 Credit rows have an accounted-for result for this candidate. Preserve duplicate source rows and their associations. Avoid repeating completed pilot rows unless a subsequent code change invalidates their results.
 
-Validate each request against the saved applicable XSD before sending. Distinguish actual schema validation from manual comparison. Resolve diagnostic XML mistakes without changing application code.
+Use bounded retries and polling. If a common technical failure reappears, stop repetitive calls and identify affected remaining cases as blocked. Fix directly related integration defects within this scope; report unrelated failures separately.
 
-4. Execute the two requests.
+Do not alter the four previously zero-hit Debit cases to manufacture matches.
 
-Show the exact launch command without secrets, then execute:
+7. Return a reviewable change and an evidence-based result.
 
-* One getDocs request for the selected Debit document.
-* One getDocs request for the selected Credit document.
+Include:
 
-Use bounded timeouts and one attempt per document. A Debit failure must not suppress the Credit attempt unless a common connection or authentication failure prevents execution.
+* Branch, source revision, changed files, and focused diff summary.
+* Regression checks and actual results.
+* Exact DEV launch commands and staging identity.
+* Per-source-row outcomes and separate Debit/Credit totals.
+* Documents discovered/retrieved, image counts, Tungsten jobs completed, output verification, and evidence paths.
+* Any remaining failure and its first observed stage.
 
-Save request, response headers, raw response body, UTC timestamp, elapsed time, and correlation information privately. Preserve all previous captures and pending_technical cases.
+Distinguish NO_MATCH, provider image unavailability, technical failure, blocked/not-run cases, and successful technical completion. Exit 0 or COMPLETE alone is insufficient.
 
-Do not rerun the 17-row dataset, retry the known-invalid builder, vary field values by trial and error, or initiate Tungsten jobs during this diagnostic.
+Keep OCR accuracy NOT EVALUATED without independent expected values. Keep front/back labels identified as assumptions unless supported by documented mapping or provider evidence.
 
-5. Verify the returned content.
+Update the relevant handoff with the implemented correction and observed validation. Preserve the remaining status-classification issue separately.
 
-For each response, report separately:
-
-* Transport/TLS outcome.
-* HTTP status and any SOAP fault.
-* Expected response structure.
-* Document identity/correlation, where provided.
-* Image/MIME part count, CID resolution, byte lengths, and whether image decoding succeeds.
-
-Do not treat HTTP 200 alone as success. Do not assume exactly two images: mask 15 requests all four documented segment types. Assign front/back or BW/GS labels only when supported by response metadata or documented mapping; otherwise report those labels as unverified.
-
-Use existing parsing utilities where possible. If the response contains images but the current parser cannot process them, distinguish successful provider retrieval from the parsing failure.
-
-6. Return the evidence and next action.
-
-Provide a compact Debit-versus-Credit results table, exact commands, evidence paths, and a comparison with the previously malformed requests.
-
-State clearly:
-
-* Whether a contract-conforming getDocs request retrieved images.
-* Any remaining request, provider, availability, or parsing issue.
-* Which application changes would be required later, without implementing them.
-* That the application’s Credit end-to-end flow remains unvalidated until the correction is integrated and tested through the normal pipeline.
-
-If either request fails, identify the first observed failing stage and the smallest evidence-supported next step. Do not automatically attribute failure to Symcor or retention.
-
-Complete this focused diagnostic now. No code fixes, commits, deployments, full regression runs, or messages to other teams.
+Complete the correction and available DEV validation in this task. Do not merge, activate scheduled jobs, change shared infrastructure, or send messages to other teams.
