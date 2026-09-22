@@ -1,70 +1,97 @@
-Before asking Symcor for a getDocs example, thoroughly check whether the existing project documentation already contains the example or field definitions we need.
+Continue the CLUE session. Execute a focused live getDocs diagnostic from Linux DEV using the provider-supplied example found in our existing documentation.
 
-Continue the current CLUE session. This is a documentation review only. Do not modify application code, configuration, dependencies, deployment, or runtime state. Do not make live service calls or contact anyone. All responses and artifacts must be in English.
+This authorizes preparing and sending diagnostic requests for one Debit document and one Credit document. Preserve the test-only boundary: do not modify application code, dependencies, deployment, shared configuration, credentials, or existing runtime state. All responses and artifacts must be in English.
 
-Context:
+1. Reuse the authoritative contract and existing environment.
 
-* The diagnosis reported a mismatch between CLUE’s getDocs request and the saved PAT XSD.
-* The successful Debit execution obtained images through search with docsFetchLimit=10; it did not validate getDocs.
-* Credit remains blocked at getDocs.
-* Before requesting additional information from Symcor, we must establish what our existing documents already answer.
+Use the original document under:
+C:\repos\fcrm_clue\existing code\symcor\
 
-1. Locate and inventory the available sources.
+Locate:
+AWSSpecRelease6.1 (2021.05.03).docx
+Appendix D → Get Document Samples → Request XML
 
-Start from the current workspace, previously shown as:
-C:\repos\fcrm_clue
+Reuse the extracted document text and saved PAT WSDL/XSD from the completed review. Do not repeat the full documentation investigation or transcribe XML from screenshots.
 
-Read the documentation index and follow references to the original Symcor guides, specifications, appendices, attachments, sample XML, SOAP/Postman collections, sample client code, and saved WSDL/XSD files.
+Execute through the established connection:
+tag5916@crcluesbdzwnk0.dev.vmc2.td.com
 
-Inspect relevant document tables, code blocks, embedded attachments, and archives where accessible. Use programmatic text/document extraction; no screenshots, OCR, or vision.
+Reuse the existing Python transport/session, encrypted client identity, secure secret loader, and verified CA configuration. Keep TLS and hostname verification enabled. Do not request passwords already available through the working configuration.
 
-List the actual filenames, versions/dates, and locations reviewed. Identify inaccessible, image-only, or missing referenced documents explicitly.
+Use the established Symcor PAT endpoint:
+https://penhubpat.td.com/aws/services/AwsService
 
-2. Search for the operation and its field semantics.
+2. Select exactly two documents from saved evidence.
 
-Search case-insensitively, including naming variations:
+Debit:
+Use the document associated with Debit Excel row 3, whose images were successfully retrieved through inline search.
 
-* getDocs / AwsGetDocsRequest
-* getDocsWithSuppData
-* docIDList / AwsDocID
-* siteSpecificDocID / universalDocID
-* imageFormat / imageMask
-* deliveryMethod / deliveryDetail
-* schedulePolicy / schedulePriorityLevel
-* synchronous retrieval / delivery / scheduling
+Credit:
+Select one child document from Credit Excel row 2. Prefer a document with image availability indicated and without sorryFlag=1. Record the actual availability metadata.
 
-Read surrounding sections, footnotes, tables, and cross-references. A search result alone is not sufficient.
+For each document, extract its matching siteSpecificDocID and universalDocID from the same saved provider response. Preserve their exact values and association. Do not use the example’s IDs, a UTI, a parent document ID, or identifiers reconstructed from the workbook.
 
-Prioritize provider-supplied documentation and samples. Clearly distinguish them from CLUE-generated requests, mocks, tests, and handoff summaries. Our own known-invalid request is not an authoritative example.
+Keep original identifiers private. Use source sheet/row references in the summary.
 
-3. Determine what is actually documented.
+3. Prepare valid diagnostic XML outside the application.
 
-For each required field, find:
+Create a small reusable diagnostic helper and request files in a private run-specific directory outside Git. Reuse the existing transport to send the prepared XML. Do not edit or monkey-patch build_get_docs_envelope or implement another batch pipeline.
 
-* Supported values and their meanings.
-* Any documented default.
-* Whether empty, nil, omitted, and explicit values are treated differently.
-* Applicability to synchronous image retrieval.
-* The exact document/page/section or XML location supporting the finding.
+Follow the provider example and saved PAT schema:
 
-Check whether examples match the saved PAT namespace/schema and service version. Distinguish an old or related-operation example from a directly applicable getDocs example.
+* Correct SOAP envelope, namespace, operation wrapper, and element order.
+* The configured clientID and existing tracing mechanism.
+* docIDList containing exactly one docID.
+* Both siteSpecificDocID and universalDocID.
+* No documentFolder element.
+* imageFormat = 0.
+* deliveryMethod = ONLINE.
+* deliveryDetail = NOTHING, following the provider sample; record the prose/sample difference.
+* schedulePolicy = SCHEDULE_OFFLINE, the documented compatibility value.
+* schedulePriorityLevel = 1.
 
-If getDocsWithSuppData explains shared fields, identify which semantics are explicitly shared; do not assume its entire request can be reused.
+For imageMask, inspect the selected document’s availability metadata and the documented mask semantics. Use the available mask if the documentation establishes that it uses the same encoding. Otherwise use the provider sample’s value 15 and explicitly record that choice. Do not invent individual bit mappings or interpret the mask as an image count.
 
-Do not invent values or treat an XSD type declaration as proof of the correct operational value.
+Validate each request against the saved applicable XSD before sending. Distinguish actual schema validation from manual comparison. Resolve diagnostic XML mistakes without changing application code.
 
-4. Return a focused evidence report.
+4. Execute the two requests.
 
-Provide:
-A. Whether a provider-supplied getDocs example was found, with its exact location.
-B. A table:
-Field | Documented value/meaning | Source/version/page | PAT applicability | Remaining uncertainty
-C. A sanitized excerpt or path to the applicable example.
-D. Any conflict between the guide, sample, and saved PAT XSD.
-E. Only the specific information still missing after this review.
+Show the exact launch command without secrets, then execute:
 
-If no complete example is found but the field definitions are sufficient, state that clearly. A complete example is not automatically required if authoritative documentation already resolves the request.
+* One getDocs request for the selected Debit document.
+* One getDocs request for the selected Credit document.
 
-Do not claim “the documentation has no example” unless the inventory supports that conclusion. Otherwise say “not found in the accessible sources reviewed” and identify the coverage gaps.
+Use bounded timeouts and one attempt per document. A Debit failure must not suppress the Credit attempt unless a common connection or authentication failure prevents execution.
 
-Finish by stating whether the existing documentation is sufficient to prepare a corrected request in a later task, or exactly which unresolved question requires Symcor clarification. Preserve the current test-only boundary; do not implement or execute a correction.
+Save request, response headers, raw response body, UTC timestamp, elapsed time, and correlation information privately. Preserve all previous captures and pending_technical cases.
+
+Do not rerun the 17-row dataset, retry the known-invalid builder, vary field values by trial and error, or initiate Tungsten jobs during this diagnostic.
+
+5. Verify the returned content.
+
+For each response, report separately:
+
+* Transport/TLS outcome.
+* HTTP status and any SOAP fault.
+* Expected response structure.
+* Document identity/correlation, where provided.
+* Image/MIME part count, CID resolution, byte lengths, and whether image decoding succeeds.
+
+Do not treat HTTP 200 alone as success. Do not assume exactly two images: mask 15 requests all four documented segment types. Assign front/back or BW/GS labels only when supported by response metadata or documented mapping; otherwise report those labels as unverified.
+
+Use existing parsing utilities where possible. If the response contains images but the current parser cannot process them, distinguish successful provider retrieval from the parsing failure.
+
+6. Return the evidence and next action.
+
+Provide a compact Debit-versus-Credit results table, exact commands, evidence paths, and a comparison with the previously malformed requests.
+
+State clearly:
+
+* Whether a contract-conforming getDocs request retrieved images.
+* Any remaining request, provider, availability, or parsing issue.
+* Which application changes would be required later, without implementing them.
+* That the application’s Credit end-to-end flow remains unvalidated until the correction is integrated and tested through the normal pipeline.
+
+If either request fails, identify the first observed failing stage and the smallest evidence-supported next step. Do not automatically attribute failure to Symcor or retention.
+
+Complete this focused diagnostic now. No code fixes, commits, deployments, full regression runs, or messages to other teams.
