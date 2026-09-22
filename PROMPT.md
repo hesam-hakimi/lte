@@ -1,34 +1,17 @@
-Continue the CLUE session. Fix the missing source transaction data in business-output columns A:W through the normal application pipeline. This is an implementation task, including regeneration and download of the corrected workbooks.
+Continue the existing CLUE session. This is a focused follow-up to your received report for prompt 74628.
 
-The previous export corrected the layout but left 22 input columns empty. Matching the template’s headers alone is insufficient.
+The mapping implementation and export results are now reported received. Do not repeat completed provider runs or restart the original task.
 
-1. Establish the source-to-output mapping.
-    * Read the authoritative template: C:\repos\FCRM\data\All Transactions_ip_op_template.xlsx, sheet in.
-    * Inspect the actual TDB input workbook, converted CSVs, existing Rahona inputs, mapping code and project documentation.
-    * For every A:W column, identify its meaning, source field, any documented transformation and supporting evidence.
-    * Different column names do not establish that the data is unavailable. Check semantic mappings.
-    * Do not guess account roles, date ranges, customer information or other missing values. Distinguish genuinely absent source data from data lost during processing.
-2. Fix source-data preservation and mapping.
-    * Trace the original input through parsing, stored source records, document associations and workbook export. Identify exactly where available values are omitted.
-    * Implement supported mappings and preserve original business-input values, including leading zeros, identifiers and date meaning.
-    * When one input row produces several document rows, copy that input row’s transaction context to every associated output row.
-    * Preserve duplicate source rows and their identities. Do not associate records solely by account/date or output row position.
-    * Keep genuinely unavailable fields empty and explain them in the companion report. Do not fabricate values or use OCR to replace missing transaction context.
-3. Preserve the approved output contract.
-    * Exactly 41 columns A:AO, sheet in.
-    * A:W: source transaction data.
-    * X/Y: cheque_front / cheque_back.
-    * Z:AO: the existing eight field/confidence pairs.
-    * Preserve all existing associations, images, extraction results and unavailable/no-match outcomes. Keep technical diagnostics outside the business workbook.
-4. Validate actual values.
-    * Add focused regression tests comparing known source values with exported cells, including multiple documents per input row, duplicate source rows and leading-zero identifiers.
-    * Test supported Rahona input preservation and verified TDB mappings separately.
-    * If the TDB fixture cannot supply every business field, complete the supported correction and identify the exact remaining data requirements. Do not describe the workbook as fully populated or business-complete.
-5. Regenerate and deliver.
-    * Re-export all four existing runs from copies of saved workspaces using the corrected application code. Do not repeat Symcor or Tungsten calls.
-    * Preserve previous evidence and downloads.
-    * Download the corrected workbooks to a new Windows review folder, verify transfer checksums and open that folder for visual inspection.
+1. Resolve column Q, Transaction_Details, from authoritative evidence.
+    Your report says the template’s Q2 note requires an ISN for Debit, the feed supplies ItemSeqNo, but the implemented mapping uses UTI and is explicitly contested. A matching details_column role in code is insufficient evidence of business equivalence.
+    Inspect the native template, requirements and source-field documentation. Establish Debit and Credit semantics separately, citing the exact file and sheet/cell or section.
+    Use ItemSeqNo for Debit only if its required ISN meaning is documented. Use UTI only where its meaning is supported. If a direction remains unresolved, leave its unsupported Q values blank and explain the gap in the companion report. Preserve all original source values in stored evidence.
+2. Supply the existing field-by-field mapping report for all 23 A:W columns.
+    Distinguish documented mappings, unresolved semantics and fields absent from the actual test input. Support each of the 17 claimed missing fields individually; a note about missing CIF fields does not establish absence of every other field. Identify the specific Rahona input needed for the remaining business context.
+3. Make only the supported correction and run focused tests.
+    Cover direction-specific Q behavior, identifier preservation and source-row lineage. Reuse existing validation evidence; do not repeat the full suite unless an applicable repository gate requires it.
+4. If export behavior changes, regenerate the affected workbooks from copies of saved workspaces, without Symcor or Tungsten calls. Preserve the 41-column contract, prior fixes, all associations and outcomes. Download to a new review folder, verify checksums, and report before/after Q values with source-row identities and reconciled totals.
 
-Report the root cause, implemented mappings, remaining source-data gaps, tests and local workbook paths. Include a small before/after comparison showing populated A:W values and reconcile all 363 output rows.
+Also state whether investigation 68249 is already active or completed, and provide its existing result if available. Do not launch duplicate work. Keep blank-Debit OCR and the other acceptance concerns separate.
 
-Preserve the getDocs and classification fixes. Keep the blank Debit OCR investigation open separately. Do not merge, push, change shared deployments or resume unrelated packaging/archive work.
+Report evidence, remaining uncertainties, targeted test results and workbook paths. Keep archive/lifecycle and publishing work deferred.
