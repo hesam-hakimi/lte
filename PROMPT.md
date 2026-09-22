@@ -1,45 +1,39 @@
-Continue CLUE from the laptop session. Copilot is unavailable inside VDI, so perform DEV preparation and testing through SSH/SCP from this laptop. Do not require Copilot on DEV.
+URGENT: Run a focused connectivity test FROM the Linux DEV server TO Symcor PAT now. Defer unrelated deployment, Python upgrades, and regression testing. All responses must be in English.
 
-The delivery receipt reports:
+Reuse the established laptop SSH connection:
 
-* Repository: https://github.com/TD-Universe/W001CLUEinitialRepo.git
-* Branch: feature/clue-import-20260921
-* Published commit prefix: f7491a8
-* Laptop tests: 537 passed, 2 skipped.
-* DEV terminal shown as tag5916@crcluesbdzwnk0.
+* DEV: tag5916@crcluesbdzwnk0.dev.vmc2.td.com
+* Symcor: https://penhubpat.td.com/aws/services/AwsService
 
-Verify these against the actual checkout and connection configuration. All responses and artifacts must be in English.
+Execute the checks remotely on DEV, not on the laptop. Use existing diagnostic scripts where suitable; otherwise use installed Linux tools, curl and OpenSSL.
 
-1. Establish SSH from THIS laptop using the existing connection settings and authentication method. Confirm the remote hostname and user. A successful connection inside VDI does not prove laptop access. The earlier BatchMode authentication failure does not prove interactive login is unavailable.
+1. Confirm the execution location.
+    Record hostname -f, whoami and UTC timestamp. Report whether the request uses a proxy, without exposing credentials.
+2. Check DNS and TCP separately.
+    Resolve penhubpat.td.com from DEV and test TCP port 443 with a bounded timeout. Record resolved IPs and the actual result. Do not reuse the previous report as current evidence.
+3. Test verified HTTPS and client authentication.
+    Use the existing configured CA bundle and Symcor client certificate/private key, if available. Check documented application/configuration paths rather than assuming everything is under the user’s home directory.
 
-If password/MFA interaction is required, let the user complete it in the terminal. Do not store credentials in scripts or assume subsequent connections are authenticated automatically. Reuse an already configured authentication agent/key where available. Preserve host-key verification.
+Keep certificate and hostname verification enabled. Do not use –insecure or disable verification. Do not print secrets or copy laptop credentials for this task.
 
-2. Resolve the full published commit SHA. Package that exact committed tree with git archive, using –output rather than a PowerShell binary pipeline. Verify the archive contains the application, dependency definitions, tests, and required synthetic fixtures. Record the commit and archive SHA-256.
+If client credentials are unavailable, complete the network checks and collect the TLS error, then report authenticated access as BLOCKED. Do not classify a missing client certificate or untrusted CA as a firewall failure.
 
-Do not recursively copy the laptop working directory, virtual environment, .env, private keys, or outputs directory.
+4. Send one GET request to:
+    https://penhubpat.td.com/aws/services/AwsService?wsdl
 
-3. Reuse existing deployment/verification helpers. If a remote runner is missing, create a small Bash script with LF line endings and explicit error handling. Transfer the archive and runner using SCP into a user-owned staging location. Verify the transferred archive hash before extraction. Preserve existing deployments and dirty directories.
-4. On DEV, inspect the actual Python environment and project requirements. The receipt states Python >=3.10. Prepare an isolated environment using the configured package source and declared dependencies.
+Use a 10-second connection timeout and 30-second overall timeout. Save the response and diagnostic output privately. Record curl exit code, HTTP status and whether the body is the expected WSDL rather than an HTML/error page. Do not use HEAD/404 as the service-health verdict.
 
-Run the documented test command on DEV:
-PYTHONPATH=src .venv/bin/python -m pytest tests/clue
+If the existing authenticated SOAP diagnostic is ready, also execute one read-only getCriterionRules request for ALL1 using the configured clientID and existing validated request builder. Check for a valid operation response and SOAP faults. Do not search for or retrieve cheque records.
 
-Capture the real exit status and a test report. Do not translate PowerShell stderr output alone into failure or success. Report actual results rather than assuming the laptop count will repeat.
+Return a concise table:
+Stage | PASS / FAIL / BLOCKED / NOT RUN | Evidence
 
-5. Continue the already authorized DEV configuration and one-case integration smoke test when prerequisites are available. Read current repository configuration and handoff instructions first.
+Include DNS, TCP 443, server certificate verification, client authentication, WSDL and the optional SOAP operation.
 
-Important details from the delivery receipt:
+Finish with direct answers:
 
-* Real input files were excluded from Git. Transfer only the existing authorized one-row test input separately if needed.
-* Reuse provisioned DEV certificate/secret locations and keep HTTPS verification enabled.
-* Preserve the working laptop’s positive –symcor-docs-fetch-limit setting. The receipt states the default getDocs path remains incompatible with live PAT; do not accidentally switch back to it.
-* Preserve the explicit –symcor-segment-order setting, while retaining its configured-order evidence status.
-* Check effective settings: the receipt says –env-file values override process environment values.
+* Can DEV reach Symcor over the network?
+* Can DEV complete a verified authenticated request?
+* What is the first failing stage, and what exact configuration or resource is missing?
 
-Use the normal application pipeline and real providers. No fixture fallback. Record the Symcor and Tungsten exchanges from this DEV run, correlate document/image/job identities, and validate the generated workbook against the raw responses.
-
-6. Retrieve the test report and appropriate output artifacts to the laptop. Report the deployed source SHA, remote host/user, environment paths, test exit status, integration results, and remaining blockers. Positive OCR accuracy remains NOT EVALUATED for the existing blank-field case.
-
-If direct laptop SSH is unavailable, identify whether the failure is name resolution, network access, or authentication. Use an existing documented jump host only if available; do not assume the VDI is an SSH jump host. Otherwise prepare the same runner for manual execution through the working VDI terminal.
-
-No production changes, shared infrastructure changes, or scheduled-job activation.
+Provide the executed commands with secrets redacted and the saved evidence paths. Report uncertainty where the evidence does not establish the cause.
