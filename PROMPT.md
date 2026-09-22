@@ -1,32 +1,49 @@
-Continue the existing CLUE merge task. I have added the GitHub token to the local .env. You are authorized to use it for this repository and complete the previously authorized PR merge when repository requirements are satisfied. All responses and artifacts must be in English.
+Continue CLUE after the completed merge of PR #1. Prepare and verify an installable application package for the CADP handoff. All responses, code, documentation, and reports must be in English.
 
-Last reported state—verify before acting:
+Known baseline—verify locally:
 
 * Repository: TD-Universe/W001CLUEinitialRepo
-* Branch: feature/clue-import-20260921
-* Existing PR: #1, targeting main
-* Latest reported commit: 5ac9541
-* Working tree clean; local and remote HEAD matched.
-* Candidate validation: 537 passed, 2 skipped; release validation passed.
-* The loopback TLS teardown race was fixed, and cryptography was added to the test dependencies.
+* PR #1 merged into main; reported merge commit begins 66806b56.
+* Build backend: setuptools.build_meta.
+* Declared Python requirement: >=3.10.
+* Previous DEV execution used a Git source archive and PYTHONPATH=src.
+* No application wheel or sdist has yet been demonstrated.
+* DEV currently has Python 3.9.25; its successful scenario does not change the declared Python requirement.
 
-1. Load the GitHub token securely.
-    Locate the .env I just updated in this workspace and use the existing dotenv loader or a proper parser to read the relevant GitHub token variable. Do not execute .env as a script or dump its contents. Keep the token in memory and, if using GitHub CLI, supply it through the child process’s GH_TOKEN environment variable. Never print it, put it in command arguments or remote URLs, persist it in Git configuration, or include it in logs or commits. Confirm .env is excluded from version control.
-2. Verify authenticated access.
-    Use the available GitHub CLI or API client to confirm access to the repository and PR #1. Report only the authenticated account and relevant access result. If authentication, organization authorization, or token permissions block access, report the specific error and smallest required action without exposing the token.
-3. Resume the existing PR.
-    Read repository instructions and inspect the current PR head/base, diff, draft status, required checks, reviews, unresolved threads, and mergeability. Reuse the existing PR. Verify that the intended deployment scripts, CA configuration, dependency fix, TLS test fix, and CADP handoff are included in the PR’s complete change set.
-4. Reuse applicable validation.
-    Confirm the recorded test results correspond to the current candidate commit. Adding an ignored token to .env does not require rerunning the application suite. Repeat checks only for changed code, resolved conflicts, missing evidence, or repository-required gates.
+1. Establish the build source.
+    Read repository instructions, pyproject.toml, README, deployment scripts, and docs/handoff/clue/CADP_DEPLOYMENT_HANDOFF.md. Use a clean checkout or worktree of the verified merged revision, preserving existing work. Record the full source SHA. Put any necessary packaging fixes on a new feature branch.
+2. Build the application distributions.
+    Use the existing setuptools configuration and a Python interpreter satisfying the declared requirement. Build an sdist and build the application wheel from that sdist, so missing source-distribution files are detected. Preserve the existing package version unless repository release policy requires a change.
 
-The root-level CI.yml was reported inactive. Do not move or enable it, alter the EDP workflow, or change branch protection as part of this task. Distinguish local validation from actual GitHub CI. If no automated checks are configured, report that accurately and apply the repository’s actual merge requirements.
+Inspect both artifacts for required modules, entry points, and runtime resources. Exclude real environment files, credentials, keys, certificates, customer input, cheque images, provider captures, generated outputs, and runtime state. Keep the application wheel distinct from dependency wheels and the existing source-release ZIP.
 
-5. Complete the merge.
-    Update the PR description with accurate changes, validation, and remaining limitations. Mark it ready for review if appropriate. Once required checks and approvals are satisfied, merge using an allowed repository method, matching the merge request to the exact reviewed head SHA. Recheck if the head changes.
+3. Prove installation independently of the checkout.
+    Create a fresh virtual environment and install the generated wheel normally, including its declared runtime dependencies. Do not use an editable install, PYTHONPATH=src, or dependency/Python-version bypasses.
 
-Do not bypass required approvals, self-approve, use administrator overrides, force-push, or push directly to main. Do not ask again whether to merge—the action is already authorized. If approval or a required check is pending, report that exact blocker. A queued merge remains pending until GitHub confirms completion.
+Run from a directory outside the source checkout with PYTHONPATH unset. Confirm the imported CLUE modules come from the installed distribution. Check the declared console entry points and python -m clue.batch using their supported help commands. Run pip check.
 
-6. Return a concise receipt.
-    Include the PR URL, source SHA, target branch, checks/review status, merged or blocked status, and merge commit SHA if completed. Verify the final state from GitHub.
+4. Exercise the installed application.
+    Reuse one existing small synthetic DAT input and the existing local provider simulator or documented offline fixtures. Execute the installed application through its normal batch entry point and verify the resulting workbook and relevant image/field associations.
 
-Keep token use confined to this task. Do not deploy, activate scheduled jobs, make new provider calls, or modify the existing DEV credentials.
+Do not silently fall back to the source checkout. If simulator tooling needs the checkout, run it separately while the application under test remains the installed wheel. Fix demonstrated packaging/resource-path defects and repeat only affected checks. Avoid rebuilding the test framework or repeating unrelated acceptance suites.
+
+5. Address the Linux installation boundary.
+    Record the Python version, OS, and architecture actually tested. Reuse an available supported Linux environment if one exists. If DEV still only provides Python 3.9, complete the build and available installation checks, and mark Linux installation on a supported interpreter as pending.
+
+Prepare offline installation instructions for the confirmed target interpreter and architecture. Do not assume the previously downloaded cp39 dependency wheels suit a newer interpreter. Preserve requires-python >=3.10.
+
+6. Update the CADP handoff.
+    Document the actual build, installation, and launch commands; package version and source SHA; dependency delivery method; external configuration and credential locations; and configurable input/output/state/log paths. Preserve the DEV CA-bundle setting and enabled TLS verification.
+
+Clearly distinguish executed checks from instructions awaiting execution. Keep the existing Credit-path, image-side, and positive OCR validation limitations accurate.
+
+7. Return the deliverables.
+    Provide:
+
+* Wheel and sdist paths, sizes, and SHA-256 hashes.
+* Source revision and any packaging-fix diff.
+* Clean-install and installed-application test results.
+* Updated CADP handoff path.
+* Exact remaining deployment prerequisites.
+
+Keep generated packages outside Git. Do not activate or modify platform-owned CI, deploy to shared environments, enable scheduled jobs, make live provider calls, or change existing credentials as part of this packaging task.
