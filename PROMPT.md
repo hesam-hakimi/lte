@@ -1,13 +1,23 @@
-Continue the existing CLUE session from the received response to prompt 93625.
+Continue the existing CLUE session from the received response to prompt 25784.
 
-The imageFormat discrepancy is reconciled at the reported-evidence level: wire value 0 means JPEG under specification section 5.11.5. Do not repeat that investigation, cache tests, or provider runs.
+Implement the narrowly identified search-provenance persistence fix. Preserve the unresolved CP-D03 business question.
 
-Make the existing support material reviewable and return attention to the missing A:W source data.
+1. Confirm the exact point where processing_date_source is lost, then preserve search provenance through the normal execution, durable storage, workspace reopening, and diagnostic export paths.
+    Record the input profile, source-row locator, source date field and value, submitted ProcessingDate criteria, and the mapping’s unresolved status. Keep provenance associated with the source row and search request, including NO_MATCH results and cases where multiple source rows share a document.
+    Use the existing metadata structure where suitable. Keep this information outside the 41-column business workbook.
+2. Preserve historical evidence honestly.
+    Older runs without recorded provenance must remain distinguishable from new runs that persist it. Do not silently reconstruct historical provenance from current code. Any reconstruction from saved evidence must be explicitly labelled and performed on a copy.
+3. Verify the real persistence path with focused offline coverage:
+    * Normal execution followed by close, reopen, and diagnostic re-export.
+    * NO_MATCH provenance and source-row isolation for shared documents.
+    * Older records lacking provenance.
+    * Unchanged search criteria, business values, and outcome classifications.
+    Reuse existing fixtures. Run the focused tests and any mandatory gate required by the actual change.
+4. Correct the handoff wording using the completed audit:
+    Debit: 6 mapped, 16 absent from the supplied fixture, 1 unresolved.
+    Credit: 5 mapped, 16 absent from the supplied fixture, 2 unresolved.
+    Do not describe unresolved fields as absent or imply that obtaining the Rahona extract resolves record linkage automatically.
 
-1. Present the human-readable support note already contained in support_note_and_appendix.json directly in your response. Preserve its evidence appendix and provide its exact local path. Do not send it.
-    Correct any wording that implies Account-only searches rule out account-format problems. They exclude RoutingTransit formatting from those requests, but do not establish that Account retained its authoritative representation. Numeric storage does not prove an original leading zero existed, and a maximum length is not a padding rule.
-2. Using existing run records, state where the submitted ProcessingDate actually came from: an explicit test override, manually supplied criteria, or an application mapping. Reconcile this with the statement that map_processing_date() refuses the unconfirmed mapping. If the provenance is not recorded, say so.
-    Keep this search-contract question separate from the existing business-column F mapping. Preserve “empty for the submitted criteria”; do not claim the expected documents are absent.
-3. Using the completed A:W audit, provide a separate, concise data request for the populated Rahona Base RIP extract. List the 16 missing columns from the existing report and identify the unresolved business definitions for Credit Q and W in both directions. Request confirmation of any undocumented record linkage; do not invent mappings or join keys.
+Report changed files, test results, and one inspectable diagnostic example with its exact local path.
 
-No new provider calls, speculative padding, date widening, application changes, workbook regeneration, or repeated tests. Preserve the 41-column contract, prior fixes, PARTIAL status, and existing outcomes. Keep OCR accuracy, image-side attribution, runtime compatibility, and deferred archive/lifecycle work separate.
+Do not change date mappings, account representations, existing contract guards, business-column F, association behavior, or the workbook layout. Preserve prior fixes and PARTIAL outcomes. No live provider calls, business-workbook regeneration, external messages, or archive/lifecycle work.
