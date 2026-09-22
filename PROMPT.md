@@ -1,22 +1,13 @@
-Continue the existing CLUE session. The requested cache-path regression coverage is now reported received; do not repeat that work.
+Continue the existing CLUE session from the received response to prompt 93625.
 
-Resolve the remaining contract questions using existing native documentation and saved artifacts before proposing another live query.
+The imageFormat discrepancy is reconciled at the reported-evidence level: wire value 0 means JPEG under specification section 5.11.5. Do not repeat that investigation, cache tests, or provider runs.
 
-1. Reconcile imageFormat.
-    Your latest report states imageFormat=0, while the earlier getDocs correction reference records JPEG.
-    Inspect the exact saved SOAP XML for one successful and one sorry response, together with the applicable XSD/specification.
-    Report the literal transmitted value, its documented meaning and precise source reference. Do not assume 0 and JPEG are equivalent.
-    Determine whether this is a reporting discrepancy or an actual request-contract issue. Correct documentation if appropriate; do not make speculative code changes.
-2. Resolve or precisely bound the Debit search uncertainty.
-    Identify authoritative evidence for mapping the supplied TransactionDate to Symcor ProcessingDate.
-    Document the permitted Account and TransitBankAcct search semantics and required identifier formatting.
-    A successful fifth case does not establish the date mapping for the four empty cases. Preserve “empty for the submitted criteria” separately from “expected document does not exist.”
-    If the documentation cannot resolve this, state the exact missing confirmation. Do not widen dates or change identifiers yet.
-3. Prepare a concise support note for owner review.
-    Include only questions still unanswered after that review:
-    * What recovery route exists for the four unique sorryFlag=1 documents?
-    * Are matching records expected in PAT for the four supplied Debit cases, and under which documented search criteria?
-    * What source field should supply ProcessingDate?
-    Include a local evidence appendix with source-row identities, provider document identities, relevant request/response locators and documentation references. Keep association counts separate from unique-document counts.
+Make the existing support material reviewable and return attention to the missing A:W source data.
 
-Use existing evidence only. Do not send the note, make live calls, regenerate workbooks or change application behavior. Preserve PARTIAL and the existing outcomes pending resolution of the remaining acceptance gaps.
+1. Present the human-readable support note already contained in support_note_and_appendix.json directly in your response. Preserve its evidence appendix and provide its exact local path. Do not send it.
+    Correct any wording that implies Account-only searches rule out account-format problems. They exclude RoutingTransit formatting from those requests, but do not establish that Account retained its authoritative representation. Numeric storage does not prove an original leading zero existed, and a maximum length is not a padding rule.
+2. Using existing run records, state where the submitted ProcessingDate actually came from: an explicit test override, manually supplied criteria, or an application mapping. Reconcile this with the statement that map_processing_date() refuses the unconfirmed mapping. If the provenance is not recorded, say so.
+    Keep this search-contract question separate from the existing business-column F mapping. Preserve “empty for the submitted criteria”; do not claim the expected documents are absent.
+3. Using the completed A:W audit, provide a separate, concise data request for the populated Rahona Base RIP extract. List the 16 missing columns from the existing report and identify the unresolved business definitions for Credit Q and W in both directions. Request confirmation of any undocumented record linkage; do not invent mappings or join keys.
+
+No new provider calls, speculative padding, date widening, application changes, workbook regeneration, or repeated tests. Preserve the 41-column contract, prior fixes, PARTIAL status, and existing outcomes. Keep OCR accuracy, image-side attribution, runtime compatibility, and deferred archive/lifecycle work separate.
