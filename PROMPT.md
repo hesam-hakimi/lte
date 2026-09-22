@@ -1,32 +1,62 @@
-Continue from the latest live-verification results.
+Continue the current CLUE session. Create a one-row input workbook using the supplied known test case and execute the real end-to-end pipeline from my laptop against Symcor PAT and the configured real Tungsten test service.
 
-The laptop-to-Symcor PAT connection and the manually corrected getCriterionRules request succeeded. Image retrieval and end-to-end processing remain unverified.
+This specific PAT test is authorized. The previous missing-test-input blocker is resolved for this case. Preserve current changes and reuse the existing application, configuration, certificates, and test helpers.
 
-1. Resolve the application defect.
-    Compare build_criterion_rules_envelope() with the fetched WSDL, current documentation, and saved successful request. Confirm the required clientID element, namespace, and order. Implement the smallest supported correction using the existing configured client ID; do not hard-code the test value.
+Exact Symcor search:
 
-Explain any discrepancy with Appendix B. Do not assume PAT behavior establishes the production contract or run production probes.
+* documentFolder: ALL1
+* ProcessingDate: “20260717”
+* ItemSequenceNumber: “4850040005”
+* Account: “05224026”
+* DebitCreditIndicator: “D”
+* Use operator 1 (EQ) for all four search criteria.
 
-2. Verify the normal application path.
-    Confirm the configured TD CA bundle reaches the actual application adapter. Keep server-certificate verification enabled.
+The supplied previous response contains one matching document, amount 5000.88 and currency CAD. Treat this as the expected reference, not a substitute for a fresh live response.
 
-Repeat getCriterionRules against PAT through the normal application client, without a manually patched SOAP envelope. Validate the response structure and rules, not only HTTP 200. Add only focused regression coverage for the affected behavior.
+1. Create the input workbook.
+    Use the actual business template’s A:W headers and order. Populate the supplied values using the documented mappings. Preserve account and identifier values as text, including leading zeros. Leave unrelated optional fields blank.
 
-3. Resolve DEV testing correctly.
-    Distinguish the source execution environment from the destination service environment. Review the approved DEV-to-Symcor mapping. If DEV is authorized to call the PAT endpoint and existing access is available, run the equivalent bounded test from DEV. Otherwise report the specific missing access or mapping evidence.
-4. Complete one real image-retrieval case.
-    First check existing approved test references for an account number and processing date known to contain a cheque in PAT. Do not treat synthetic spreadsheet examples as approved live search inputs.
+ProcessingDate is explicitly supplied here. Do not infer it from TransactionDate or globally change their mapping. If necessary, use a scoped test-case configuration alongside the workbook to carry the exact search criteria without adding business-sheet columns.
 
-If a valid case is available, execute the documented search and image-retrieval sequence, pass the retrieved images to the real Tungsten integration, and generate the workbook through the normal pipeline. Verify the image/document/row association and compare extracted fields with visible cheque content.
+Ensure the normal application reads this workbook. Do not bypass input ingestion by calling providers directly and then manually assembling Excel.
 
-If approved input is unavailable, complete the code correction and available verification, then state exactly what test data the Symcor owner must provide.
+2. Execute the real Symcor search and image retrieval.
+    Use the working PAT endpoint, configured client ID, client certificate, and TD CA bundle with certificate verification enabled.
 
-Return:
+Build requests using the current WSDL/XSD and corrected application helpers. Do not copy the email’s rewritten Symantec clicktime URLs into XML namespaces.
 
-* Changes and focused test results.
-* Evidence that the normal application request now succeeds.
-* Separate laptop and DEV results.
-* Separate statuses for image retrieval, real Tungsten processing, and Excel validation.
-* The first remaining blocker and artifact paths.
+Preserve all four search criteria. Validate the fresh response against the account, processing date, and item sequence. If the result differs from the expected single document, report the discrepancy without broadening the query.
 
-Preserve unrelated work. No fixture fallback, certificate-verification bypass, infrastructure changes, deployment, commit, or push.
+Use complete document IDs from the fresh response, not the truncated ID in the screenshot. Follow the documented retrieval sequence to obtain the available front/back images.
+
+The historical search response has images=nil. This does not complete image retrieval; continue with the required document/image retrieval operations. Validate that returned payloads decode into actual images and retain document and side associations.
+
+3. Process the images through real Tungsten.
+    Submit the retrieved images using the existing documented payload and image-side handling. Preserve the actual metadata, confidence values, and missing-field results.
+
+No fixtures, synthetic images, canned OCR values, or silent provider fallback are permitted for this run.
+
+4. Generate and verify the final workbook.
+    Use the normal application exporter:
+
+* A:W: preserve original input values.
+* X:Y: embed the actual front/back images, not file paths.
+* Z:AO: populate the eight metadata/confidence pairs in template order.
+
+Reopen the generated workbook and verify headers, input preservation, embedded image anchors, and correspondence between each image, document, provider response, and output row.
+
+Compare readable cheque content with the Tungsten output. Report genuine differences; do not overwrite provider results to match expectations. If content comparison cannot be completed, mark OCR accuracy UNVERIFIED.
+
+5. Deliver the artifacts and evidence.
+    Provide absolute local paths for:
+
+* Input workbook and any scoped mapping/configuration.
+* Retrieved front/back images.
+* Final enriched workbook.
+* Run report with actual commands, timestamps, result counts, and sanitized errors.
+
+Report separate PASS/FAIL/BLOCKED/NOT RUN statuses for input ingestion, Symcor search, image retrieval, Tungsten processing, workbook validation, and OCR content comparison.
+
+If an application defect prevents this authorized test, diagnose and implement the smallest supported correction, run focused regression checks, and resume. Do not fabricate missing required business values or alter the search scope.
+
+Use bounded timeouts and retries. Preserve credentials and unrelated changes. Do not call production, modify infrastructure, deploy, commit, or push. Complete the execution rather than returning only a plan.
