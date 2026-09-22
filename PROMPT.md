@@ -1,36 +1,32 @@
-URGENT: Transfer my existing Symcor client identity from my laptop to DEV and use it to complete the authenticated connectivity test.
+Continue the current Python live-test task. First inspect and reproduce the method that already worked on this laptop.
 
-I authorize transferring my Symcor client certificate and matching private key, or the keystore containing that identity, to my private directory on DEV for this test. This supersedes the earlier restriction against copying the laptop Symcor identity for this specific task.
+The JKS password was previously provided in this project’s .env, and you were instructed to use it. Check that existing configuration before requesting manual password entry.
 
-Use the established SSH/SCP connection:
-tag5916@crcluesbdzwnk0.dev.vmc2.td.com
+1. Trace the successful laptop execution.
+    Locate the saved successful SymcorCoreAdapter.get_criterion_rules() run, including symcor_pat_normal_client_criterion_rules.json and its runner.
 
-1. Identify the correct laptop files.
-    Reuse the exact Symcor identity and configuration used in the successful laptop PAT test. Check the existing configuration and documented TLS location, including %LOCALAPPDATA%\clue\tls where applicable.
+Inspect the actual application configuration loader, provider construction, and certificate preparation code. Determine:
 
-Confirm that the identity includes its matching private key. Prefer the existing working PEM pair or PKCS#12 bundle. If conversion from JKS is necessary, use existing tooling and export only the configured identity without altering the original keystore.
+* Which .env file and configuration variable supplied the password.
+* Whether the JKS password and exported PEM passphrase were the same or separately configured.
+* How the working Python transport loaded the private key.
+* Which certificate chain, CA bundle, and effective TLS settings were used.
 
-2. Transfer into a private DEV location.
-    Create a new run-specific directory under:
-    /home/tag5916/clue_private/tls/
+Read secrets programmatically without displaying their values. Report variable names and file paths only. Use saved evidence first; avoid unnecessarily repeating the laptop service call.
 
-Use directory permissions 0700 and credential-file permissions 0600, owned by tag5916. Transfer only the selected Symcor identity, required intermediate certificates, and CA bundle if needed.
+2. Reproduce that configuration on DEV.
+    Use the already-transferred files under:
+    /home/tag5916/clue_private/tls/run-20260922T1400Z/
 
-Preserve SSH host-key verification. Leave /etc/certs and other users’ files unchanged. Keep credentials outside Git. Do not copy the laptop’s SSH private key or entire .env file.
+Reuse the working application’s credential-loading mechanism. Supply the required existing secret to the remote Python process through private configuration or another established secure mechanism. Do not assume the laptop’s .env is automatically available on DEV.
 
-Verify transfer integrity and certificate/key correspondence without printing private material or passwords. Reuse the existing secure passphrase mechanism; if a password is genuinely missing, request hidden terminal entry rather than asking for it in chat.
+Adapt filesystem paths and check configuration precedence. Keep TLS verification enabled. Reuse the existing encrypted-key handling before considering transport changes.
 
-3. Immediately test FROM DEV.
-    Use installed curl/OpenSSL; this task does not depend on a Python upgrade or a new service account.
+Validate that the configured secret loads the transferred private key and that it matches the certificate, without exposing private material.
 
-Perform one GET to:
-https://penhubpat.td.com/aws/services/AwsService?wsdl
+3. Execute the real application test.
+    Run the normal Python Symcor adapter on DEV and validate getCriterionRules(ALL1). Then continue the previously requested one-row Symcor → images → Tungsten → Excel test using the existing application pipeline.
 
-Explicitly configure the newly transferred client identity. Keep hostname and server certificate verification enabled. Use the correct CA trust and a 10-second connection timeout / 30-second overall timeout.
+Do not stop at a comparison report or a curl check. If the existing secret works, proceed without asking me to re-enter it.
 
-Save the response and diagnostics privately. Check the curl exit code, HTTP status, and whether the body is the expected WSDL—not merely HTTP 200.
-
-4. Report actual results.
-    Include execution hostname/user, UTC timestamp, remote credential paths, public certificate fingerprint, TLS outcome, HTTP status, WSDL validation, and evidence paths. If unsuccessful, identify the first failing stage from the actual error.
-
-Proceed with the authorized transfer and test now. Keep broader deployment and end-to-end processing outside this urgent task.
+Return a short laptop-versus-DEV configuration comparison and actual live-test results. Request additional input only if the relevant secret is genuinely absent or fails validation after checking the original working configuration.
