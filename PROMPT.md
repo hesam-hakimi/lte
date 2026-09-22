@@ -1,17 +1,24 @@
-Continue the existing CLUE session. This is a focused follow-up to your received report for prompt 74628.
+Continue the existing CLUE session from the completed Q correction.
 
-The mapping implementation and export results are now reported received. Do not repeat completed provider runs or restart the original task.
+68249 was a ChatGPT prompt reference, not a repository task identifier. You reported that no corresponding investigation is active or completed in this session. The complete diagnosis scope is below; do not continue searching for that number.
 
-1. Resolve column Q, Transaction_Details, from authoritative evidence.
-    Your report says the template’s Q2 note requires an ISN for Debit, the feed supplies ItemSeqNo, but the implemented mapping uses UTI and is explicitly contested. A matching details_column role in code is insufficient evidence of business equivalence.
-    Inspect the native template, requirements and source-field documentation. Establish Debit and Credit semantics separately, citing the exact file and sheet/cell or section.
-    Use ItemSeqNo for Debit only if its required ISN meaning is documented. Use UTI only where its meaning is supported. If a direction remains unresolved, leave its unsupported Q values blank and explain the gap in the companion report. Preserve all original source values in stored evidence.
-2. Supply the existing field-by-field mapping report for all 23 A:W columns.
-    Distinguish documented mappings, unresolved semantics and fields absent from the actual test input. Support each of the 17 claimed missing fields individually; a note about missing CIF fields does not establish absence of every other field. Identify the specific Rahona input needed for the remaining business context.
-3. Make only the supported correction and run focused tests.
-    Cover direction-specific Q behavior, identifier preservation and source-row lineage. Reuse existing validation evidence; do not repeat the full suite unless an applicable repository gate requires it.
-4. If export behavior changes, regenerate the affected workbooks from copies of saved workspaces, without Symcor or Tungsten calls. Preserve the 41-column contract, prior fixes, all associations and outcomes. Download to a new review folder, verify checksums, and report before/after Q values with source-row identities and reconciled totals.
+1. Reconcile the mapping report using existing evidence.
+    AW_field_mapping_report.json reports 6 MAPPED, 16 ABSENT and 2 UNRESOLVED for 23 columns. Explain any overlap and provide separate Debit and Credit counts, with exactly one status per column per direction. Preserve Debit Q = documented ItemSeqNo and unresolved Credit Q = blank. This reporting clarification does not require another export or provider run.
+2. Diagnose the all-blank pilot Debit OCR result.
+    Locate the saved corrected run:
+    /home/tag5916/clue_private/e2e_fixed_20260922/pilot_debit
+    The case is Debit Items, Excel row 3. Two images and two completed Tungsten jobs were reported, but all extracted fields were blank.
+    Use saved captures and workspace copies. Trace:
+    * Source row and Symcor document identity.
+    * Retrieved image bytes and hashes versus submitted image bytes.
+    * Tungsten request configuration, job/document identities, completion and result retrieval.
+    * Raw field values, statuses and confidence.
+    * Parsed fields, persisted fields and exported Z:AO cells.
+    Compare one successful Credit case from the saved runs. Identify the first stage where values are absent or lost. Distinguish a genuinely empty raw provider response from an incorrectly fetched/interpreted response or downstream application data loss.
+3. Establish the evidence before proposing a correction.
+    Check the existing Tungsten documentation for relevant request/result semantics. Do not infer OCR correctness or expected cheque content from HTTP 200, job completion or confidence alone.
+    If an application defect is demonstrated, provide a minimal offline reproducer and the smallest supported correction. Keep this phase diagnosis-only; do not change provider profiles or repeat live calls. If saved evidence is insufficient, identify the exact missing artifact or bounded test needed.
+4. Deliver inspectable evidence.
+    Download the original Debit image pair for my visual review, reusing existing downloads if their hashes match. Also provide the existing mapping JSON and a concise diagnosis report in the Windows review folder. Report exact paths, image hashes, findings, uncertainties and the proposed next action.
 
-Also state whether investigation 68249 is already active or completed, and provide its existing result if available. Do not launch duplicate work. Keep blank-Debit OCR and the other acceptance concerns separate.
-
-Report evidence, remaining uncertainties, targeted test results and workbook paths. Keep archive/lifecycle and publishing work deferred.
+Preserve the current source mappings, output contract, getDocs and classification fixes. Keep the eight unavailable-image associations, four NO_MATCH cases, OCR accuracy, image-side attribution and Python mismatch separate. Archive/lifecycle and publishing remain deferred.
