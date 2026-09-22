@@ -1,35 +1,19 @@
-Continue from the completed field-alias correction. Prepare and execute the next meaningful CLUE validation using the existing tools.
+Continue the active CLUE laptop checkout. The user explicitly authorizes committing and pushing the completed CLUE changes for DEV setup. This supersedes earlier “no commit/push” instructions for this scope. All responses and artifacts must be in English.
 
-Constraint: You have no vision capability. Do not visually interpret cheque images or infer their contents from filenames, requested field names, or Tungsten classifications.
+Read the current repository instructions and latest local handoff. Confirm the actual checkout, branch, remote, and pending changes.
 
-1. Prepare a small, machine-readable expected-results file for a positive test case. It must record:
+Review and stage the relevant application fixes, tests, reusable verification/capture tools, and documentation. Preserve unrelated work. Exclude credentials, .env files, private keys/keystores, live cheque images, raw service responses, real test-input files, and generated outputs. Review legitimate templates and synthetic fixtures separately. Never print secrets.
 
-* Exact Symcor search criteria and case identity.
-* Human-confirmed front/back labels, with their source.
-* Human-reviewed expected values for the eight business fields.
-* A distinction between “reviewed and absent” and “not yet reviewed.”
+Run the required repository gates and focused checks for the candidate changes. The previous “534 passed, 2 skipped” report is historical evidence; verify whether it applies to this working tree. Avoid redundant full-suite runs and new live service calls.
 
-Do not populate expected values from Tungsten’s response; the comparison must use independent evidence.
+Commit on the existing feature branch, or create a feature branch if currently on a shared/protected branch. Push normally to the configured project remote. Do not force-push or merge into a shared branch. Verify that the remote branch points to the committed SHA.
 
-2. Reuse the existing end-to-end runner and verification helpers. Ensure the test can compare:
+Return a DEV delivery receipt containing:
 
-* Human-reviewed expectations against the actual Tungsten results.
-* Raw Tungsten results against normalized fields and Excel cells.
-* Input-row identity, document ID, image hashes, and Tungsten job IDs across the run.
+* Credential-free repository address.
+* Branch and full published commit SHA.
+* Verification actually performed.
+* Relevant setup/configuration instructions.
+* Remaining local changes excluded from the commit.
 
-Preserve leading zeros, numeric zero confidence, missing confidence, and field-status distinctions. Keep confidence values unscaled.
-
-3. Extend the existing capture mechanism as needed to retain the Symcor responses and retrieved image parts from the same run, alongside the Tungsten exchanges. Keep credentials out of captured logs. Preserve the current workbook contract.
-4. If an already supplied, authorized PAT case with reviewed nonempty target fields is available, run that case through live Symcor, real Tungsten, and Excel generation using the existing configuration and bounded timeouts.
-
-Do not broaden archive searches or invent another transaction. If the positive case or its human-reviewed expectations are missing, complete the local preparation and identify precisely what is needed. Do not repeat the existing blank-field case as evidence of positive extraction.
-
-5. Report separately:
-
-* Pipeline execution.
-* Provider-to-Excel fidelity.
-* Matches and mismatches against independently reviewed values.
-* Fields not evaluated.
-* Front/back labels confirmed for this case versus labels based only on configured order.
-
-Use focused checks for any changes. Preserve unrelated work. No deployment, commit, or push. All responses and artifacts must be in English.
+Complete the authorized commit and push without requesting the same permission again. If blocked, finish available preparation and report the exact failing step.
