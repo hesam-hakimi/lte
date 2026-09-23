@@ -1,17 +1,23 @@
-Continue by identifying the TLS trust configuration of the previously successful DEV Linux run.
+Continue from the DEV trust comparison. Run one controlled laptop PAT test using the existing local CA bundle whose SHA-256 matches the DEV bundle.
 
-The local configuration evidence points to the same PAT URL. Keep that finding qualified: the original execution log and executed script version have not yet been verified.
+Certificate-use confirmation is already recorded. Reuse the validated combined PEM, existing application transport and known-good control request.
 
-Using existing approved access to that DEV Linux host:
+Run this wrapper exactly once:
 
-1. Locate the recorded run, its run_new_input.sh, and the referenced symcor.env.
-2. Read only the relevant TLS settings programmatically. Never print or copy the entire environment file, passwords, private keys or other credentials.
-3. Identify the effective server trust source: CLUE_SYMCOR_CA_BUNDLE or the actual fallback used by that application’s transport.
-4. If a CA file is configured, inspect its public certificate metadata and SHA-256 fingerprints. Report its provenance and compare it with the laptop’s certifi trust store.
-5. Check available execution evidence for the endpoint and trust configuration actually used. Distinguish historical evidence from the host’s current settings.
+& ‘C:\repos\clue-e2e-20260922\tls_handoff_tools\Invoke-SymcorDevControlCheck.ps1’ -CaBundle ‘C:\Users\tag5916\AppData\Local\clue\tls-pem-handoff-20260923\server-ca.pem’ -IHaveIssuerScopeConfirmation
 
-Do not make another Symcor request, install certificates or modify trust settings in this step.
+Before connecting, verify offline that the CA hash matches the recorded DEV value and the target remains:
+https://penhubpat.td.com/aws/services/AwsService
 
-Return a short Linux-versus-laptop comparison and the smallest justified next action. Do not assume that a CA used on Linux automatically resolves the laptop’s potentially different network path.
+Keep certificate and hostname verification enabled. Use a 20-second limit, no retries, no redirects and no additional diagnostic connections. Change only the process-scoped CA selection and restore the previous environment afterward.
 
-If existing Linux access is unavailable, finish everything possible locally and provide one concise message requesting the specific missing information from the DEV host owner.
+Report:
+
+* Effective CA source and hash.
+* Server TLS verification result.
+* Client authentication evidence, distinguishing observed results from assumptions.
+* HTTP/SOAP outcome and whether the expected response with actualSize=1 was received.
+
+If it fails, stop and report the exact stage and sanitized error. A verification error alone does not prove Netskope interception; a connection reset alone does not identify its cause.
+
+Keep the formal CA-reference question open. Do not install certificates, change global trust, expose secrets, upload to Vault or run the batch.
