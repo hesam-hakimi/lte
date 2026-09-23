@@ -1,3 +1,1 @@
-Thanks, Dylan, that helps! We’ll define separate keys for the cert chain, private key and CA bundle in CD.yml, with Base64 values in EDP.
-
-Murugesan, we’ll check the package you already shared first. We’ll also confirm what Symcor accepts before requesting an externally signed cert.
+Thanks, Dylan. It came from our dev setup, but we haven’t confirmed it’s needed on VMC2. We’ll check the trust store our Python runtime uses and only include a separate CA bundle if needed.
