@@ -1,78 +1,45 @@
-# CLUE — Excel input and preserved workbook with result sheet
+Continue the existing CLUE development session. Produce and deliver an offline re-export of the completed MON_INSTRUMENTS run using the implemented Excel/result-sheet workflow.
 
-Decision ID: CLUE\-IO\-EXCEL\-RESULT\-2026\-09\-23
-Recorded: 2026\-09\-23
-Authority: Direct owner instruction in the current CLUE conversation\.
-Status: OWNER\-CONFIRMED REQUIREMENT; implementation and execution evidence not yet received\.
-Implementation prompt: 58316, prepared with this decision\.
+Current evidence
+- The owner has received your 58316 implementation report: reported commit b368696, 675 passed / 5 skipped / 0 failed, with a four-source/eight-result fixture demonstration. Do not repeat that implementation or treat its result as pending.
+- This task applies the normal export path to the previously completed real run. It does not authorize provider execution.
+- Read the actual checkout status and current CLUE_HANDOFF.md first. Preserve newer work and concurrent changes; do not reset to a historical commit.
 
-## Owner instruction
+Identify the completed run from its native records
+- Original source: C:\repos\FCRM\sources\all_txions_20260922165027.xlsx
+- Transaction sheet: MON_INSTRUMENTS; 16 source rows, five Debit and eleven Credit.
+- Historical run revision: d34e07e.
+- Run ID: run-20260923T002748516082Z-ac3021a6.
+- Reported DEV workspace: /home/tag5916/clue_private/newinput_20260922/mon_instruments/ws
+- Reported delivered evidence: C:\Users\tag5916\Downloads\CLUE_DEV_Review_20260923_MON_INSTRUMENTS\
+These locations are evidence locators, not proof of current availability. Confirm identity from the saved run metadata, source identity and available hashes. Do not select the older 17-source/363-result dataset.
 
-The owner specified two changes: input will be Excel in the previous format; output will retain the input workbook’s original tabs and add the results in a new sheet named `result`\.
+Execution boundary
+1. Reuse the completed run's durable associations, cached images, OCR results, outcomes and provenance. Copy existing artifacts from the controlled DEV location if necessary; perform the export on a separate working copy so the original workspace and delivered evidence remain intact.
+2. Use the normal application export-only/re-export path. Make zero Symcor or Tungsten calls. Do not launch, resume or retry provider processing, send any prepared getTransactionItems request, or substitute fixture-generated data for real cached results.
+3. Keep retrieval criteria, RETURN_ALL_CHEQUES, source/document associations, source A:W values, confidence semantics, provenance and the live guard unchanged. Do not filter or deduplicate to reduce row counts.
 
-This supersedes the earlier DAT/CSV input requirement and `in` result\-sheet target for this workflow\. It does not change the existing source schema, enrichment\-column contract, retrieval/matching semantics or one\-to\-many association behavior\.
+Workbook preservation
+Produce a separate output .xlsx preserving every original tab, its name, relative order, contents, formulas, formatting, dimensions, visibility and material workbook features. Append exactly one sheet named result with the existing 41-column A:AO contract: source A:W, cheque images X:Y, and the eight field/confidence pairs Z:AO. Preserve repeated confidence headers positionally. Keep diagnostics in the existing companion artifacts.
 
-## Effective contract
+This run predates the new source-workbook retention implementation. Do not assume a retained source snapshot already exists. Use the exact original workbook after checking its identity against saved evidence. If historical re-export needs a small compatibility fix to accept that verified source, make it in the normal export path, with focused verification. Do not manually assemble a demonstration workbook, invent historical metadata, or weaken the live guard. If essential source bytes or saved results cannot be recovered, report the precise missing artifact and stop before producing a misleading substitute.
 
-|Concern         |Current requirement                                                                      |
-|----------------|-----------------------------------------------------------------------------------------|
-|Input           |Excel workbook (.xlsx), existing business template and exact A:W headers                 |
-|Output          |A separate enriched copy of the input workbook                                           |
-|Original tabs   |Preserve every original tab’s name, relative order, data, formulas and presentation      |
-|New tab         |Append one sheet named exactly `result`                                                  |
-|Result layout   |Existing 41 columns A:AO                                                                 |
-|A:W             |The corresponding source row’s 23 values, repeated for each accepted document association|
-|X:Y             |Existing front/back cheque-image columns                                                 |
-|Z:AO            |Existing eight extraction-field/confidence pairs                                         |
-|Diagnostics     |Existing companion artifacts; no new diagnostic columns in the business table            |
-|Multiple cheques|Existing RETURN_ALL_CHEQUES behavior retained                                            |
-|Source file     |Read-only; do not overwrite it                                                           |
-|Legacy inputs   |Existing unrelated DAT/CSV support remains available; it does not override this workflow |
+Inspect the actual workbook for features relevant to preservation. Verify any charts or pivot tables that are present; disclose a concrete unsupported feature instead of silently dropping it. Handle an existing case-insensitive result-tab collision without overwriting or renaming an original tab.
 
-Workbook preservation includes original sheet names/order/visibility, values, formulas, styles, merged ranges, row/column dimensions and existing workbook features\. Reader normalization must not rewrite the original tabs\. Process transaction sheets under the existing supported profile, preserving source sheet/row identity; a notes tab is not automatically a transaction table\.
+Acceptance checks
+Reuse the existing conformance checker and perform a read-only comparison against the original source and completed run artifacts. Do not weaken assertions to fit an output.
+- Original tabs are preserved, result is the only added tab, and the source checksum is unchanged.
+- Result has the exact 41 headers in the established order.
+- Baseline totals remain 16 source rows, 354 result rows, 350 source/document associations, 88 unique associated documents and 684 embedded cheque images on result.
+- Outcomes remain 341 completed_extraction, 1 extraction_fields_blank, 8 image_unavailable and 4 no_matching_document.
+- All 354 result rows retain their recorded provenance and source-row identity. Compare all 8,142 source A:W cells against their corresponding original source rows; report mismatches, preserving blanks and identifiers.
+- Original processing status remains PARTIAL with historical exit code 3. Report the export command's actual exit code separately; a successful export does not turn the provider run into a successful extraction run.
+- Reopen the export workspace and verify export-only can reproduce the same business content without provider calls. Do not delete the owner's original workbook to demonstrate this.
+- If any count differs, explain it from native evidence; do not force the expected totals by changing associations, outcomes or images.
 
-If an incoming source already has a case\-insensitive `result` sheet\-name collision, report it before provider work\. Do not overwrite source content or invent `result1`\. This is an implementation safeguard for the two confirmed requirements, not a new business\-selection rule\.
+Delivery
+Save the new workbook, existing-format JSON/CSV companions and a concise comparison_report.json in a new review folder under the current Windows user's Downloads, separate from the historical delivery. The comparison report must include run/source identity, source and output hashes, preservation checks, actual counts, A:W comparison results, provenance/outcome checks, zero-provider-call evidence and any limitations. New output bytes will differ because the workbook packaging changed; do not require byte identity with the historical workbook.
 
-## Scope and evidence limits
+Update the local CLUE_HANDOFF.md with the received 58316 result and this task's actual outcome. Return the exact export command, actual exit code, focused checks performed and absolute paths to the workbook, companions and comparison report. Open the output folder and workbook for owner review using the normal file-opening mechanism; if that fails, report it accurately. Use programmatic verification; no screenshots, video or new OCR are needed.
 
-This document records a requirement and an implementation prompt\. It does not claim that Windows/DEV code was changed or tests passed\. The native checkout and input workbook are on the owner’s environment\. Existing run outputs are historical evidence and must not be overwritten\.
-
-Relevant historical references:
-
-- [Prior business mapping](Releases/CLUE_Reference_2026-09-23_R1/docs/03_Business_Output_and_Source_Mapping.md): the 41\-column layout remains; its `in` target is superseded here\.
-- [Earlier alignment instruction](../CLUE_Input_Output_Alignment_Implementation_Prompt.txt): preserve supplied A:W values and exact enrichment columns\.
-- The current conversation’s completed\-run reports and contract corrections remain the evidence for their respective changes\. The frozen release’s old 40872\-pending checkpoint is not the current session status\.
-
-This limited contract update does not resolve CP\-D02/CP\-D03, source\-to\-archive linkage, account representation, provider readiness, OCR accuracy or image\-side attribution\. It does not authorize a new provider run\.
-
-## Implementation prompt 58316
-
-Continue the existing CLUE session\. Implement the following owner\-confirmed input/output changes through the normal application pipeline\.
-
-1. Excel input
-   The input for this workflow is now an Excel workbook &#40;\.xlsx&#41;, using the existing business format and its 23 A:W columns\. This supersedes the previous CSV\-content\-with\-\.dat requirement for this workflow\. Reuse the current workbook profile and exact supplied headers; retain unrelated legacy input support\.
-2. Preserve the workbook and append results
-   Produce a separate output \.xlsx based on the original input workbook\. Preserve every original worksheet with its name, order, content, formulas, formatting, merged cells, dimensions, visibility and existing workbook features\. Append one worksheet named exactly result, after the original tabs\. Keep the source file unchanged\.
-
-Write enrichment rows only to result\. Preserve the existing 41\-column A:AO layout: A:W source values, X:Y front/back cheque images, and Z:AO the eight existing field/confidence pairs in their exact template order\. Preserve repeated confidence headers positionally\. Keep technical diagnostics in the existing companion artifacts\.
-
-Reuse existing rules for identifying transaction sheets and eligible rows; do not ingest every tab blindly or accidentally process the generated result sheet\. Keep source worksheet and row identity through processing and re\-export\. If the incoming workbook already contains a sheet named result, including a case variant, report the collision before provider calls rather than overwrite an original tab or invent a different output\-sheet name\.
-
-Scope and implementation
-Read the actual checkout, current handoff, input profile and workbook writer first\. Preserve completed fixes and other sessions’ changes\. Implement workbook preservation in the normal writer, including offline export\-only/re\-export; do not manually reconstruct a demonstration output after the pipeline runs\. Retain the immutable source workbook identity and the material needed for later re\-export\. Preserve historical DAT\-run export behavior where no original Excel workbook exists\.
-
-Keep retrieval criteria, source\-to\-document associations, RETURN\_ALL\_CHEQUES, source A:W pass\-through, provenance, PARTIAL/NO\_MATCH/image\-unavailable outcomes and the live\-execution guard unchanged\. This request changes input/output packaging, not cheque selection, identifier/date mappings or confidence semantics\.
-
-Verification and delivery
-Use existing fixtures or captured\-response replay; no new Symcor/Tungsten calls or rerun of the completed live batch\. Verify with a multi\-sheet workbook containing transaction data and a non\-transaction tab:
-
-- all original tabs retain their names/order and contents, including formulas and material formatting;
-- result is the only additional sheet and has the exact 41\-column structure;
-- multi\-cheque expansion retains the correct source row’s A:W values;
-- partial outcomes and diagnostic provenance remain intact;
-- close/reopen/export\-only preserves the workbook and makes zero provider calls;
-- the original input checksum is unchanged and a conflicting result tab is handled without overwriting data\.
-
-Run focused regression checks for the changed reader/writer/export paths\. Reuse the existing conformance checker and update its output\-sheet expectation for this workflow; do not weaken the other assertions or repeat unrelated investigations\.
-
-Update README, contracts, run instructions and CLUE\_HANDOFF\.md with this owner decision\. Label implementation and test status using actual evidence\. Return changed files, actual verification results, and absolute paths to the sample input, generated output workbook and concise comparison report\. Open the output folder for owner review\. All development text and deliverables must be in English\.
+Do not rerun the entire test suite unless a specific export-path code change requires it. Do not push, merge or deploy. All prompts, development output and artifacts must be in English. Distinguish inspected evidence, reported historical results and unresolved items. CP-D02/CP-D03, child-filter validity and general OCR accuracy remain unresolved by this export task.
