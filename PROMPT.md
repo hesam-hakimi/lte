@@ -1,26 +1,19 @@
-The certificate issuer, Murugesan, has now replied directly to my question about using this certificate for laptop DEV connectivity testing:
+Proceed with one additional, read-only TLS diagnostic connection to penhubpat.td.com:443 to investigate the server-verification failure.
 
-“There is no password associated for this cert. you can use it.”
+Reuse tools/symcor_probe.py check_tls after inspecting its implementation and supported options. The objective is to capture the peer’s presented certificate chain, without sending a client certificate, private key, credentials, or any HTTP/SOAP business request.
 
-The issuer-scope blocker is resolved for this test. My authorization for one bounded, read-only DEV request remains in effect.
+Requirements:
 
-Run the prepared live test now:
+* Use the same network/proxy route as the failed application request and SNI penhubpat.td.com. Report any route difference; do not silently change proxy, VPN or network settings.
+* One connection, a 20-second deadline, no retries.
+* Capture public certificate metadata: subject, issuer, SANs, validity dates and SHA-256 fingerprints for each certificate actually presented.
+* Report an incomplete chain accurately; do not assume the peer sends its root certificate.
+* If the existing helper only captures the leaf, use an already-installed suitable diagnostic tool if available. Do not claim a full-chain capture when only the leaf was obtained.
+* Treat any unverified capture strictly as diagnostic evidence. Do not change application verification, install certificates, add trust anchors, or rerun the authenticated request.
+* Compare captured fingerprints with existing local trust stores and authoritative references read-only. Do not trust a certificate merely because the peer supplied it.
 
-& ‘C:\repos\clue-e2e-20260922\tls_handoff_tools\Invoke-SymcorDevControlCheck.ps1’ -IHaveIssuerScopeConfirmation
+Assess whether the evidence supports an origin-server chain, corporate TLS inspection, or an unresolved classification. Do not infer permanent inability to use mTLS from this laptop merely from evidence of inspection; the network team must confirm the supported route.
 
-Use the validated combined PEM unchanged, the confirmed Python interpreter, and the existing default certifi trust configuration without a custom CA override. Keep certificate and hostname verification enabled.
+Return the exact command executed, sanitized findings, local evidence paths, and the specific question or approved CA reference needed from the gateway/network owner. Include a short English message I can send them.
 
-Execute the existing known-good control request against penhubpat.td.com once, using the configured 20-second timeout and no retries. Preserve and restore environment settings through the corrected wrapper.
-
-Do not repeat completed offline checks or request another general approval.
-
-Report:
-
-* Whether the live request was actually sent.
-* Server TLS verification result.
-* HTTP/SOAP authentication outcome.
-* Whether the expected response and actualSize=1 were received.
-
-If it fails, report the precise failure stage and sanitized error. Do not disable verification, add trust anchors, or automatically retry.
-
-Keep secrets and response contents out of chat. Do not run the full batch, upload to Vault, commit or push.
+The earlier certificate-use confirmation remains recorded; do not reopen that question. Complete this diagnostic without another general approval request.
