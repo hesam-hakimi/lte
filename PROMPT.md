@@ -1,27 +1,26 @@
-Continue from the new PEM validation results. Preserve the completed checks; do not repeat the certificate preparation.
+The certificate issuer, Murugesan, has now replied directly to my question about using this certificate for laptop DEV connectivity testing:
 
-Resolve the remaining trust configuration question and make the live-test command ready:
+“There is no password associated for this cert. you can use it.”
 
-1. Trace the effective server trust configuration used by build_symcor_transport in the confirmed Python environment. Inspect the custom SSLContext, Requests settings, relevant environment overrides and pip_system_certs behavior. Report what is actually loaded, rather than inferring it from installed packages.
-2. Reconcile the “item E” requirement with the project documentation. “Do not add a trust anchor without an authoritative reference” does not by itself establish that a separate CA bundle is mandatory. Identify whether an explicit approved CA file or pinning requirement exists, or whether the existing approved runtime trust store may be used. Cite the exact local evidence. Do not change a genuine policy or bypass a guard.
-3. Review the earlier successful DEV control request and identify its actual trust settings and whether server verification was enabled. Do not reuse a configuration that succeeded only with verification disabled.
-4. Correct the PowerShell wrapper:
+The issuer-scope blocker is resolved for this test. My authorization for one bounded, read-only DEV request remains in effect.
 
-* Use the exact Python interpreter validated in this report.
-* Preserve all existing environment values and restore them in finally, including CLUE_ENV_FILE. Removing variables is not a full restore if they previously had values.
-* Keep certificate overrides confined to the test process.
-* Use the delivered combined PEM unchanged.
-* Do not use the client PEM as a server CA bundle.
+Run the prepared live test now:
 
-My previous request already authorizes one bounded, read-only DEV test; no additional general execution approval is needed. The certificate issuer’s deployment-only restriction remains a separate unresolved issue. Do not assert that it has been cleared.
+& ‘C:\repos\clue-e2e-20260922\tls_handoff_tools\Invoke-SymcorDevControlCheck.ps1’ -IHaveIssuerScopeConfirmation
 
-Complete the investigation and prepare the command now. Once the issuer confirms this use is permitted and the applicable trust requirements are satisfied, run the existing known-good DEV control request once, with verification enabled, bounded timeout and no retry loop.
+Use the validated combined PEM unchanged, the confirmed Python interpreter, and the existing default certifi trust configuration without a custom CA override. Keep certificate and hostname verification enabled.
 
-Return:
+Execute the existing known-good control request against penhubpat.td.com once, using the configured 20-second timeout and no retries. Preserve and restore environment settings through the corrected wrapper.
 
-* The effective trust source and evidence.
-* Whether a separate CA file is required, optional or still unresolved.
-* The corrected command.
-* Any exact remaining blocker.
+Do not repeat completed offline checks or request another general approval.
 
-Do not modify application authentication, disable verification, run the full batch, upload to Vault, commit or push. Keep secrets and response data out of chat.
+Report:
+
+* Whether the live request was actually sent.
+* Server TLS verification result.
+* HTTP/SOAP authentication outcome.
+* Whether the expected response and actualSize=1 were received.
+
+If it fails, report the precise failure stage and sanitized error. Do not disable verification, add trust anchors, or automatically retry.
+
+Keep secrets and response contents out of chat. Do not run the full batch, upload to Vault, commit or push.
