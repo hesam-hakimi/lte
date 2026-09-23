@@ -1,64 +1,71 @@
-Continue the existing CLUE session. Execute the newly supplied Symcor workbook through the normal application pipeline using the latest implemented changes. The owner authorizes the live Symcor/Tungsten calls needed for this new input. This is an execution task, including delivery of the resulting workbooks.
+Continue prompt 57291 from the currently running new-input execution. Do not start a second run or repeat completed provider calls.
 
-1. Reconcile the current implementation
+The latest received report says:
 
-Read the current project reference, state, business-output mapping and prompt ledger. Treat archived statements as historical.
+* Input: C:\repos\FCRM\sources\all_txions_20260922165027.xlsx
+* Sheet MON_INSTRUMENTS: 16 source rows, 5 Debit and 11 Credit.
+* Execution revision d34e07e; profile rahona-workbook.
+* Workspace: /home/tag5916/clue_private/newinput_20260922/mon_instruments/ws
+* Last observed progress: 350 associations, getDocs 342 done / 8 failed, extraction still running.
+    These are intermediate observations, not final acceptance results.
 
-Prompt 40872 now has a received implementation report: commit d34e07e, search-provenance persistence, 10 new tests, full suite reported as 642 passed / 5 skipped / 0 failed. Any reference still marking its result pending predates that report.
+1. Finish the existing execution
 
-Verify the actual checkout and execution environment contain the latest source-mapping/Q correction, getDocs, classification, output-profile, diagnostic-metadata, cache-path and search-provenance changes. Preserve existing work. Do not reset the checkout, blindly apply commits, or repeat completed investigations.
+Check the actual process and durable workspace state. If still active, monitor it through completion. If interrupted, diagnose and resume that workspace using the supported mechanism, without resubmitting completed work. If already finished, proceed directly to verification and delivery.
 
-2. Identify and inspect the new input
+Do not modify application code underneath the active process. Do not rerun historical batches or the full test suite for this follow-up.
 
-The owner’s screenshot places the new workbook under:
-C:\repos\FCRM\sources\
+2. Reconcile the real results
 
-Resolve the unique file matching:
-20260922165027.xlsx
+Use the final manifest, durable state and saved request/response evidence to report:
 
-Report its exact filename, size and SHA-256. If this does not uniquely identify a file, request only the missing file identity.
+* Source rows and direction counts.
+* Output rows, associations and unique documents, separately.
+* Available images and unavailable associations/documents.
+* Extraction outcomes, remaining queued/running/failed work, exit code and final status.
 
-Do not substitute the older:
-C:\repos\fcrm_clue\inputs\rahona\All Transactions.xlsx
+Determine the actual cause of each of the eight getDocs failures. Do not assume they are the earlier sorryFlag cases merely because the counts match. Identify NO_MATCH source rows from this run’s evidence.
 
-Inspect the actual workbook programmatically. The displayed sheet is MON_INSTRUMENTS. Inventory all sheets, full headers, cell types, data rows, directions and populated A:W fields. Determine the supported input profile from its actual schema. Do not assume the photographed row count is authoritative.
+Keep completed_extraction, extraction_fields_blank, image_unavailable and no_matching_document distinct. Preserve PARTIAL where required.
 
-Keep the original unchanged. If a minimal sheet-selection or input-adapter adjustment is necessary, implement it through the normal application with focused verification; do not hand-build the final output.
+3. Verify the business output against the actual input
 
-3. Preserve source values and contract boundaries
+For every output row, use its recorded source-row identity to compare all 23 A:W values with the corresponding input row, allowing only documented serialization/formatting differences. Report the comparison count and every mismatch.
 
-Preserve supplied A:W business values, identifier representations, duplicate source-row identities and one-to-many lineage.
+Confirm that:
 
-The earlier DAT_CSV rule deriving Debit Q from ItemSeqNo and leaving Credit Q blank must not overwrite explicitly supplied Transaction_Details in this workbook. Preserve explicitly supplied Transaction_Original_Amount as well.
+* All 14 supplied columns remain populated wherever their source values are populated.
+* The nine source-blank columns remain source-blank rather than being filled by inference.
+* Supplied Q, P, CIF_Number and Transaction_Event_Identifier remain unchanged.
+* The DAT_CSV derived-Q rule did not overwrite this workbook’s supplied Q values.
+* Duplicate source rows and shared-document associations retain their own source values.
+* The workbook has exactly 41 columns A:AO, sheet in, images at X/Y, and eight field/confidence pairs at Z:AO.
+* Diagnostic and search-provenance fields remain outside the business sheet.
 
-The screenshot suggests CIF_Number contains values resembling earlier item sequence numbers, while Transaction_Details contains UTI-like strings. Verify and flag these semantic concerns; do not reinterpret CIF_Number as ItemSeqNo, rewrite Q, or declare their business meanings validated.
+Preserving a source value does not validate its business meaning. Keep the CIF/W ISN-like values, Q UTI-like values and account representation concerns explicitly separate from pass-through correctness.
 
-Separate source-column pass-through from provider search criteria and record linkage. Inspect accompanying native documentation for authoritative mappings. Do not invent joins, assume Account plus date uniquely identifies a document, or equate UTI, CIF and ISN.
+4. Clarify the control-path claim using existing evidence
 
-CP-D03 remains unresolved unless new evidence explicitly resolves it. Preserve its guards. Do not convert to DAT_CSV merely to bypass a native/Rahona contract guard. Do not pad identifiers, substitute dates, or use start_dt/end_dt as an automatic broad search range.
+Your statement that assert_live_allowed() is never invoked does not by itself establish that applicable guards were enforced.
 
-If an essential contract or linkage requirement genuinely blocks execution, complete the safe offline preparation and report the exact missing rule and affected rows. Do not fabricate a successful run.
+Trace the actual rahona-workbook call path and explain:
 
-4. Execute with the latest code
+* Whether that guard is intended to govern this path, with the relevant code/contract evidence.
+* Which checks actually ran before provider calls.
+* Which source fields produced the submitted ProcessingDate and search identifiers.
+* How Credit search identifiers were obtained, without silently treating CIF_Number or W as ISN or Q as an approved search identifier.
+* Why map_processing_date() and extract_isn() were outside this path.
 
-Use the established DEV provider configuration and supported runtime. Record the actual code revision, interpreter version, input profile, command and run identifier. Keep the Python-version mismatch explicit if it remains; do not lower the declared requirement.
+Distinguish prepared provenance from criteria confirmed in captured outgoing requests. Keep CP-D03 unresolved unless authoritative evidence resolves it.
 
-Create an isolated, resumable workspace for this input. Run all eligible rows through the normal pipeline. If using Debit/Credit pilots, continue the same run without repeating their provider calls.
+This is a bounded review of the current run, not authorization to weaken a guard, invent mappings, widen dates, pad identifiers or conduct exploratory provider calls. If an applicable enforcement gap is established, report its exact impact and the smallest proposed correction separately; do not conceal it or declare acceptance.
 
-Preserve prior runs and evidence. Use existing bounded retries and resume behavior. Do not rerun old batches or the full test suite merely to execute this new file.
+5. Deliver the review files
 
-Persist diagnostic metadata and per-source-row search provenance, including NO_MATCH rows. Distinguish prepared criteria from confirmed transmitted requests. Missing historical provenance must not be reconstructed from current code or described as predating the fix without supporting run-version evidence.
+Download the business workbook(s), manifest, export summary and a concise source-value verification report into a fresh Windows Downloads review folder. Verify DEV/download checksums and open Explorer on that folder.
 
-5. Verify and deliver
+Provide the exact local paths, actual final counts, exit status, and any remaining blocker. Confirm whether any new provider calls occurred during this continuation and distinguish normal completion/resume from retries.
 
-Keep the business workbook exactly 41 columns A:AO, sheet in, images X/Y, and eight field/confidence pairs Z:AO. Diagnostic and provenance metadata belong outside that business layout.
+The Python 3.9.25 versus declared >=3.10 mismatch remains unresolved unless actually addressed and verified. General OCR accuracy and image-side attribution also remain separate acceptance concerns.
 
-Compare exported A:W values against this workbook for every source/output association. Report populated, source-blank and semantically unresolved fields separately. Correct formatting alone is not complete business output.
-
-Reconcile actual source rows, output rows, associations, unique documents, images and outcomes. Preserve NO_MATCH, image_unavailable, extraction_fields_blank and PARTIAL where applicable. Provider completion does not establish OCR accuracy.
-
-Download the resulting business workbook(s), manifests, summaries and mapping diagnostics into a fresh timestamped Windows review folder. Verify DEV/download checksums and open that folder in Explorer.
-
-Report exact paths, commands, revision/runtime, counts, exit status, value-level verification results and remaining blockers. Distinguish measured evidence from inference. Keep OCR accuracy, image-side attribution, unavailable images, NO_MATCH and runtime compatibility separate.
-
-Do not send external messages, merge, push, deploy, or perform archive/lifecycle work.
+Do not merge, push, deploy, send external messages or perform archive/lifecycle work. Finish with the delivered artifacts and evidence-based results, rather than another plan.
