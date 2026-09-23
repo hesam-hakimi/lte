@@ -1,23 +1,14 @@
-Continue from the DEV trust comparison. Run one controlled laptop PAT test using the existing local CA bundle whose SHA-256 matches the DEV bundle.
+Document the successful laptop PAT test in the existing CLUE handoff and current-state records. Reuse the completed evidence; no further network calls are needed.
 
-Certificate-use confirmation is already recorded. Reuse the validated combined PEM, existing application transport and known-good control request.
+Record:
 
-Run this wrapper exactly once:
+* Exact endpoint, Python runtime and successful command.
+* Combined PEM configuration and effective CA bundle path/SHA-256.
+* TLS and hostname verification enabled, HTTP 200, SOAP response without fault, actualSize=1, and the 21-field match.
+* Protected local evidence paths, without secret values or response contents.
 
-& ‘C:\repos\clue-e2e-20260922\tls_handoff_tools\Invoke-SymcorDevControlCheck.ps1’ -CaBundle ‘C:\Users\tag5916\AppData\Local\clue\tls-pem-handoff-20260923\server-ca.pem’ -IHaveIssuerScopeConfirmation
+Mark the laptop PAT connectivity test as passed. Keep formal CA-reference confirmation, Production validation and Vault integration separate from this result. Do not claim that this test proves the absence of TLS inspection.
 
-Before connecting, verify offline that the CA hash matches the recorded DEV value and the target remains:
-https://penhubpat.td.com/aws/services/AwsService
+Prepare a concise DevOps handoff showing the working application-setting mappings. Reflect the latest agreement: PEM text can be stored directly in Vault; JKS and an additional Base64 layer are not required. Distinguish the client identity from the server CA bundle.
 
-Keep certificate and hostname verification enabled. Use a 20-second limit, no retries, no redirects and no additional diagnostic connections. Change only the process-scoped CA selection and restore the previous environment afterward.
-
-Report:
-
-* Effective CA source and hash.
-* Server TLS verification result.
-* Client authentication evidence, distinguishing observed results from assumptions.
-* HTTP/SOAP outcome and whether the expected response with actualSize=1 was received.
-
-If it fails, stop and report the exact stage and sanitized error. A verification error alone does not prove Netskope interception; a connection reset alone does not identify its cause.
-
-Keep the formal CA-reference question open. Do not install certificates, change global trust, expose secrets, upload to Vault or run the batch.
+Preserve unrelated changes. Keep private keys, PEM contents and response data outside Git. Return the updated document paths and a short handoff summary; do not upload to Vault, commit or push.
