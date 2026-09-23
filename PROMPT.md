@@ -1,48 +1,27 @@
-Validate the newly delivered Symcor PEM on my Windows laptop and prepare a minimal real DEV connectivity test using the existing CLUE application.
+Continue from the new PEM validation results. Preserve the completed checks; do not repeat the certificate preparation.
 
-Read the current local project instructions, latest handoff, configuration and TLS implementation first. Confirm the correct repository and Python environment; do not assume the current terminal directory is correct. Reuse existing validation and smoke-test helpers.
+Resolve the remaining trust configuration question and make the live-test command ready:
 
-New input:
+1. Trace the effective server trust configuration used by build_symcor_transport in the confirmed Python environment. Inspect the custom SSLContext, Requests settings, relevant environment overrides and pip_system_certs behavior. Report what is actually loaded, rather than inferring it from installed packages.
+2. Reconcile the “item E” requirement with the project documentation. “Do not add a trust anchor without an authoritative reference” does not by itself establish that a separate CA bundle is mandatory. Identify whether an explicit approved CA file or pinning requirement exists, or whether the existing approved runtime trust store may be used. Cite the exact local evidence. Do not change a genuine policy or bypass a guard.
+3. Review the earlier successful DEV control request and identify its actual trust settings and whether server verification was enabled. Do not reuse a configuration that succeeded only with verification disabled.
+4. Correct the PowerShell wrapper:
 
-* Email attachment: clue.dev.td.com.pem.txt.
-* The sender says it contains the certificate and private key.
-* The agreed delivery is an unencrypted PEM private key, but verify the actual file.
-* This is a NEW delivery. Do not substitute the previous encrypted client-key.pem or report its results as validation of this attachment.
+* Use the exact Python interpreter validated in this report.
+* Preserve all existing environment values and restore them in finally, including CLUE_ENV_FILE. Removing variables is not a full restore if they previously had values.
+* Keep certificate overrides confined to the test process.
+* Use the delivered combined PEM unchanged.
+* Do not use the client PEM as a server CA bundle.
 
-1. Locate and inspect the file
-    Look for the exact attachment in Downloads and the established local handoff folder. If missing or ambiguous, ask only for its local path.
-    Keep the original unchanged and keep all key-bearing files outside Git with access restricted to my Windows account.
-    Inspect the content programmatically without printing PEM, Base64, private keys, passwords or environment-file contents. Identify its actual format, certificate count and whether a private key is present and encrypted.
-2. Validate the identity locally
-    Check certificate validity dates, issuer, relevant key usage/EKU, certificate-chain structure, and whether the private key matches the client certificate.
-    If the previous client certificate fingerprint is available, compare it and report whether this is the same identity.
-    Verify loading through the application’s actual TLS configuration.
-    Use the delivered combined PEM unchanged if supported. Do not generate a new identity, convert formats or overwrite existing certificate files.
-    If the key is encrypted, report that the delivery differs from the agreed format; do not silently decrypt it or request a password in chat.
-3. Respect the delivery scope
-    The email footer labels this a deployment copy and explicitly excludes testing and format changes.
-    Check whether existing project evidence confirms that laptop DEV connectivity validation is permitted for this copy.
-    If that scope is unresolved, finish the local inspection and prepare the exact live-test command, but do not use this credential online yet. State the specific confirmation needed from the certificate issuer.
-    Once that scope is confirmed, proceed with the test below without another general approval request.
-4. Run the minimal real DEV test
-    Use the existing application’s Symcor client, configured DEV endpoint and existing authentication mechanism.
-    Reuse one previously successful, read-only DEV request with known test input. Do not invent account data or use production.
-    Apply certificate overrides only to the test process and restore the prior configuration afterward.
-    Preserve TLS certificate and hostname verification. Never use verify=False or trust the client certificate issuer as a workaround for server verification.
-    Use the trust configuration actually used by this Python runtime. Do not assume that the Windows trust store and the application’s trust store are identical.
-    Use bounded timeouts and no retry loop. Do not run the full batch, Tungsten processing, Vault upload or deployment.
-5. Report evidence clearly
-    Report separately:
+My previous request already authorizes one bounded, read-only DEV test; no additional general execution approval is needed. The certificate issuer’s deployment-only restriction remains a separate unresolved issue. Do not assert that it has been cleared.
 
-* PEM parsing and key encryption status.
-* Certificate/private-key match and TLS loader result.
-* Whether the live request actually ran.
-* Server TLS verification.
-* Client authentication and HTTP/SOAP outcome.
-* Whether the expected application response was received.
+Complete the investigation and prepare the command now. Once the issuer confirms this use is permitted and the applicable trust requirements are satisfied, run the existing known-good DEV control request once, with verification enabled, bounded timeout and no retry loop.
 
-Do not treat a successful local load, an HTTP response alone, or a SOAP authentication fault as proof of successful Symcor authentication.
-Distinguish laptop results from anything still unverified on VMC2.
+Return:
 
-Return a short PASS/FAIL/NOT RUN table, the sanitized cause of any failure, the exact reusable PowerShell command, and the next concrete action.
-Keep sensitive response data local and out of chat/logs. Make only the minimal helper changes needed; do not commit or push.
+* The effective trust source and evidence.
+* Whether a separate CA file is required, optional or still unresolved.
+* The corrected command.
+* Any exact remaining blocker.
+
+Do not modify application authentication, disable verification, run the full batch, upload to Vault, commit or push. Keep secrets and response data out of chat.
