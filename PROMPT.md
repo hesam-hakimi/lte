@@ -1,9 +1,35 @@
-For all_txions_20260922165027.xlsx, could you confirm whether each MON_INSTRUMENTS row represents an individual cheque or the entire POD transaction?
+Continue the existing CLUE session. Reconcile the input-contract conclusions in your latest report before proposing a matching change.
 
-Our offline review found that account, processing date and credit/debit direction leave multiple matching documents for 10 of the 11 Credit rows. Amount is also insufficient because some rows share the same amount.
+Your report says production linkage is already answered by ItemSeqNo qualified by UTI, but later requests that confirmation under CP-D02. Resolve that contradiction using authoritative evidence.
 
-If each row represents one cheque, which source field authoritatively links it to Symcor’s document? In this sample, CIF_Number and Transaction_Event_Identifier both match an archive ItemSequenceNumber, but we have not found documentation confirming that mapping.
+1. Separate serialization, schema and document linkage.
 
-Please also confirm the additional scope required to identify the document uniquely: the saved responses contain repeated ISNs across different dates.
+The recorded owner decision establishes CSV content with a .dat extension.
 
-Please distinguish any convention specific to this test workbook from the intended production input contract.
+The later CLUE_Input_Output_Alignment_Implementation_Prompt.txt records:
+“Columns A:W already exist in the input file.”
+“Do not use the legacy DAT_CSV_V1 schema to override the user’s confirmed A:W input contract.”
+
+Reconcile both instructions. A .dat extension does not establish the column schema. A profile name, code comment or supported test adapter does not by itself establish the approved production feed.
+
+Identify the applicable input contract and its authority, version and scope. Preserve existing supported profiles while distinguishing this workflow from historical fixtures.
+
+2. Establish what is actually supported.
+
+For ItemSeqNo → archive ItemSequenceNumber and source UTI → archive UTI, cite the exact source establishing each mapping, its applicable feed and direction, and any required qualifying fields.
+
+If that evidence is absent, retain the mapping as unresolved or candidate. Uniqueness in this sample is not approval.
+
+Keep ProcessingDate distinct from TransactionDate; do not close CP-D03 using the uniqueness table.
+
+Trace the actual uses of DAT_CSV_V1.key_column. Establish whether it affects intake identity, search, document selection or export before describing Account as a defect.
+
+3. Reconcile the evidence scope.
+
+Explain the 91 distinct documents in this analysis versus the delivered run’s 88. Identify included runs, parent documents and child documents. Do not assume the difference is an error or silently change the baseline.
+
+Retain the precise observations: CIF/W contain one duplicated value; adding amount leaves two Credit rows ambiguous; composite-key uniqueness was measured only within the inspected sample.
+
+Update the existing investigation and handoff with corrected conclusions and only the remaining narrowly scoped questions.
+
+Use existing files and captures. Preserve mappings, guards and delivered outputs. No provider calls, rerun, output regeneration or new selection algorithm. Return the authority table, count reconciliation and corrected conclusion.
