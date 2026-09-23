@@ -1,18 +1,20 @@
-Continue the existing CLUE session. The result of prompt 91864 has been received. Preserve the completed corrections and delivered outputs.
+Commit and push the CLUE code changes completed in this workspace. This instruction authorizes the commit and push; proceed without another routine confirmation.
 
-Resolve one remaining overstatement: “UTI is ruled out.”
+1. Read the repository instructions and current local handoff. Inspect the repository root, Git status, current branch, configured remotes, and diff. Use the existing project repository and established remote; do not guess or create a new repository.
+2. Include the completed implementation changes, relevant tests, and sanitized project documentation. Review both tracked and untracked files, and stage specific files deliberately. Preserve unrelated or unfinished work.
+3. Do not commit credentials, .env files, JKS/keystores, private keys, certificate bundles, authentication tokens, real input workbooks, cheque images, provider request/response captures, OCR outputs, or logs containing customer information. Check the staged diff and any existing unpushed commits for these materials without printing sensitive values. Keep safe configuration examples with placeholders.
+4. Preserve the current live-execution guard and accepted input/output contract. Do not change matching rules, call Symcor or Tungsten, retrieve images, run OCR, rerun the batch, or regenerate delivered outputs as part of this task.
+5. Run the relevant lightweight offline validation and any mandatory repository checks. Reuse existing test evidence where applicable and clearly distinguish previous results from checks run now. Avoid an unnecessary full test-suite rerun.
+6. Commit the reviewed changes with a clear message describing the actual work. Use the current feature branch. If the checkout is on main/master, a protected branch, or detached HEAD, create a descriptive feature branch first.
+7. Fetch the remote state and push normally, setting the upstream if needed. Do not force-push, rewrite published history, merge into main, or discard local work. If remote divergence or authentication prevents a safe push, preserve the work and report the exact blocker without exposing credentials.
+8. Verify that the remote branch points to the pushed local HEAD.
 
-A UTI identifying a transaction group does not invalidate its documented use in getTransactionItems. Likewise, rejecting UTI as a cheque-level identifier or as the Debit Transaction_Details output value does not, by itself, disprove its possible role as a scope qualifier. Source-column mapping remains unapproved.
+Return:
 
-Check AWSSpecRelease6.1 §4.6.2, page 41: AwsSearchTransactionItemsRequest includes UTIList, hitListFetchLimit and optional criteriaList. Without criteriaList, all child items are returned; supported child-filter criteria are defined by the client-specific Supplementary specification.
+* Repository and branch.
+* Commit SHA and brief change summary.
+* Validation actually performed and results.
+* Push result and remote verification.
+* Files intentionally left uncommitted and why, without sensitive contents.
 
-Using the existing saved evidence:
-
-1. Correct the investigation and handoff wording, distinguishing provider-returned UTI, source-to-provider mapping, and item-level identity.
-2. Verify the permitted getTransactionItems criteria and operators against the actual client Supplementary and WSDL/XSD. Do not assume every searchTransaction criterion is supported.
-3. Prepare exact, schema-valid comparison requests for row 7 and the shared transaction containing rows 13/14: first without criteriaList, then with the existing account/date/direction criteria only where supported. Use UTIs returned by Symcor, not inferred from source Transaction_Details.
-4. Define comparison by distinct child DocID sets, including counts, limits and truncation indicators. Explain what this can establish and what still requires an approved source-to-item mapping.
-
-Prepare but do not execute these requests. Preserve the live-execution guard; identify the existing supported execution path and any unresolved prerequisites. No provider calls, image retrieval, OCR, batch rerun, or output regeneration. Do not introduce CIF/W/amount-based selection.
-
-Return the corrected conclusion, precise source citations, and the prepared comparison requests.
+Do the work, not just provide Git commands. Report success only after the push and remote verification complete.
