@@ -1,86 +1,73 @@
-Continue the existing CLUE session. The result of prompt 84167 has been received. Preserve the completed changes through b3be6c1, including the live-execution guard.
+Continue the existing CLUE session from the completed row-7 investigation in prompt 92638. Preserve the current checkout, completed fixes, live-execution guard, and delivered MON_INSTRUMENTS artifacts.
 
-Investigate the owner’s CSV question: why does one source row produce nine output records, and is the association commercially justified?
+Complete the remaining offline investigation using the saved requests/responses and native documentation. Do not make provider calls, resume or rerun the batch, change selection rules, or regenerate delivered outputs.
 
-This is an offline investigation using the delivered MON_INSTRUMENTS run, saved requests/responses, durable state, and current code. Keep delivered artifacts unchanged. Do not repeat provider calls, resume or rerun the batch, regenerate the business workbook, or change mappings or guards.
+The parent/child model is now supported by the existing Archive Web Service Specification:
 
-Use these existing locations:
+* Printed page 38, section 4.6: a transaction is a linked document set identified by UTI, typically containing a parent item and child items.
+* Page 39: AwsSearchTransactionRequest defines documentFolder, transactionType, applyFilter and search criteria; omitted applyFilter defaults to false.
+* Page 40: AwsSearchTransactionResponse defines parentFolder, childFolders and childDocuments.
+* Page 18, section 3.6: distinguishes returning transaction contents from returning only items matching the supplied criteria.
+* Page 48, section 5.7: parentItemThreshold explains inline item enumeration.
 
-* Input: C:\repos\FCRM\sources\all_txions_20260922165027.xlsx
-* Delivered artifacts: C:\Users\tag5916\Downloads\CLUE_DEV_Review_20260923_MON_INSTRUMENTS\
-* Saved DEV workspace, if needed: /home/tag5916/clue_private/newinput_20260922/mon_instruments/ws
+Verify these passages against the actual local specification edition. The remaining question is which documents should be associated with this source row.
 
-1. Establish the exact source row.
+1. Establish the actual transmitted request
 
-The owner’s photographs show:
+Locate the saved searchTransaction request for:
+input-rahona-workbook-v1#MON_INSTRUMENTS#000007
+Account_Number 6450420, date 2025-05-05, Credit.
 
-* Sheet: MON_INSTRUMENTS
-* Source row: 7
-* Locator: input-rahona-workbook-v1#MON_INSTRUMENTS#000007
-* Account_Number: 6450420
-* Processing_Transaction_Date: 2025-05-05
-* Direction: Credit
-* Currency: CAD
-* Transaction_Amount: 15567
-* CIF_Number and Transaction_Event_Identifier: 3740000709
-* Nine document ordinals, with distinct-looking document IDs.
+Report the capture path and exact relevant XML values:
 
-Verify these against the actual input and manifest. Read the complete Transaction_Details value directly from the workbook, preserving its exact representation. Confirm that the CSV filter isolates one source locator.
+* documentFolder
+* transactionType
+* applyFilter: explicitly true, explicitly false, or omitted
+* hitListFetchLimit
+* Every criterion’s indexName, operator and values.
 
-2. Trace where one source row becomes nine associations.
+Distinguish top-level request fields from search criteria. In particular, absence of TransactionType from the criteria list does not prove it was absent from the request.
 
-Follow the actual saved evidence through:
-source row → search criteria → returned parent transactions → child cheque documents → persisted associations → CSV rows.
+Explain request construction using the run’s recorded code revision. Current defaults alone do not establish what a historical run transmitted. Use read-only historical inspection where needed.
 
-Identify:
+2. Explain the nine returned children using the contract
 
-* The exact transmitted criteria and corresponding capture files.
-* How many parent transactions were returned.
-* Which children belong to each parent.
-* Whether children were returned inline, through a subsequent child-enumeration request, or both.
-* Whether the nine output rows represent nine distinct archive documents.
-* The code location that selects and expands these results.
+Compare the actual request with its saved response and the documented filtering rules.
 
-Check whether repeated enumeration or export creates any duplicate associations. Distinguish repeated retrieval attempts from duplicate final rows.
+Determine whether the response represents all children of the matched transaction or a filtered subset. Identify the evidence supporting that conclusion.
 
-3. Examine source-to-parent and source-to-cheque linkage.
+Where child index values are available, compare them with the criteria actually sent. Do not treat the input amount, CIF_Number, Transaction_Event_Identifier or Transaction_Details as search criteria unless they were transmitted.
 
-Compare the exact source Transaction_Details string with the provider’s parent transaction identifiers. Record equality or differences, including any normalization actually performed.
+Explain what applyFilter=true would mean under the existing criteria. Do not claim it would select cheque 3740000709 without evidence, and do not perform a live experiment or describe an offline calculation as an observed provider result.
 
-An observed identifier match and a documented business mapping are separate findings. Cite the evidence for each.
+3. Correct the amount reconciliation
 
-Check the existing requirements and recorded owner decisions concerning “process every returned cheque” and one row per source/document association. Explain whether those decisions establish membership in this particular source transaction, or only define how selected documents are exported.
+The nine amounts displayed in the previous report sum to 267,021.75. Its reported total, 279,021.75, equals that sum plus the reported parent amount of 12,000.
 
-Do not assume CIF_Number or Transaction_Event_Identifier is an archive ItemSequenceNumber. Do not use an OCR memo as an authoritative join key. Selecting the cheque ending in 709 requires a supported business rule.
+Recompute from the saved native response using Decimal, keeping parent and child amounts separate. Determine whether the discrepancy arose in parsing, aggregation or report transcription. Correct the diagnostic artifact and explain the actual cause without changing historical provider evidence or business outputs.
 
-4. Produce a nine-row evidence table.
+4. Check the pattern across the existing 16 source rows
 
-For each output record include:
+Using saved evidence only, produce a compact table with:
 
-* Document ordinal.
-* Parent transaction identifier.
-* Universal document ID.
-* Archive item/sequence identifier, where available.
-* Association identifier or durable-state locator.
-* Relevant saved response locator.
-* Child amount, only if explicitly available from a reliable saved source.
+* Source locator and direction.
+* Returned parent and distinct child-document counts.
+* Whether source Transaction_Details exactly matches a returned UTI.
+* Number of children matching the supplied CIF/W value.
+* Number matching the supplied amount.
+* Number matching both identifier and amount.
 
-Keep OCR-read identifiers separately labelled. If parent or child amounts permit reconciliation with CAD 15,567, show it and state its limits; matching totals alone do not prove the association.
+Label these as observed comparisons, not approved identifier mappings. Preserve NO_MATCH rows and distinguish unavailable evidence from a failed comparison.
 
-5. Answer the owner’s question directly.
+5. Deliver a bounded conclusion
 
 Separate:
 
-* Why the application mechanically produced nine rows.
-* Whether the archive returned one parent containing nine cheques or multiple parents.
-* Whether available evidence establishes that all nine belong to this source row.
-* Whether any mechanical duplication exists.
-* What remains unknown about whether the source row represents a deposit/group or an individual cheque.
+* Documented provider behavior.
+* What this run actually requested and received.
+* Compliance with the existing RETURN_ALL_CHEQUES expansion policy.
+* Any unresolved source-to-cheque business mapping.
 
-Explain the consequence of repeating the source amount on every association row: summing those copied values counts the source amount nine times. The previous A:W preservation check proves copying fidelity, not correct document selection or additive financial totals.
+Existing A:W source ownership and accepted multi-cheque expansion are already established. Do not reopen them or impose a one-row-per-cheque selection rule without support.
 
-Do not remove rows, choose the first result, or introduce a deduplication/filtering rule to make the output appear correct.
-
-Save a review artifact in the existing review folder with the evidence table, code/capture references, and conclusion. Update the relevant investigation note without changing historical run outcomes.
-
-Finish with the direct answer, artifact path, and—only if evidence remains insufficient—the precise business definition or linkage confirmation needed. Do not repeat the provider-profile investigation or its test suite.
+Update the investigation artifact and relevant handoff with exact evidence references. Return the actual applyFilter value, corrected totals, the 16-row comparison, and the smallest remaining clarification—if any. No broad audit or full test-suite rerun is needed.
