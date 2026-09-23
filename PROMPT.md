@@ -1,58 +1,44 @@
-Continue the existing CLUE development session. The owner now authorizes exactly ONE fresh, real, end-to-end DEV execution of the same MON_INSTRUMENTS input workbook, followed by delivery of the actual output and row-level diagnostic tables.
+Continue the same CLUE session from the received FreshRun_BLOCKED report. Resolve the specific prerequisites of the already authorized one-time real DEV run where existing authoritative evidence permits, and identify exact remaining external gaps. Do not start another execution blindly.
 
-This supersedes the earlier no-new-provider-calls restriction for this specific run only. It is not authority to bypass the live guard, change provider contracts, broaden search criteria, execute the separate prepared getTransactionItems A/B investigation, or run in production. Do not ask the owner to reconfirm this already approved run. If an actual readiness gate blocks execution, report the precise blocker and supporting evidence; do not weaken the gate or substitute an offline run.
+Received state
+- The attempted normal-pipeline execution used revision 31568a2 and the hash-verified 11,841-byte, 16-row MON_INSTRUMENTS workbook.
+- It exited with code 2 / live_execution_refused before delivery processing, state-database creation, credential loading or provider calls. There is no fresh acquisition result. The source summary and association tables delivered with this report are historical evidence.
+- The reported active profile set still references symcor-synthetic-v0 and tungsten-synthetic-v0. native_symcor_profile() supplies documented symcor-dev-v1; native_tungsten_contract() raises CP-D08. DEV Python is 3.9.25, while the declared requirement is >=3.10; runtime was not the observed cause of this refusal.
+- The historical acquisition predates guard enforcement at 7cc20ae. A prior successful provider call establishes past execution, not current contract eligibility.
 
-Reconcile current work first
-- The owner received the provider-origin fix report at commit 31568a2. It reports acquisition origin recovered as dev from verification.json and corroborating run_summary.json; new runs persist their own acquisition origin. The prior claim that historical recovery was impossible was withdrawn.
-- The latest re-export remained offline with zero provider calls. It is not a fresh execution of Symcor/Tungsten.
-- Preserve the Excel/result implementation, source/image hash checks, acquisition-origin fix and other current changes. Check the actual checkout and CLUE_HANDOFF.md; do not reset or reapply completed commits blindly.
-- Incorporate the row-level table reporting addendum if not already applied. Do not start a second agent task or duplicate a currently active acquisition run. If this exact newly authorized execution is already running, follow it to completion and deliver its results.
+The owner's authorization for exactly one fresh real DEV acquisition remains in scope because this attempt made zero provider calls. Do not ask the owner to approve the same run again. Preserve the live guard and the distinction between owner authorization, documented contract evidence and environment readiness. Never satisfy a gate by changing a label without supporting evidence, disabling a check or downgrading a requirement.
 
-1. Select the exact input and environment
-Use the authoritative original bytes for all_txions_20260922165027.xlsx, sheet MON_INSTRUMENTS, with 16 source rows (five Debit and eleven Credit) and the existing A:W schema.
-The suggested C:\repos\FCRM\sources\all_txions_20260922165027.xlsx path previously contained different bytes: 12,814 bytes rather than the admitted 11,841 bytes. The preceding task recovered the exact source from the historical run's landing copy, matching delivery.content_sha256. Reuse that already verified source, confirm its complete recorded hash and retain it unchanged. Do not use a different file merely because its name matches.
+1. Establish the exact blockers from code and native evidence
+Read the actual current checkout, CLUE_HANDOFF.md, profile registry, assert_live_allowed call path, native profile helpers and current DEV launch configuration. Preserve concurrent changes and received fixes.
+Produce a compact table:
+gate/required contract item | exact code location/condition | active value | available native evidence/version/location | missing fact or implementation/configuration defect | smallest corrective action.
 
-Use the existing controlled Linux DEV environment and the supported live configuration. Confirm that the revision actually executed contains the received fixes and that the active Python runtime/configuration meets the application requirements. If needed, stage that revision through the established DEV execution method in a separate run directory. Do not alter production or shared deployments. Reuse the configured authentication, JKS/certificate and TLS setup without exposing credentials or weakening certificate verification.
+Separate wrong profile binding, unimplemented helper/registry wiring, genuinely absent provider contract facts, required approvals and the independent Python compatibility issue. Do not equate a helper raising CP-D08 with proof that all required evidence is absent. Do not declare the missing contract external until you have checked the relevant existing project sources.
 
-Check the real provider-profile eligibility and live guard using current evidence. Owner authorization does not convert unresolved or synthetic contract/profile pins into approved live ones. If blocked, return a table with the failing check, observed value, required condition and smallest missing action. Do not label a run completed if providers never executed.
+2. Resolve the Symcor binding using the documented profile
+Verify that symcor-dev-v1 applies to the selected DEV endpoint, operations and input/output profile combination. Review the existing provider specification, client supplement, profile evidence and the previously completed native-profile work; do not redo broad protocol research.
+Where that evidence establishes compatibility, wire the documented native profile into an explicit DEV configuration/profile set using the supported mechanism. This is selection of an evidenced existing contract, not permission to invent or alter one. Keep synthetic fixture configurations identifiable and unchanged for their intended use. Do not globally repin unrelated profiles or weaken assert_live_allowed.
+Use focused offline tests to show the intended binding is selected and that unresolved/synthetic live combinations remain rejected. If an actual documented owner/contract approval is still required beyond the existing run authorization, state the exact requirement, its source, and the concrete proposed change; do not give an unexplained 'owner decision' blocker.
 
-2. Perform one fresh acquisition
-Create a new workspace and new run ID; preserve the historical workspace, working re-export copies and delivered artifacts.
-Run the normal application pipeline against real DEV Symcor and Tungsten. Do not use export-only, fixtures, response replay or cached results from the old run as a substitute for acquisition. Use supported isolation/configuration for the fresh run; do not delete shared caches. Normal within-run document sharing, caching and idempotency must remain intact so multiple source associations do not force redundant calls.
+3. Audit the precise Tungsten CP-D08 requirements
+Search the relevant existing local contract documents, supplied examples, provider integration code, meeting decisions and saved successful acquisition evidence already referenced by the current handoff. Use those sources directly; do not infer a contract solely from endpoint configuration or one successful response.
+For each item actually required by the live gate, identify what is established and what is missing: request/response structure, authentication, configured API/contract version, required configuration or session fields, error handling and applicable job/status/idempotency behavior. Separate these from business confidence interpretation and other concerns; show which are truly gating this DEV execution under the existing policy.
 
-Keep the existing eligible-row rules, Debit/Credit retrieval routes, criteria, account/date/identifier mappings, RETURN_ALL_CHEQUES, source-value pass-through, confidence interpretation and image attribution unchanged. Use the normal supported timeouts, concurrency and bounded retry policy; record attempts. Do not launch another batch, broaden dates, pad accounts, add guessed identifiers or perform exploratory retries to obtain a preferred result. Use the documented inline/fallback child-retrieval behavior; do not force extra getTransactionItems calls.
+If an existing approved native contract/profile already satisfies the required items, correct the helper/registry/configuration mismatch with traceable evidence and focused tests. Do not mark all CP-D08 questions resolved merely to run the batch.
+If essential contract facts are absent, finish the internal review and return only the precise remaining questions, each with the sources checked and why the missing fact is necessary. Prepare a concise English question table for the owner to route to the appropriate team. Do not send it yourself. Do not request documents or facts already available in the project.
 
-Record acquisition origin at acquisition time, including the actual run ID, code revision, source hash, provider mode and evidence status. Keep it separate from subsequent export activity. All status and counts must reflect the new run's actual evidence.
+4. Handle the runtime honestly
+Check for an existing approved Python interpreter meeting >=3.10 and the project's normal DEV execution method. Use it if available. If none exists, report the minimal provisioning requirement and concrete supported-run setup. Do not lower requires-python simply because an earlier run happened to execute under 3.9.25, and do not install or alter a shared system runtime without the appropriate environment authority.
 
-3. Produce the established business deliverable
-Generate a separate output .xlsx preserving all original source tabs and appending exactly result with the existing 41 columns: A:W source values, X:Y images, Z:AO field/confidence pairs. Preserve positional confidence headers. Keep diagnostics in companion files, not extra business columns or worksheet tabs.
-Retain source identity and provenance for every association and every source with no document. Preserve actual partial outcomes; do not force SUCCESS or reproduce historical counts artificially. Use the existing conformance checker and focused output checks. Do not repeat unrelated test suites or completed fixture/re-export demonstrations.
+5. Complete the already-requested historical Debit date evidence
+Reuse the generated source_summary.csv, incomplete_request_parameters.csv, saved requests/responses and hash-verified workbook. Do not run another investigation if the answer is already present in those files; surface it in the response.
+The blocked-run report now shows submitted date 20260717 for source rows 2 through 6. Return all five rows with:
+source row | raw source date field/value | serialized ProcessingDate/operator | raw account | account sent | other actual criteria | returned document identifiers/count | recorded outcome | evidence location.
+Confirm whether the submitted date mechanically follows the selected source field. Distinguish a mechanical conversion/mapping defect from the still-unapproved business equivalence between that source field and archive capture date. Do not alter the date, account representation, identifiers or matching to force a hit. Label this table HISTORICAL BASELINE ONLY.
 
-4. Present results as tables
-Start with a run-identity table: new run ID, DEV environment, executed revision, source path/hash, source row count, start/end times, acquisition provider mode/evidence, actual provider-call counts, actual command (without secrets), exit code and final status. Explicitly label this as a fresh provider run only if native evidence demonstrates it.
+6. Continue only when real prerequisites pass
+If the evidenced configuration and runtime fixes satisfy every applicable live prerequisite, proceed directly with the already authorized ONE fresh DEV acquisition using the existing one-run prompt and the same verified source. First check no such acquisition is already active or completed. Use a new acquisition identity and isolated workspace, preserve the original evidence, and deliver the actual workbook plus row-level and before/after tables.
+Keep retrieval criteria, multi-cheque associations, confidence semantics, source values and the guard unchanged. Do not add the separate getTransactionItems A/B probes or exploratory retries. Normal supported bounded retries remain part of that single run.
+If a prerequisite remains unresolved, do not make provider calls or substitute a fixture/re-export result. Return the completed evidence matrix, any concrete reversible fixes and tests, and the smallest remaining dependency. State explicitly that the new provider run has not happened.
 
-Show a source-summary table covering all 16 original input rows, including:
-source worksheet/Excel row | account | source date field/value | actual submitted date/range | operation | document count | completed/partial outcome counts | incomplete stage/reason.
-
-Provide the complete association table as CSV and a readable Markdown report:
-source row | result row | account as supplied | account as sent | source date | submitted date/range/operator | request ID/operation | provider UTI if applicable | actual DocID/universalDocID | search outcome | front/back image outcomes | OCR outcome | final outcome | last successful/incomplete stage | evidence locator.
-
-Use one row per source/document association, retaining a row for a source with no document. Do not deduplicate by account/date or hide failures. If the displayed association table is abbreviated, label the subset and provide the complete file. Actual DocIDs must be available in the complete table.
-
-For every incomplete source, also provide a request-parameter table:
-source row/request ID | parameter | source value | actual serialized value | operator | sent/empty/omitted/not-applicable/not-recorded | relevant contract/evidence finding.
-Keep secrets out of diagnostic captures. Distinguish a genuine zero-hit response from transport/authentication errors, SOAP faults, parsing defects or absent evidence. An omitted optional parameter is not automatically a defect. Mark downstream stages NOT_ATTEMPTED only when supported. Do not infer historical or current wire values from code defaults.
-
-5. Compare with the historical baseline
-Use historical acquisition run run-20260923T002748516082Z-ac3021a6, revision d34e07e, solely as a comparison baseline:
-- 16 sources; 354 output rows; 350 associations; 88 unique associated documents; 684 embedded images.
-- Outcomes: 341 completed_extraction, 1 extraction_fields_blank, 8 image_unavailable and 4 no_matching_document; PARTIAL/exit 3.
-- Reported original source rows 2, 4, 5 and 6 had no matching document; row 3 had one document. Confirm identities from records before comparison.
-
-Show a before/after table for all five Debit sources, including exact submitted account/date/other criteria, returned DocIDs or explicit NONE_RETURNED, response status, stage reached and any changed result. Compare the eight historical image-unavailable associations and the blank-extraction case as well. Explain observed changes using evidence; do not assume a rerun fixes unchanged criteria.
-
-Historical counts are reference values, not mandatory targets for a new provider run. Report any real change in returned document sets, image availability or extraction. Keep root-cause hypotheses separate from established findings. The eight confidence-semantic BLOCKED checks are distinct from the historical eight image-unavailable associations and must not be marked resolved without the required evidence.
-
-6. Deliver and update the handoff
-Copy the new workbook, JSON/CSV companions, run summary, conformance results and row-level diagnostic reports into a new clearly named Windows Downloads review folder containing the new run identity. Open that folder and workbook for owner inspection if available. Return exact absolute paths and the tables directly in your final response.
-Update CLUE_HANDOFF.md with the new run's actual status and evidence, including any blocker or incomplete result. Preserve prior files and hashes. Do not push, merge, deploy to production or send external messages. All development text and artifacts must be English.
+Return tables rather than aggregate-only prose. Keep development prompts, reports and artifacts in English. Update the actual local handoff accurately. Do not push, merge, deploy to production or send external messages. Preserve earlier artifacts and do not claim documentation-only or configuration-only work resolved the four historical Debit NO_MATCH outcomes.
