@@ -1,70 +1,64 @@
-Continue the existing CLUE session. Implement the narrowly scoped live-execution enforcement fix identified in your final report for prompt 61843.
+Continue the existing CLUE session from the received result of prompt 72954.
 
-Prompts 57291 and 61843 have received completion reports. Preserve the delivered MON_INSTRUMENTS outputs and their PARTIAL status. Do not repeat that run.
+The objective is to reconcile CP-D06 and CP-D08 against existing evidence and prepare a usable, versioned DEV provider profile wherever the documented contract permits it. Complete supported implementation work offline.
 
-All responses, code, tests and documentation must be in English.
+1. Reconcile the baseline
 
-1. Establish the applicable policy
+Preserve the enforcement fix reported at commit 7cc20ae and its reported 654 passed / 5 skipped / 0 failed result. Do not repeat that work.
 
-Read the current local handoff and actual code for:
+Record that prompts 40872, 57291, 61843 and 72954 have received results. References still marking them pending are stale.
 
-* assert_live_allowed()
-* Profile resolution and synthetic/provider-contract markers.
-* build_providers and the application entry points used by normal execution and resume.
+Preserve the completed MON_INSTRUMENTS run: 16 source rows, 354 output rows, 350 associations, 88 unique documents, 684 embedded images, zero reported A:W comparison mismatches, and PARTIAL status. Do not rerun or regenerate it.
 
-Your latest report states that assert_live_allowed() is called only by a test, while production merely reports synthetic_execution. Verify this against the current checkout and identify the earliest shared boundary that can enforce the existing rule before any provider network activity.
+2. Resolve requirements from the actual sources
 
-Distinguish input-schema support from provider-contract readiness. A workbook matching the Rahona schema does not itself establish approved search mappings.
+Read the current code, native provider documentation, available WSDL/XSD, supplementary specifications, Tungsten setup/Postman material and saved request/response evidence.
 
-2. Implement the smallest effective correction
+Build a concise evidence matrix covering:
 
-Enforce the existing live-execution policy on every applicable path that can initiate real Symcor or Tungsten activity, including resume.
+* CP-D06: effective Symcor operations, required criteria, document identities, child enumeration, getDocs request/response handling, limits and image-side attribution.
+* CP-D08: Tungsten request schema and encoding, process/configuration selection, response fields, confidence semantics, submission/status/error behavior and recovery after an unknown submission outcome.
 
-For disallowed configurations, fail before provider authentication, network activity or job submission. Return a clear diagnostic explaining the blocking profile/contract condition, without exposing credentials.
+For each requirement, identify its exact source, implementation location, evidence status and effect on DEV eligibility.
 
-An explicit provider mode, endpoint or credential file must not silently satisfy a separate contract restriction.
+Distinguish documented behavior, observed behavior, inference and an actual approval requirement. Do not describe a missing implementation as missing provider documentation. Do not infer contract approval from HTTP success or populated OCR fields.
 
-Preserve legitimate local fixture/simulator execution and offline export of completed workspaces. Export-only operations must not acquire a new dependency on live authorization.
+Reuse the already established getDocs evidence, including imageFormat 0 = JPEG. Do not reopen settled questions or request examples already present in the native documents.
 
-Use the existing guard and documented policy. Do not add a generic bypass, clear synthetic markers, or automatically infer approval from previous runs. If an allowed DEV exception is not defined by the existing contract, enforce the restrictive rule and identify that missing policy decision separately.
+3. Prepare the supported profile implementation
 
-The owner’s authorization for the completed new-input run must not become a permanent or global bypass. This task authorizes implementation and offline verification, not additional live calls.
+Inspect load_native_profiles() and the existing provider contracts. Identify which failures represent missing code and which represent genuinely unresolved requirements.
 
-3. Prove enforcement through the real application path
+Where current evidence and policy satisfy the prerequisites, implement the smallest versioned provider-profile configuration and loader wiring. Keep input-schema selection, provider-contract readiness and output-profile selection separate.
 
-Add focused regression coverage that would have caught the original defect. Calling assert_live_allowed() directly is insufficient.
+Keep assert_live_allowed() enforced. Do not enable execution merely by clearing synthetic markers, adding an unconditional approved flag or introducing a generic bypass.
 
-Exercise the actual application/provider setup path with offline doubles and verify:
+For unsupported requirements, leave the affected capability explicitly unresolved and blocked. Implement the supported portions and identify the exact remaining fact or decision needed to activate the profile.
 
-* A disallowed live configuration is blocked with zero provider network/authentication calls, even when endpoint and credential settings are otherwise present.
-* Applicable resume paths enforce the same rule before new provider work.
-* Local fixture/simulator execution remains functional.
-* An allowed configuration, if one is defined by the existing policy, reaches the mocked provider path.
-* Offline re-export remains available and preserves business values, outcomes and layout.
+CP-D03, source-to-document business linkage and unresolved identifier meanings must remain explicit. A profile change must not silently approve the current source-date mapping, reinterpret CIF/W/Q, pad accounts or widen search dates. Any existing documented approved-search-case mechanism must retain its actual limited scope.
 
-Keep all verification offline. Do not use real provider calls to demonstrate that the guard works.
+4. Validate offline
 
-Run the relevant focused tests. Run a broader suite only if an applicable repository gate or a concrete remaining risk requires it.
+Use the actual profile loader and normal application entry point with saved-response replay or mocked transports.
 
-4. Preserve project boundaries
+Verify that supported profile configuration reaches the intended adapter with documented request construction, while unresolved configurations remain blocked before network activity.
 
-Do not change CP-D03, date or identifier mappings, account representation, source-to-document associations, the DAT_CSV Q correction, or Rahona source-value pass-through.
+Do not rely solely on a fabricated approved ProfileSet. If a real supported profile is introduced, update the test that currently assumes every shipped profile is blocked to assert the correct per-profile policy.
 
-Preserve getDocs, classification, output-profile, diagnostic-metadata, cache-path and search-provenance fixes.
+Run focused tests for changed behavior and any mandatory repository gate. Do not repeat unrelated acceptance batches or completed guard tests without a concrete reason.
 
-Keep the business workbook at 41 columns A:AO, sheet in, images X/Y and eight field/confidence pairs Z:AO. Do not regenerate or modify delivered workbooks or historical evidence.
+5. Deliver a concrete handoff
 
-The Python-version mismatch, OCR accuracy, image-side attribution, unavailable images, NO_MATCH and business-semantic questions remain separate.
+Update the local current-state document, handoff and prompt ledger. Report their exact paths.
 
-5. Deliver the implemented result
+Deliver:
 
-Update the local handoff and prompt ledger with:
+* The evidence matrix and implemented profile/configuration changes.
+* Actual test commands and results.
+* Whether a real DEV profile is now eligible, and the precise basis or remaining blockers.
+* A documented command template for later execution, if supportable; do not execute it.
+* A short draft containing only questions still unanswered after reviewing existing sources. Identify the appropriate source/provider owner for each question, but send nothing.
 
-* The confirmed enforcement gap and its scope.
-* The implemented enforcement boundary and behavior.
-* Exact changed files and revision or diff identity.
-* Test commands and actual results.
-* Evidence that blocked cases made zero network calls.
-* Any policy question that remains unresolved.
+Keep all previous fixes, source-value preservation and the 41-column business workbook contract intact. Keep the Python mismatch, OCR accuracy, image-side attribution, unavailable images and NO_MATCH concerns separately tracked.
 
-Provide a concise final implementation report. Do not merge, push, deploy, send external messages or perform archive/lifecycle work.
+Make no live provider calls, including smoke probes. Do not weaken TLS, modify delivered evidence, merge, push, deploy or perform archive/lifecycle work.
