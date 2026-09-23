@@ -1,64 +1,86 @@
-Continue the existing CLUE session from the received result of prompt 72954.
+Continue the existing CLUE session. The result of prompt 84167 has been received. Preserve the completed changes through b3be6c1, including the live-execution guard.
 
-The objective is to reconcile CP-D06 and CP-D08 against existing evidence and prepare a usable, versioned DEV provider profile wherever the documented contract permits it. Complete supported implementation work offline.
+Investigate the owner’s CSV question: why does one source row produce nine output records, and is the association commercially justified?
 
-1. Reconcile the baseline
+This is an offline investigation using the delivered MON_INSTRUMENTS run, saved requests/responses, durable state, and current code. Keep delivered artifacts unchanged. Do not repeat provider calls, resume or rerun the batch, regenerate the business workbook, or change mappings or guards.
 
-Preserve the enforcement fix reported at commit 7cc20ae and its reported 654 passed / 5 skipped / 0 failed result. Do not repeat that work.
+Use these existing locations:
 
-Record that prompts 40872, 57291, 61843 and 72954 have received results. References still marking them pending are stale.
+* Input: C:\repos\FCRM\sources\all_txions_20260922165027.xlsx
+* Delivered artifacts: C:\Users\tag5916\Downloads\CLUE_DEV_Review_20260923_MON_INSTRUMENTS\
+* Saved DEV workspace, if needed: /home/tag5916/clue_private/newinput_20260922/mon_instruments/ws
 
-Preserve the completed MON_INSTRUMENTS run: 16 source rows, 354 output rows, 350 associations, 88 unique documents, 684 embedded images, zero reported A:W comparison mismatches, and PARTIAL status. Do not rerun or regenerate it.
+1. Establish the exact source row.
 
-2. Resolve requirements from the actual sources
+The owner’s photographs show:
 
-Read the current code, native provider documentation, available WSDL/XSD, supplementary specifications, Tungsten setup/Postman material and saved request/response evidence.
+* Sheet: MON_INSTRUMENTS
+* Source row: 7
+* Locator: input-rahona-workbook-v1#MON_INSTRUMENTS#000007
+* Account_Number: 6450420
+* Processing_Transaction_Date: 2025-05-05
+* Direction: Credit
+* Currency: CAD
+* Transaction_Amount: 15567
+* CIF_Number and Transaction_Event_Identifier: 3740000709
+* Nine document ordinals, with distinct-looking document IDs.
 
-Build a concise evidence matrix covering:
+Verify these against the actual input and manifest. Read the complete Transaction_Details value directly from the workbook, preserving its exact representation. Confirm that the CSV filter isolates one source locator.
 
-* CP-D06: effective Symcor operations, required criteria, document identities, child enumeration, getDocs request/response handling, limits and image-side attribution.
-* CP-D08: Tungsten request schema and encoding, process/configuration selection, response fields, confidence semantics, submission/status/error behavior and recovery after an unknown submission outcome.
+2. Trace where one source row becomes nine associations.
 
-For each requirement, identify its exact source, implementation location, evidence status and effect on DEV eligibility.
+Follow the actual saved evidence through:
+source row → search criteria → returned parent transactions → child cheque documents → persisted associations → CSV rows.
 
-Distinguish documented behavior, observed behavior, inference and an actual approval requirement. Do not describe a missing implementation as missing provider documentation. Do not infer contract approval from HTTP success or populated OCR fields.
+Identify:
 
-Reuse the already established getDocs evidence, including imageFormat 0 = JPEG. Do not reopen settled questions or request examples already present in the native documents.
+* The exact transmitted criteria and corresponding capture files.
+* How many parent transactions were returned.
+* Which children belong to each parent.
+* Whether children were returned inline, through a subsequent child-enumeration request, or both.
+* Whether the nine output rows represent nine distinct archive documents.
+* The code location that selects and expands these results.
 
-3. Prepare the supported profile implementation
+Check whether repeated enumeration or export creates any duplicate associations. Distinguish repeated retrieval attempts from duplicate final rows.
 
-Inspect load_native_profiles() and the existing provider contracts. Identify which failures represent missing code and which represent genuinely unresolved requirements.
+3. Examine source-to-parent and source-to-cheque linkage.
 
-Where current evidence and policy satisfy the prerequisites, implement the smallest versioned provider-profile configuration and loader wiring. Keep input-schema selection, provider-contract readiness and output-profile selection separate.
+Compare the exact source Transaction_Details string with the provider’s parent transaction identifiers. Record equality or differences, including any normalization actually performed.
 
-Keep assert_live_allowed() enforced. Do not enable execution merely by clearing synthetic markers, adding an unconditional approved flag or introducing a generic bypass.
+An observed identifier match and a documented business mapping are separate findings. Cite the evidence for each.
 
-For unsupported requirements, leave the affected capability explicitly unresolved and blocked. Implement the supported portions and identify the exact remaining fact or decision needed to activate the profile.
+Check the existing requirements and recorded owner decisions concerning “process every returned cheque” and one row per source/document association. Explain whether those decisions establish membership in this particular source transaction, or only define how selected documents are exported.
 
-CP-D03, source-to-document business linkage and unresolved identifier meanings must remain explicit. A profile change must not silently approve the current source-date mapping, reinterpret CIF/W/Q, pad accounts or widen search dates. Any existing documented approved-search-case mechanism must retain its actual limited scope.
+Do not assume CIF_Number or Transaction_Event_Identifier is an archive ItemSequenceNumber. Do not use an OCR memo as an authoritative join key. Selecting the cheque ending in 709 requires a supported business rule.
 
-4. Validate offline
+4. Produce a nine-row evidence table.
 
-Use the actual profile loader and normal application entry point with saved-response replay or mocked transports.
+For each output record include:
 
-Verify that supported profile configuration reaches the intended adapter with documented request construction, while unresolved configurations remain blocked before network activity.
+* Document ordinal.
+* Parent transaction identifier.
+* Universal document ID.
+* Archive item/sequence identifier, where available.
+* Association identifier or durable-state locator.
+* Relevant saved response locator.
+* Child amount, only if explicitly available from a reliable saved source.
 
-Do not rely solely on a fabricated approved ProfileSet. If a real supported profile is introduced, update the test that currently assumes every shipped profile is blocked to assert the correct per-profile policy.
+Keep OCR-read identifiers separately labelled. If parent or child amounts permit reconciliation with CAD 15,567, show it and state its limits; matching totals alone do not prove the association.
 
-Run focused tests for changed behavior and any mandatory repository gate. Do not repeat unrelated acceptance batches or completed guard tests without a concrete reason.
+5. Answer the owner’s question directly.
 
-5. Deliver a concrete handoff
+Separate:
 
-Update the local current-state document, handoff and prompt ledger. Report their exact paths.
+* Why the application mechanically produced nine rows.
+* Whether the archive returned one parent containing nine cheques or multiple parents.
+* Whether available evidence establishes that all nine belong to this source row.
+* Whether any mechanical duplication exists.
+* What remains unknown about whether the source row represents a deposit/group or an individual cheque.
 
-Deliver:
+Explain the consequence of repeating the source amount on every association row: summing those copied values counts the source amount nine times. The previous A:W preservation check proves copying fidelity, not correct document selection or additive financial totals.
 
-* The evidence matrix and implemented profile/configuration changes.
-* Actual test commands and results.
-* Whether a real DEV profile is now eligible, and the precise basis or remaining blockers.
-* A documented command template for later execution, if supportable; do not execute it.
-* A short draft containing only questions still unanswered after reviewing existing sources. Identify the appropriate source/provider owner for each question, but send nothing.
+Do not remove rows, choose the first result, or introduce a deduplication/filtering rule to make the output appear correct.
 
-Keep all previous fixes, source-value preservation and the 41-column business workbook contract intact. Keep the Python mismatch, OCR accuracy, image-side attribution, unavailable images and NO_MATCH concerns separately tracked.
+Save a review artifact in the existing review folder with the evidence table, code/capture references, and conclusion. Update the relevant investigation note without changing historical run outcomes.
 
-Make no live provider calls, including smoke probes. Do not weaken TLS, modify delivered evidence, merge, push, deploy or perform archive/lifecycle work.
+Finish with the direct answer, artifact path, and—only if evidence remains insufficient—the precise business definition or linkage confirmation needed. Do not repeat the provider-profile investigation or its test suite.
