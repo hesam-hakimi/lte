@@ -1,55 +1,30 @@
-Continue CLUE-OPS-ENV-LIFECYCLE in W001CLUEinitialRepo on the reported branch feature/clue-env-lifecycle-20260924. This instruction is self-contained: do not depend on locating the missing overnight prompt.
+Continue CLUE-OPS-ENV-LIFECYCLE in W001CLUEinitialRepo on the existing feature branch. This prompt is self-contained.
 
-Resolve and record the actual repository, full HEAD and local changes. Preserve existing work and keep the unrelated fcrm_clue history separate.
+Preserve the completed implementation and reported Windows/Linux package checks. Verify current HEAD and local changes; do not restart completed work.
 
-Your report establishes reported implementation of environment YAML, claim/move, recovery and verified ZIP completion, with 722 tests passed and 4 skipped. It also says the complete original acceptance criteria were unavailable. Continue from the existing implementation; do not recreate completed components or mark full acceptance complete yet.
+Close only these four gaps:
 
-The owner already authorized local investigation, gap implementation and offline verification. Continue through fixes and verification without stopping at a plan or requesting routine permission. All engineering output must be English. Account zero-prefix fallback remains deferred.
+1. Workbook-write failure
+Inject a failure during XLSX writing, separately from archive failure. Verify the input remains recoverable, incomplete output is not published, and completion is not falsely reported. Restart from persisted state and prove committed retrieval/OCR stages are not repeated.
 
-First produce:
-Requirement | Existing function/test | Evidence | Remaining gap
+2. Live-worker claim protection
+Use two independent processes. Keep the first worker healthy beyond the stale-claim interval and verify the second cannot steal its delivery. Separately test owner termination and safe recovery. Age alone must not establish owner death. State the supported same-host/shared-mount topology and reject unsupported use explicitly.
 
-Inspect existing tests before adding work. Missing evidence in the previous report does not prove missing implementation.
+3. Environment/profile compatibility
+Inspect existing contracts and registry code for accepted combinations. Distinguish environment-name checks from semantic compatibility. Reject evidenced incompatible combinations before input claim or provider work. Do not invent compatibility rules; document any missing authoritative rule precisely.
 
-Complete these acceptance checks:
+4. External YAML with installed code
+Keep mutable configuration outside the wheel. Through the existing installed launcher, verify external YAML selection, relative paths, missing/invalid configuration rejection and preservation of operator edits. Supply templates and exact commands through the existing delivery mechanism. Preserve direct-input/export-only behavior; do not create another installer.
 
-1. Configuration
-Prove that two selected environment YAML files use isolated input, processing, output and completed paths through the actual entry point. Document defaults/YAML/environment/CLI precedence, relative-path resolution and secret references. Reject missing required settings, missing inbox, environment/profile mismatch and overlapping/aliased lifecycle paths before claiming input.
+Inspect existing tests first, implement actual gaps and run focused regressions. Repeat the full suite only for a concrete risk or required repository gate.
 
-Do not overwrite operator configuration or silently create a mistyped inbox. Document the supported YAML subset and explicitly reject unsupported syntax.
+Update existing README/operator instructions, handoff and backlog. Preserve live guards, Excel A:W/result/41-column contract, associations, provenance and historical outcomes. Keep Debit zero-prefix fallback deferred. Do not expand into header/confidence issues or infrastructure provisioning. No live provider call or historical batch rerun is needed.
 
-2. Excel workflow
-Run the YAML-driven inbox workflow on an actual multi-sheet XLSX fixture. Verify original tabs/order/visibility, source A:W values, exactly one appended result sheet, the existing 41-column layout, and multi-document associations/provenance.
+Make focused commits. Fetch and inspect the application's remote/base/PR state, preserve unrelated work, and never force-push or merge unrelated histories. Push the feature branch and create or update one draft PR against the established base. Do not merge, bypass required reviews, publish to Nexus or deploy.
 
-Show the output workbook and verified archive containing the byte-identical original XLSX. The displayed CSV archive member does not establish workbook preservation. Keep outputs available in output.
+If remote access is unavailable, complete independent local work and provide the precise blocker plus ready PR title/body.
 
-3. Readiness and ownership
-Verify still-copying files and temporary/lock files are not consumed. Test same-name arrivals, established delivery/redelivery semantics and two independent worker processes competing for one delivery.
+Return:
+Gap | Change/evidence | Test result | Remaining limitation
 
-Threads alone do not establish process-level behavior. Recovery must not release a live worker's claim or adopt its input. Preserve source identity/hash and avoid overwrites.
-
-4. Restart and cross-filesystem movement
-Use fresh processes reopening persisted state after interruption around claim/move, processing, output commit and archive finalization. Count fixture-provider calls and prove committed stages are not repeated.
-
-Exercise EXDEV through deterministic fault injection, including interrupted copy and verification failure. Clearly distinguish simulated checks from an actual cross-filesystem Linux/NAS test. Preserve existing handling of unknown remote completion.
-
-5. Outcomes and archive failures
-Test invalid input, output failure, finalized PARTIAL and archive permission/disk failure. Preserve distinct statuses and exit codes. Compression must not convert PARTIAL into success.
-
-After committed output and an archive failure, restart only completion/archiving with no additional provider work. Verify original input bytes and a manifest linking delivery/run, input hash, output identity and outcome before retiring the processing copy.
-
-Repeated completion must create no duplicate output/archive. Do not introduce retention deletion.
-
-6. Installed package
-Verify templates, configuration resolution and the existing launcher outside the source checkout using the current package mechanism. Preserve direct-input/export-only compatibility.
-
-A new review package must identify its actual revision and checksum. The earlier a6f3ba4 bundle does not prove this later feature is packaged. Reuse the installer; do not create another one. Report source, installed-package, Windows and Linux checks separately.
-
-7. Documentation and delivery
-Update the existing README/operator guide and handoff/backlog. Include actual validation/processing commands, folder transitions, readiness, restart, failure and PARTIAL behavior.
-
-Deliver one acceptance table, focused test results, input/output/archive paths and hashes, and focused local commits. Run broader tests only for a concrete regression risk or required repository gate.
-
-Finish with IMPLEMENTED_AND_VERIFIED_IN_STATED_SCOPE only for evidenced scope; otherwise PARTIAL_WITH_EXPLICIT_REMAINING_GAPS. External infrastructure blockers must not stop independent local work.
-
-No live provider calls or historical batch rerun are needed. Preserve live guards, retrieval/matching, source ISN/date semantics and the historical 16-source/354-row baseline. No push, merge, Nexus publication or operational deployment is requested.
+Include full HEAD and actual push/PR status. Work through implementation and verification without stopping at a plan or requesting routine confirmation. All engineering output must be English.
