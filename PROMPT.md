@@ -1,72 +1,44 @@
-# CLUE — EDP and Nexus evidence update
+Continue the existing CLUE corporate development session. Update our handoff information, then trace and locate the actual Python deployment bundle in Nexus. Complete the investigation using native files, existing pipeline logs and authorized Nexus metadata. Use English throughout. Do not stop at a proposed search plan.
 
-Recorded: 2026\-09\-24 UTC\. Checkpoint: CLUE\-2026\-09\-24\-NEXUS\-POM\-OBSERVED\-BUNDLE\-UNVERIFIED\.
+NEW CONTEXT — screenshot observations; verify natively
 
-This addendum updates deployment evidence alongside the frozen CLUE\-REF\-2026\-09\-23\-R5 business baseline\. Read it with the root 01\_CURRENT\_STATE\.json\. The R5 archive does not contain this update\. Findings come from supplied screenshots, the deployment meeting transcript and reported agent results\. No corporate repository, EDP run or Nexus service was accessed from this reference task\.
+1. Natasha's onboarding merge is reported as PR #4 in TD-Universe/W001CLUEinitialRepo, feature/edponboard -> main, merge commit a6f3ba4b107104337a5c7b327edd7b6d9586076b, merged 2026-09-23T18:20:42Z. Payload: 8 changed files. Seven visible paths: .mvn/wrapper/MavenWrapperDownloader.java, .mvn/wrapper/maven-wrapper.properties, CD.yml, CI.yml, mvnw, mvnw.cmd, pom.xml. Inspect the complete native diff.
+2. POM: com.td.clue:clue-cd-only:1.0.5-SNAPSHOT, packaging pom, parent com.td.pipe:pipeline-parent-pom:LATEST. CI.yml declares deployableArtifact type pom, Maven wrapper and JDK 21. Python commands were removed from that file; other workflows/inherited executions remain unverified.
+3. GitHub run 35901809407, job 107319618610, “EDP XL Pipeline Caller”, succeeded in 11 seconds. It called https://release.td.com/webhooks/start-edp-vmc and received HTTP 200 with an empty body. This proves the trigger response, not downstream build/deployment success.
+   https://github.com/TD-Universe/W001CLUEinitialRepo/actions/runs/35901809407/job/107319618610
+4. Nexus rp.td.com visibly contains td-maven-snapshots / com.td.clue / clue-cd-only / 1.0.5-SNAPSHOT. Displayed assets:
+   com/td/clue/clue-cd-only/1.0.5-SNAPSHOT/clue-cd-only-1.0.5-20260923.184900-2.pom
+   plus .pom.md5 and .pom.sha1. No Python archive is visible in that selected component. Search beyond it before concluding absence. The banner reports the repo.td.com -> rp.td.com cutover completed.
+5. CD.yml declares DEV host crcluesbdzwnk0.dev.vmc2.td.com, VMC reuse, custom app type, an AutoSys state and Vault names tungsten_primarykey, tungsten_secondarykey, symcor_cert_privatekey, symcor_certpublickey. Provisioning/runtime mapping are unverified. Do not expose values or inline notification webhooks.
+6. Earlier DEV success was reported as developer-account rehearsal in an alternate directory, with Python 3.12.14. /opt/td/clue installation and service-account validation were not completed. sudo -n requiring a password does not rule out approved interactive operator sudo. Historical upload-credential restrictions do not prove downloads are blocked.
+7. Earlier comparison reported the business workbook implementation in W001CLUEinitialRepo@5ac9541d and a provisional exporter in fcrm_clue@2a2603f. The later source-alignment result is unknown here. Verify current ancestry; neither historical commit is automatically the current release. POM version 1.0.5 is separate from application version 0.2.0.
 
-## Current conclusion
+COMPLETE THIS WORK
 
-**The CD\-only Maven POM is visibly published in Nexus\. Publication and location of a deployable Python CLUE bundle remain unverified\.** A successful GitHub caller and its HTTP 200 response do not establish downstream build or deployment success\.
+A. Read existing CLUE_HANDOFF.md, deployment runbook/report, prior findings and git status. Preserve unrelated changes. Record new observations with evidence levels, then resolve uncertainty from native evidence. Identify the correct checkout, current refs, merge and complete diff without resetting or overwriting work.
 
-The operator starts after SSH login with no Git checkout, copied application files, deployment script or configuration template already present\. Application payloads must come from Nexus\. Initial instructions must cover the approved interactive sudo/account transition, exact download, verification and extraction before invoking anything inside the bundle\.
+B. Read pyproject.toml, existing build/release/bundle scripts, CI/CD/workflows and parent/effective configuration. Derive actual package/bundle names, formats, versions and expected contents. Prefer configuration and parent version used by the historical run: resolving LATEST today may differ. Inspect without initiating a build, deployment lifecycle or workflow rerun.
 
-## Newly received evidence
+C. Follow the existing GitHub run into the downstream EDP/XL run. Record its ID, stages, statuses and accessible log references. Locate build/publish commands, outputs and coordinates. Do not replay the webhook or send messages to others.
 
-|Item              |Observation                                                                                                                                                                                               |Limit                                                                                                                                                                         |
-|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|Repository / merge|TD-Universe/W001CLUEinitialRepo, PR #4, feature/edponboard to main; user attributes merge to Natasha. Payload shows merge commit a6f3ba4b107104337a5c7b327edd7b6d9586076b, merged at 2026-09-23T18:20:42Z.|Screenshot evidence; current refs and native merge contents not read here.                                                                                                    |
-|Change size       |Payload reports 8 changed files, 772 additions, 50 deletions, 2 commits. Seven distinct paths were visible in supplied diffs.                                                                             |Eighth file and collapsed wrapper bodies were not inspected.                                                                                                                  |
-|POM               |com.td.clue:clue-cd-only:1.0.5-SNAPSHOT, packaging pom; parent com.td.pipe:pipeline-parent-pom:LATEST; description refers to CD-only infrastructure onboarding.                                           |Inherited execution and actual EDP stages require inspection. Local POM alone cannot rule out downstream packaging.                                                           |
-|CI                |deployableArtifact type pom; Maven wrapper and JDK 21. Python matrix/install/test/build commands were removed from this particular file.                                                                  |Does not prove Python checks disappeared from all workflows or establish Java as the application’s target runtime.                                                            |
-|CD                |Existing DEV host crcluesbdzwnk0.dev.vmc2.td.com, custom app type, VMC infrastructure reuse and an AutoSys salt state declared.                                                                           |Does not prove application installation, a CLUE AutoSys job or service-account readiness.                                                                                     |
-|Vault             |Four static names: tungsten_primarykey, tungsten_secondarykey, symcor_cert_privatekey, symcor_certpublickey.                                                                                              |Provisioning, PEM packaging, CA delivery, runtime paths and application variable mapping remain unverified. Secret values and inline notification webhooks are not reproduced.|
-|GitHub caller     |EDP XL Pipeline Caller, run 35901809407, job 107319618610, succeeded in 11 seconds.                                                                                                                       |This is the caller’s result, not a downstream build result.                                                                                                                   |
-|Trigger           |Log selects https://release.td.com/webhooks/start-edp-vmc; HTTP 200 with empty body at 2026-09-23T18:20:57Z.                                                                                              |No downstream EDP run ID or Python artifact URL appears in the supplied excerpt. Do not replay the webhook to investigate.                                                    |
-|Nexus             |td-maven-snapshots / com.td.clue / clue-cd-only / 1.0.5-SNAPSHOT; format maven2.                                                                                                                          |Only the selected component’s visible assets were reviewed.                                                                                                                   |
-|Visible assets    |clue-cd-only-1.0.5-20260923.184900-2.pom and its .pom.md5 and .pom.sha1 files.                                                                                                                            |No Python wheel or deployment archive is visible here. This does not establish absence elsewhere.                                                                             |
-|Endpoint          |Banner says cutover to rp.td.com is complete and EDP uploads there.                                                                                                                                       |Discover the exact asset URL; the Nexus homepage or UI URL is not an artifact download.                                                                                       |
+D. Search Nexus read-only using derived names and pipeline coordinates across relevant accessible repositories. Inspect assets, versions, classifiers and pagination. Separate access errors from empty results; report the searched scope. Use existing authorized authentication and TLS validation. Keep credentials out of commands, logs and deliverables. Do not retrieve privileged credentials or treat the Nexus homepage as a download URL.
 
-Visible asset path:
-`com/td/clue/clue-cd-only/1.0.5-SNAPSHOT/clue-cd-only-1.0.5-20260923.184900-2.pom`
+E. Download plausible existing assets to isolated temporary storage; inspect format and contents without executing packaged code. Compare available repository/build checksums and calculate SHA-256 locally. State when independent checksum/provenance is unavailable. Confirm source/release provenance, application payload, deployment entry point and dependency installation route. A POM, Maven distribution, source-only archive or HTML page is not proof of the expected deployment bundle. Record missing elements rather than creating replacements.
 
-[GitHub run shown](https://github.com/TD-Universe/W001CLUEinitialRepo/actions/runs/35901809407/job/107319618610)\.
+F. Complete the existing runbook's FIRST INSTALL instructions. The operator cannot clone Git, SCP/copy our files, or run scripts not yet downloaded. Start after SSH login:
+   approved interactive sudo/account transition
+   -> accessible staging directory
+   -> exact Nexus download(s)
+   -> checksum and format verification
+   -> extraction
+   -> configuration from extracted templates
+   -> invocation of the extracted deployment script.
+   Discover the actual account, paths and authentication mechanism; do not invent them. Include executable commands where inputs are established; mark remaining inputs explicitly. Root-owned directories alone do not justify changing permissions. Prepare these steps; do not execute deployment in this task.
 
-The merge, trigger and snapshot timestamps are search keys, not independent proof that this build produced this asset\. Maven wrapper distribution downloads are build tooling\. Do not substitute POM version 1\.0\.5\-SNAPSHOT for application release 0\.2\.0\-\*\.
+DELIVERABLE
 
-Seven visible paths: \.mvn/wrapper/MavenWrapperDownloader\.java, \.mvn/wrapper/maven\-wrapper\.properties, CD\.yml, CI\.yml, mvnw, mvnw\.cmd, pom\.xml\.
+Update existing handoff/runbook/report files with minimal duplication. Provide an evidence table: source commit, producing EDP build, artifact name/version/type/classifier, repository, exact asset URL, checksums, contents and bootstrap readiness. Distinguish POM publication from Python bundle publication.
 
-## Reconciliation with earlier reports
+Conclude with FOUND_VALID_DEPLOYMENT_BUNDLE, CANDIDATE_UNVERIFIED, ONLY_CD_POM_CONFIRMED, NOT_FOUND_WITHIN_SEARCHED_SCOPE, or ACCESS_BLOCKED, supported by evidence and gaps. If missing, identify the smallest existing build-to-publication wiring change and its owner where documented; do not implement or publish it yet. If found, give the precise next operator action.
 
-- The deployment agent reported successful developer\-account DEV rehearsal using /usr/bin/python3\.12, version 3\.12\.14, while /usr/bin/python3 remained 3\.9\.25\. Installation under /opt/td/clue, service\-account validation and live provider checks were not established by this rehearsal\.
-- sudo \-n requiring a password does not establish that a human operator lacks approved interactive sudo\. Verify the real deployment identity and permissions\.
-- Scope the earlier “Nexus publication blocked” statement: the CD\-only POM is now observed; the Python bundle’s publication remains unknown\. Historical upload\-credential restrictions do not establish download restrictions\.
-- Earlier comparison reported a provisional exporter in fcrm\_clue@2a2603f and the business workbook implementation in W001CLUEinitialRepo@5ac9541d\. Both were reported rehearsed with fixtures\. The subsequent source\-alignment prompt has no completion result here; verify current source and artifact provenance\.
-- Preserve original worksheets plus one result sheet, 41 columns A:AO, source values A:W, images X:Y, eight field/confidence pairs Z:AO and no added clue\_\* business columns\. The reported front/back versus cheque\_front/cheque\_back header discrepancy and confidence\-scale gaps remain open\.
-- R5 historical acquisition, Debit preparation and laptop PAT results remain separate evidence\. This update changes neither their outcomes nor existing authorization\. No new provider calls, application tests, build, publication or deployment occurred in this reference task\.
-
-## Next task and completion evidence
-
-Use CLUE\_Find\_Nexus\_Deployment\_Bundle\_2026\-09\-24\.txt in the corporate agent session\. Inspect the current source, historical parent/effective build configuration, existing downstream EDP run and Nexus metadata\. Resolving the parent LATEST today may not reproduce the parent’s version used in that run\.
-
-Record source/ref/commit, producing build ID, package name/version/type/classifier, repository, exact asset URL, reported checksum and locally calculated download checksum\. Inspect candidate contents without executing code\. Establish the application payload, deployment entry point and required dependency installation route\.
-
-Use bounded conclusions: FOUND\_VALID\_DEPLOYMENT\_BUNDLE, CANDIDATE\_UNVERIFIED, ONLY\_CD\_POM\_CONFIRMED, NOT\_FOUND\_WITHIN\_SEARCHED\_SCOPE, or ACCESS\_BLOCKED\. Empty keyword results, missing access and HTTP 200 returning HTML have different meanings\.
-
-If found, complete the existing runbook’s first\-install section from SSH and approved sudo through download, verification, extraction, configuration and execution of the extracted script\. If not found, identify the smallest missing build/publish linkage and the owner only where evidenced\. This investigation updates documentation; it does not implement a new deployment framework or publish/deploy an application\.
-
-## Evidence register
-
-All image observations refer to supplied screenshots, not corporate files retrieved natively\.
-
-|Evidence                        |Supplied source                                                                             |
-|--------------------------------|--------------------------------------------------------------------------------------------|
-|POM                             |IMG_3A9EBC3B-26F8-418E-9282-4AEA8AA6F70E.jpeg                                               |
-|CD                              |IMG_21133CDB-7356-4766-AA1A-D5B326243F44.jpeg                                               |
-|CI                              |IMG_90C6ABBA-2F4D-4D66-9B0E-818B018F27DD.jpeg                                               |
-|Caller                          |IMG_E1808ECC-CFFF-4FFD-949F-9A5A6C72EC2D.jpeg                                               |
-|PR size / merge                 |IMG_10FD8DC9-EEF7-4AA9-A7A8-F1B6C389AED6.jpeg; IMG_3D1785BC-58E8-4D50-9324-FD249CCF39CA.jpeg|
-|HTTP response                   |IMG_34C2ACAA-06EC-4624-A7D6-6AB207DAB590.jpeg                                               |
-|Nexus                           |IMG_3AE26287-FEBC-4584-B446-8446B60A4F79.jpeg                                               |
-|Earlier source/deployment report|IMG_D9180550-536B-4BE9-84AD-88068E996698.jpeg; IMG_B6FD2935-1BBA-49E4-96C3-26201DBC1E78.jpeg|
-
-Root entry\-point/current\-state files link this addendum\. R5 and prior prompts remain historical\. The new prompt is prepared; corporate\-agent delivery and execution are not yet confirmed\.
+Keep this an artifact investigation and documentation task: no application-code changes, build/publish/merge, deployment, provider calls or broad test runs. Preserve the Excel business contract, historical PARTIAL results, open business issues and prior authorizations. Complete accessible independent investigation before reporting blockers. Return exact local paths to updated existing documents and evidence references.
