@@ -1,145 +1,84 @@
-HIGH PRIORITY — Establish the CLUE Vault runtime contract while secret population is pending.
+Perform a read-only reconciliation of the preserved dirty fcrm_clue worktree against the current clean remote branch.
 
-Repository:
-Alpha-Universe/W001CLUEinitialRepo
+Do not edit, stage, unstage, restore, reset, stash, clean, commit, merge, rebase or push anything.
 
-Current confirmed status
+Expected repository:
+C:\repos\fcrm_clue
 
-The authoritative DEV Vault endpoint from the latest edited platform-owner message is:
+Previously reported local state:
+- branch: feature/clue-durable-core
+- local HEAD: fc07ec4409a5fb1142c6d1632cd5623779735450
+- one staged deletion: .github/workflows/ci.yml
+- backup: C:\temp\clue-git-backup-20260924-105343
 
-https://dev.vault.alpha.com
+Expected current remote tip:
+origin/feature/clue-durable-core
+26a397d3129aaf69b01742e6ddfd8da10b2fca99
 
-Do not use the earlier vault-e.dev.azure.alpha.com address unless tracked corporate documentation explicitly proves that it is a required API endpoint or redirect.
+1. Confirm the actual repository root, branch, HEAD, origin and all linked worktrees.
 
-Vault configuration:
+2. Capture read-only evidence:
 
-* KV engine: v2
-* Mount: clue
-* Logical path: dev/w001clue/w001clueinitialrepo
-* API path: /v1/clue/data/dev/w001clue/w001clueinitialrepo
+   git status --porcelain=v2 --branch -uall
+   git diff --name-status
+   git diff --cached --name-status
+   git ls-files --others --exclude-standard
+   git ls-files --others --ignored --exclude-standard
 
-Expected keys:
+   Do not print `.env`, credentials, patches or secret values.
 
-* tungsten_primarykey
-* tungsten_secondarykey
-* symcor_cert_privatekey
-* symcor_certpublickey
+3. Fetch origin without modifying the working tree.
 
-The platform owner has confirmed:
+4. Confirm the current remote SHA and describe the exact divergence between the local branch and remote branch.
 
-* the Vault structure/path has been created;
-* the secret values are not currently showing;
-* she is investigating and will confirm when they become available.
+5. Classify every staged, unstaged and untracked path as:
 
-Therefore, all four keys currently have this operational status:
+   - already durable on the clean remote branch;
+   - intentional pending source/config/test/CI/documentation work;
+   - generated artifact or evidence that should remain ignored on disk;
+   - private or machine-specific;
+   - uncertain and requiring an owner decision.
 
-NOT_READY_PENDING_POPULATION
+6. Special reconciliation gates:
 
-Objective
+   A. `.github/workflows/ci.yml`
+   - Compare its staged deletion with the current remote branch, origin/main and all proposed replacement workflows.
+   - Determine whether it is a proven intentional replacement or an unresolved deletion.
+   - Do not unstage, restore or delete anything in this task.
 
-Determine exactly how the corporate CD framework delivers these Vault secrets to the CLUE application on the DEV VMC2 host.
+   B. `requirements.lock.txt`
+   - Confirm whether build/package code requires it.
+   - Identify its current location, ignore rule and canonical tracked destination.
+   - Determine whether excluding it makes a clean checkout unable to build the bundle.
+   - Do not force-add it yet.
 
-This is a read-only investigation. Do not implement or modify anything yet.
+   C. Generator/bootstrap files
+   - Confirm that `.gitattributes`, `deploy/clue-bootstrap.sh`,
+     `tools/generate_deploy_md.py` and
+     `tests/clue/test_generate_deploy_md.py`
+     are already durable at remote commit 26a397d...
+   - Mark any equivalent local uncommitted copies as superseded; do not recommit them.
 
-Safety rules
+   D. Remaining tracked modifications
+   - Review `.gitignore`, `pyproject.toml`, `requirements.txt` and both handoff documents.
+   - Identify the originating task/session and whether each change is already represented remotely, still required, or obsolete.
+   - Report the mixed-line-ending condition without normalizing any file.
 
-* Never print, copy or retrieve any secret value.
-* Do not open the Secret tab through automation.
-* Do not use a browser session token in scripts or terminals.
-* Do not modify Vault, CD.yml, source code or deployment configuration.
-* Do not install hvac or another Vault library.
-* Do not disable TLS verification.
-* Do not use curl -k, verify=False or VAULT_SKIP_VERIFY.
-* Do not create, rotate or overwrite a secret.
-* Do not access PAT or Production.
-* Do not stage, commit, push, reset, clean, restore or stash files.
-* Leave all unrelated working-tree changes untouched.
+   E. Generated delivery and artifact paths
+   - Confirm they remain on disk and are ignored by narrow rules.
+   - Do not delete, move, rebuild or upload them.
 
-Tasks
+7. Verify that the existing backup directory still contains the previously reported status and staged/unstaged patch evidence. Do not display patch contents.
 
-1. Record the native Git state:
-    * repository root;
-    * current branch;
-    * current HEAD;
-    * origin URL;
-    * porcelain status;
-    * latest remote head of application PR #6.
-2. Fetch remote references without changing the working tree.
-3. Inspect the tracked CD.yml and report exact line references for:
-    * deploymentParameters.dev.operation_secrets.vault;
-    * the four expected secret names;
-    * type: static;
-    * skip_modify_secrets;
-    * salt_formula;
-    * autosys/runtime configuration.
-4. Search the application source and tracked documentation for:
-    * tungsten_primarykey
-    * tungsten_secondarykey
-    * symcor_cert_privatekey
-    * symcor_certpublickey
-    * Tungsten API-key environment variables
-    * Symcor client-certificate paths
-    * Symcor private-key paths
-    * secret-loading helpers
-    * operation_secrets
-    * Vault or HashiCorp references
-5. Determine how the existing application currently receives each value:
-    * environment variable;
-    * file path;
-    * YAML/job configuration;
-    * direct application-to-Vault call;
-    * not currently implemented.
-6. Inspect available internal corporate documentation and tracked repositories using the same CD.yml schema.
-7. Establish the documented behavior of:
-    * operation_secrets.vault;
-    * type: static;
-    * skip_modify_secrets: False.
-8. Determine whether the CD framework:
-    * reads the Vault KV v2 secret;
-    * authenticates using a deployment identity;
-    * writes secrets to environment variables or files;
-    * controls target ownership and permissions;
-    * refreshes values after rotation;
-    * requires an application restart.
-9. For every conclusion, provide the supporting repository/document path and line reference. Clearly label unsupported assumptions as UNKNOWN.
-10. Classify the runtime design as exactly one of:
-    A. CD-managed Vault retrieval and runtime injection
-    B. Direct application-to-Vault retrieval
-    C. Not yet established
-11. Do not choose A or B without direct corporate evidence.
-12. If design A is established, produce a mapping table with:
-    * Vault key;
-    * injected environment-variable or file name;
-    * existing application consumer;
-    * expected Linux owner/group;
-    * expected permission mode;
-    * missing application wiring.
-13. If design B is established, report—but do not implement:
-    * authentication method;
-    * runtime role or service identity;
-    * token lifecycle;
-    * CA trust source;
-    * namespace, mount and path;
-    * retry/fail-closed behavior;
-    * audit requirements.
-14. Prepare, but do not execute, a safe post-provisioning validation procedure that will report only PRESENT, MISSING or ACCESS_DENIED for the four key names without displaying their values.
+8. Return an exact disposition table with:
 
-Required output
+   - path;
+   - staged/unstaged/untracked/ignored state;
+   - purpose;
+   - remote-equivalent status;
+   - KEEP / SUPERSEDED / NEEDS DECISION / GENERATED-IGNORE recommendation;
+   - proposed future clean branch or commit grouping.
 
-Return:
+9. Finish by recommending the safest clean-worktree plan for the approved remaining changes.
 
-1. Repository, branch, HEAD and PR #6 remote head.
-2. Final Git status proving no files were changed.
-3. CD.yml evidence with exact line references.
-4. Current application secret-consumer mapping.
-5. Corporate CD-framework evidence.
-6. Runtime classification: A, B or C.
-7. Exact injection variables/files, if established.
-8. Runtime identity/role, if established.
-9. Remaining questions for the platform owner.
-10. Minimal implementation plan to execute after the secrets are populated.
-11. Safe post-provisioning validation procedure, not executed.
-12. Explicit status:
-    VAULT_PATH_CREATED
-    SECRET_VALUES_PENDING
-    REAL_SECRET_READ_NOT_RUN
+Do not perform that plan in this task. Do not modify Nexus, artifacts, PR #6 or the application repository.
