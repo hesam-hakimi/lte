@@ -1,34 +1,49 @@
-Continue CLUE-OPS-ENV-LIFECYCLE. Build the actual TEST deployment artifact now, ready for Nexus upload. Complete the work, not just a plan.
+Clean up the Git changes in the CLUE repository currently open in VS Code. Execute the reversible cleanup; do not stop at a plan. Use English for all output, comments, and documentation. Work from Git and filesystem evidence, without screenshots or OCR.
 
-SOURCE AND SCOPE
-Application repository: TD-Universe/W001CLUEinitialRepo.
-Draft PR #6: https://github.com/TD-Universe/W001CLUEinitialRepo/pull/6
-Branch: feature/clue-env-lifecycle-20260924.
-Last reported HEAD: f6762774f4a8c213648e368501b2ff24e777704c; verify the actual full local and remote SHA before building. Report divergence rather than silently selecting another revision. Preserve unrelated local work; use an isolated checkout if necessary.
-This is a feature test release; no merge is required or authorized by this task. Do not deploy to an operational environment or call Symcor/Tungsten. Debit zero-prefix fallback remains deferred.
+The screenshots showed one staged deletion, .github/workflows/ci.yml, and approximately 110 unstaged changes, many marked Untracked. They included new workflows, packaging files, deployment scripts, handoff documents, delivery evidence, and built release archives. Recheck the current state; these counts are not authoritative.
 
-REUSE THE EXISTING DEPLOYMENT CONTRACT
-Inspect the maintained release builder, deployment packager, deploy.md, and deploy/clue-bootstrap.sh. Reuse them; do not create another installer or merge unrelated repository histories.
-The earlier deployment bundle was clue-0.2.0-a6f3ba4-deploy.tar.gz, staged under C:\repos\fcrm_clue\delivery. That bundle predates this feature. The application and fcrm_clue deployment-tooling repositories have separate histories: record both revisions independently if both contribute to the build.
-The newer clue-0.2.0-f676277-local-release.zip is a review package. Do not simply rename it or assume it satisfies the deployment contract.
-Build from the selected application source using the maintained deployment packager. Verify the archive format/root layout expected by the bootstrap and installer. Include the built wheel, sdist if required by the existing contract, compatible pinned offline dependencies and lock data, existing bin/clue-deploy.sh and bin/clue-batch-run.sh, configuration examples, internal checksums, and revision manifest.
-Use the existing version conventions with a unique immutable TEST/prerelease artifact identity containing the source SHA. Do not overwrite or relabel an earlier release. If packaging fixes are necessary, make bounded changes and record the final source/tooling revisions actually used.
+1. Confirm the workspace and preserve work.
 
-EXTERNAL ENVIRONMENT CONFIGURATION
-Ship config/environments templates outside the importable Python package, consistent with the implementation. Preserve operator-owned YAML and credentials during installation. Document selection via --environment-config or CLUE_ENVIRONMENT_CONFIG_DIR. Do not invent production paths. Retain the same-host worker restriction and current profile-coverage reporting behavior.
-Exclude credentials, .env contents, private keys, real business inputs, and captured provider responses from the deliverable. Use sanitized fixtures for validation.
+* Identify the actual VS Code repository using git rev-parse –show-toplevel and confirm the current branch. Do not confuse it with an isolated C:\temp\clue-src-* build checkout.
+* Read applicable AGENTS.md instructions and the latest relevant local CLUE handoff/deployment notes. Check whether a merge, rebase, cherry-pick, unresolved conflict, or another process writing to this checkout is active. Do not alter its index or files; finish the current operation through its existing workflow first, or report the exact blocker.
+* Before mutations, save the branch, HEAD, status, and separate binary-safe staged and unstaged patches to a private local folder outside the repository. Preserve copies and hashes of any untracked files you will change or move. Do not print patch contents that may contain secrets. Use Git’s –output option or binary-safe APIs for patch capture.
+* Preserve partial staging and pre-existing user edits. Do not run Discard All Changes, git reset –hard, destructive git clean, blanket checkout/restore, git rm -r –cached ., or recursive deletion.
 
-VALIDATE THE EXACT DELIVERABLE
-Run the maintained package validator and extract the completed deployment archive into a fresh location. Verify member checksums and source provenance. Install the exact included wheel and offline dependencies into an isolated environment using the existing installer; run pip check and the installed CLI outside the source checkout.
-Prefer the available RHEL 9/Python 3.12 test environment. State any platform unavailable for this build; earlier Linux validation of another revision is not evidence for this artifact.
-Exercise an external YAML and synthetic multi-sheet workbook through input -> processing -> output/completed ZIP. Check original input bytes/hash in the archive, preserved workbook tabs, the expected 41-column result structure, and preservation of operator configuration. Record actual outcome and exit codes; do not equate successful packaging with successful OCR or business acceptance.
-Run focused tests for packaging changes and required repository gates. Previously reported 785 passed/4 skipped is historical evidence unless rerun; the green EDP caller workflow is not Python test evidence.
+2. Inspect and classify the actual files.
 
-DELIVER AND PREPARE NEXUS
-Produce one delivery directory containing the deployment archive, its .sha256 sidecar, and a manifest with full revisions, build/version identity, dependency inventory, archive hash, and validation results. Open the directory for the user and give exact absolute file paths.
-Prepare the upload and install instructions using the existing tooling. Keep installation/status, intentional batch execution, and recovery-only rollback as separate steps; normal installation must not run rollback.
-Finish the build even if Nexus details are missing. Resolve the exact TEST repository and component path from approved existing configuration. td-raw-snapshots and tdu-raw-prerelease were only candidates, not confirmed destinations. Do not reuse the unrelated clue-cd-only Maven POM coordinates.
-If an approved TEST destination and publisher access are available, upload the unique artifact and sidecars, then download it afresh and verify SHA-256 before reporting publication success. Use credentials without printing them. Otherwise deliver the completed local files and ask only for the missing Nexus destination/access; do not guess or claim publication.
+Use git status –porcelain=v1 -uall, git diff –name-status, git diff –cached –name-status, and git ls-files –others –exclude-standard. Read relevant diffs and references locally.
 
-FINAL REPORT
-Return: BUILT/VALIDATED/PUBLISHED status separately; source and tooling SHAs; three delivery paths, size and SHA-256; actual validation results; exact Nexus URL if verified; installation command using the existing bootstrap and verified hash; remaining limitations. Update the existing handoff with the artifact identity and status. Do not stop at a proposed plan.
+Classify each changed path as:
+
+* Intentional source/configuration/test/CI/documentation change to keep visible.
+* Generated build output, runtime evidence, cache, or release package to exclude from source control.
+* Machine-specific configuration or credentials to keep private locally.
+* Uncertain: preserve and report for review.
+
+Untracked does not mean disposable. Do not classify by extension alone.
+
+3. Apply a minimal cleanup.
+
+* Inspect delivery/clue-dev-deployment-2026-09-23 and the actual delivery upload/package directories. Compare scripts and documentation there with deploy/, tools/, and docs/handoff/clue/. Use content comparisons and references, not filenames alone.
+* Keep canonical deployment/build scripts, required configuration templates, tests, packaging files, and handoff documents. Preserve any unique edits in delivery copies. Do not delete duplicates or redesign the deployment process in this task.
+* Keep generated logs, evidence, archives, checksums, and generated package manifests on disk. Ignore only verified output paths after confirming they contain no unique source or required evidence intended for version control. Do not move anything still referenced by scripts or runbooks.
+* Update the existing .gitignore minimally for shared generated outputs. Use the repository-local Git exclude file for personal scratch files. Preserve existing rules and edits.
+* Do not blanket-ignore delivery/, deploy/, tools/, .github/, documentation folders, or extensions such as *.txt, *.json, *.yml, *.yaml, *.sh, and *.conf. Preserve sanitized .env.example and configuration templates.
+* If generated files were accidentally staged, unstage only those explicit paths with git restore –staged – , without –worktree. This changes the index while preserving working files.
+* .gitignore does not stop tracking files already committed. Report such cases separately; do not remove them from version control merely to reduce the change count.
+* Keep real .env files, credentials, and private key material out of staging. Do not display their values, upload them, modify working credentials, or rewrite Git history.
+
+4. Review the CI deletion explicitly.
+
+Inspect .github/workflows/ci.yml and the new workflows together. If local evidence establishes an intentional replacement, preserve that decision. If deletion intent is unclear, unstage only that deletion while leaving the working-tree state unchanged, and flag it for review. Do not silently restore the old workflow, discard new workflows, or activate duplicate pipelines.
+
+5. Verify and report.
+
+* Check the ignore rules against both representative output paths and required source/template paths using git check-ignore, with –no-index where necessary for rule testing.
+* Verify preserved files against the baseline and confirm that unstaging did not overwrite working content.
+* Review the final staged and unstaged diffs, run git diff –check and git diff –cached –check, and report actual outcomes. For ignore-only cleanup, do not rerun the full test suite. If required source changes occur, use only relevant existing checks.
+* Do not commit, push, merge, rebase, publish to Nexus, or stage all files.
+* Report before/after staged, unstaged, and untracked counts separately, noting possible overlap; list the ignore rules changed, preserved source groups, any paths unstaged or moved, the CI decision, unresolved items, and the backup location with recovery instructions.
+* Put the report in this chat; do not generate another report file inside the repository.
+
+The goal is to remove generated-file noise while preserving all meaningful work. Legitimate uncommitted changes should remain visible. Do not force an empty Source Control view.
