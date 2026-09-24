@@ -1,163 +1,238 @@
-Independently verify and, only if every gate passes, publish the isolated deployment-tooling branch.
+Implement the runtime-environment changes requested by Muhammad on the EDP onboarding branch.
 
-This is verification and remote durability only. Do not edit, amend, rebase, merge, reset, restore, clean or stash any file or commit.
+Repository:
+TD-Universe/W001CLUEinitialRepo
 
-Expected isolated branch:
-feat/clue-deployment-bundle-tooling
+Muhammad’s remote branch:
+feature/edponboard
 
-Expected isolated commit:
-8c4b5ad1dcf3e0d75c075b4d8076126ec53c287e
+Related closed PR:
+#13
 
-Expected parent/base:
-26a397d3129aaf69b01742e6ddfd8da10b2fca99
+Important repository boundary:
 
-Preserved dirty worktree:
-C:\repos\fcrm_clue
+* This task applies only to W001CLUEinitialRepo.
+* Do not modify any fcrm_clue worktree or branch.
+* Do not copy files from a dirty fcrm_clue worktree.
+* Do not touch the separate deployment-tooling branch or fetch_wheelhouse.sh.
 
-Original dirty-worktree HEAD:
-fc07ec4409a5fb1142c6d1632cd5623779735450
+Meeting-backed requirements:
 
-Existing backup:
-C:\temp\clue-git-backup-20260924-105343
+* Preserve Muhammad’s existing POM and CI/CD onboarding changes.
+* EDP should build and copy one environment-independent tar.gz artifact.
+* AutoSys will execute the runtime shell script later under the configured NPID.
+* Python runtime configuration must be provided through environment variables.
+* Secret values must never be committed, embedded in the artifact or printed.
+* DEV does not currently have the same runtime NPID as PAT/PROD.
+* Do not guess or hardcode TSTM, TSDM, directory ownership, sudo privileges or environment-specific values.
 
-1. Verify identities
+1. Verify repository and branch state
 
-In read-only mode, report:
+Report:
 
+* repository root;
+* origin URL;
+* current branch and HEAD;
+* complete porcelain Git status;
 * all linked worktrees;
-* isolated worktree path, branch and HEAD;
-* isolated git status --porcelain=v2 --branch -uall;
-* original worktree branch, HEAD and status;
-* origin URL.
+* current SHA of origin/main;
+* current SHA of origin/feature/edponboard.
 
-The isolated worktree must be clean and at the exact expected commit. If not, stop.
+Fetch origin without modifying any working tree.
 
-2. Verify ancestry and remote base
+Confirm that the remote repository is exactly:
 
-Fetch origin without changing either worktree.
+TD-Universe/W001CLUEinitialRepo
 
-Confirm:
+Confirm whether feature/edponboard still exists and whether PR #13 was closed without merging.
 
-* the isolated commit has exactly one parent;
-* its parent is exactly the expected base;
-* the range 26a397d3129aaf69b01742e6ddfd8da10b2fca99..HEAD contains exactly one commit;
-* origin/feature/clue-durable-core still resolves to the expected base.
+If the branch is missing, already merged, rewritten unexpectedly or the existing local worktree is dirty, stop and report. Do not overwrite or clean anything.
 
-If the remote base moved, stop and report. Do not rebase.
+2. Create an isolated implementation worktree
 
-3. Audit the commit directly
+Create a new clean linked worktree from the exact current SHA of:
 
-Use Git to report the complete changed-path list, statuses, modes and diffstat.
+origin/feature/edponboard
 
-The commit may contain only the intended deployment-tooling group:
+Use a new local branch such as:
 
-* maintained deployment/install shell scripts;
-* sanitized configuration examples;
-* deploy/requirements.lock.txt;
-* deployment-bundle builder;
-* wheelhouse-fetch script;
-* narrow .gitignore changes;
-* narrow .gitattributes changes.
+work/clue-edponboard-runtime-env-20260924
 
-It must not contain:
+Do not switch or modify another existing worktree.
 
-* .env or any credential file;
-* workflows or the staged ci.yml deletion;
-* deploy.md;
-* generated bundles, archives, manifests or checksums;
-* handoff documents;
-* provider responses or diagnostic evidence;
-* application-repository files;
-* unrelated source or test changes.
+Record the original remote branch SHA. It will be the expected remote tip before any later push.
 
-The earlier task requested three sanitized configuration examples, while the summary visibly listed only two. Determine whether the remaining required configuration content was already tracked in the clean base under env_conf or another canonical path.
+3. Audit Muhammad’s changes before editing
 
-If a required configuration example is missing, supplied only by an untracked file, or ambiguously duplicated, stop without pushing.
+Compare the branch with its merge base against origin/main.
 
-4. Verify lock ownership and repository rules
+Identify and report:
 
-Confirm from committed content that:
+* pom.xml changes;
+* CI and CD workflow changes;
+* artifact build and naming logic;
+* deployment destination and ownership configuration;
+* shell scripts copied into the deployment;
+* the actual shell entry point intended for AutoSys;
+* the exact build command used by CI;
+* the expected tar.gz output;
+* whether the artifact is intended to be identical across DEV, PAT and PROD.
 
-* maintained callers use deploy/requirements.lock.txt;
-* no maintained caller silently depends on build/requirements.lock.txt;
-* the canonical lock is tracked and not ignored;
-* no git add -f dependency exists;
-* generated delivery outputs are ignored narrowly;
-* maintained scripts, configuration examples and the canonical lock remain visible to Git;
-* shell scripts are LF-only, BOM-free and executable where appropriate;
-* .gitattributes contains only justified line-ending rules and no unintended repository-wide renormalization.
+Do not rewrite Muhammad’s POM/CD implementation unless a directly related defect prevents the requested runtime configuration.
 
-5. Validate from a fresh clean checkout
+4. Derive the environment-variable contract from code
 
-Create a disposable detached worktree at the exact isolated commit. Do not copy any untracked file into it.
+Search the tracked Python and shell code for all runtime configuration access, including:
 
-In that clean checkout:
+* os.environ;
+* os.getenv;
+* Pydantic/BaseSettings configuration;
+* Symcor endpoint and authentication settings;
+* Tungsten endpoint and authentication settings;
+* certificate, CA, JKS or trust-store settings;
+* TLS verification settings;
+* input/output/archive paths;
+* logging and report paths;
+* environment or job configuration paths.
 
-* confirm the Git status is clean;
-* run bash -n for every maintained shell script;
-* identify and rerun the exact test command that produced the reported 10 passed;
-* run any existing focused deployment/bundle tests;
-* build the bundle into a temporary directory outside the repository;
-* safely inspect the archive;
-* verify the manifest and all checksums;
-* confirm the expected 30-member result, or explain any evidence-backed difference;
-* confirm deploy/requirements.lock.txt is included;
-* confirm obsolete build/requirements.lock.txt is absent;
-* prove that no untracked or ignored source file is required;
-* confirm the validation leaves the clean checkout unchanged.
+Also inspect the EDP workflows, POM, deployment scripts and existing HashiCorp/Vault integration for the corresponding injected variable names.
 
-If any validation fails, stop without pushing.
+Produce a matrix containing:
 
-6. Re-run committed-content safety checks
+* environment-variable name;
+* Python consumer;
+* required or optional;
+* secret or non-secret;
+* environment-specific or common;
+* expected runtime provider;
+* shell mapping, if one name must be mapped to another.
 
-Inspect committed blobs for:
+Do not print secret values.
 
-* credentials, tokens, passwords, keys or certificates;
-* unsafe TLS bypasses;
-* machine-specific paths;
-* release-specific artifact URLs, filenames, IDs, commits or checksums;
-* superseded test-artifact references.
+5. Confirm the runtime secret-delivery mechanism
 
-Do not print secret-like values.
+EDP build-time variables do not automatically persist into a later AutoSys execution.
 
-7. Reconfirm preservation of the original worktree
+Determine from tracked repository evidence how AutoSys will receive the required runtime values:
 
-Using the existing export and backup evidence, verify read-only that the original worktree still has:
+* AutoSys job environment;
+* HashiCorp/Vault runtime injection;
+* NPID profile;
+* a protected environment file created outside Git;
+* or another documented mechanism.
 
-* the same HEAD;
-* the same staged and unstaged patches;
-* the same untracked inventory;
-* matching hashes for the three scripts that were temporarily normalized;
-* no new staged, restored, normalized or removed file.
+If the branch contains only build-time secret configuration and does not establish how the later AutoSys process receives the values, stop before editing and return this exact blocker:
 
-If the final byte-preservation claim cannot be reproduced, stop.
+RUNTIME_ENV_INJECTION_CONTRACT_NOT_FOUND
 
-8. Publish only the isolated branch
+In that case, list the exact variable names and the single question that must be answered by Muhammad/AutoSys:
 
-Check whether this remote branch already exists:
+“How will these variables be injected into the AutoSys process at runtime after the EDP deployment has completed?”
 
-refs/heads/feat/clue-deployment-bundle-tooling
+Do not solve this by hardcoding values or committing an .env file.
 
-* If it does not exist and every gate passed, perform a normal push:
-    git push -u origin feat/clue-deployment-bundle-tooling
-* If it already resolves exactly to the expected isolated commit, report it as already durable.
-* If it exists at any different SHA, stop.
+6. Implement the minimal shell integration
 
-Do not force-push.
+Only if the runtime injection contract is proven, update the actual AutoSys shell entry point and directly associated configuration example, if needed.
 
-After a successful push, verify with git ls-remote that the remote branch resolves exactly to:
+Requirements:
 
-8c4b5ad1dcf3e0d75c075b4d8076126ec53c287e
+* consume the documented runtime variables;
+* map and export them under the exact names expected by Python;
+* fail early for missing required variables;
+* do not provide fallback values for secrets;
+* do not echo or log secret values;
+* preserve existing command arguments and exit-code propagation;
+* use safe quoting;
+* keep shell files LF-only, BOM-free and executable;
+* do not introduce sudo into the application script;
+* do not hardcode PAT/PROD users into DEV;
+* do not store secret values in POM, workflow YAML, shell files, examples or the artifact;
+* do not commit .env, certificates, keys or JKS files.
 
-Do not create or merge a PR.
+Only placeholder names may be added to an example configuration file.
+
+7. Preserve the deployment model
+
+Confirm that:
+
+* the same application artifact remains usable for all environments;
+* environment differences are supplied at runtime;
+* EDP performs file deployment;
+* AutoSys performs scheduled execution;
+* ownership and privilege configuration remain the responsibility of the documented EDP/AutoSys configuration;
+* no manual Nexus artifact ID or hardcoded test-artifact URL is introduced.
+
+Do not add wheel files or make wheelhouse handling mandatory in this task. Report the existing dependency-installation behavior without changing it.
+
+8. Validate locally without calling providers
+
+Run:
+
+* bash -n on every changed shell script;
+* ShellCheck if already available;
+* focused configuration/runtime tests;
+* the exact build command used by Muhammad’s CI/POM;
+* a clean artifact build.
+
+Use dummy non-secret values to simulate the AutoSys runtime environment and confirm:
+
+* required variables reach the Python process;
+* missing required variables fail safely;
+* secret values are not printed;
+* no Symcor, Tungsten, Nexus or external endpoint is called.
+
+Safely inspect the generated tar.gz and verify:
+
+* expected application and deployment files are present;
+* the updated shell entry point is included with executable mode;
+* no .env, secret value, private key, certificate, JKS, user-specific path or generated test evidence is included;
+* no environment-specific secret makes the artifact different between environments.
+
+9. Review the proposed change
+
+The new work above Muhammad’s remote branch must be minimal.
+
+Report:
+
+* exact changed file list;
+* diffstat;
+* environment-variable matrix;
+* runtime injection evidence;
+* syntax and test results;
+* build command and result;
+* artifact filename, size and safe member summary;
+* secret scan result.
+
+Do not include unrelated source changes merely because PR #13 already contains many files.
+
+10. Commit and safely update Muhammad’s branch
+
+If and only if all validation gates pass, create one focused commit, for example:
+
+fix(deploy): pass runtime configuration to CLUE batch
+
+Immediately before pushing, confirm that remote feature/edponboard still resolves to the SHA recorded in step 1.
+
+If it moved, stop without rebasing or force-pushing.
+
+Otherwise perform a normal fast-forward push:
+
+git push origin HEAD:refs/heads/feature/edponboard
+
+Do not use force or force-with-lease.
+
+Verify with git ls-remote that the remote branch resolves to the new commit.
+
+Do not merge, reopen or create a PR in this task. Note explicitly that pushing to a branch belonging to closed PR #13 does not itself reopen the PR.
 
 Return:
 
-* worktree and repository identities;
-* commit parent, complete file list, modes and diffstat;
-* configuration-example reconciliation;
-* lock-file and Git-rule verification;
-* exact test commands and results;
-* clean-checkout bundle evidence;
-* original-worktree preservation evidence;
-* push result and final remote SHA.
+* old and new remote SHAs;
+* exact implementation files;
+* variable mapping;
+* proven runtime secret-delivery mechanism;
+* test and build evidence;
+* artifact inspection result;
+* push result;
+* any action Muhammad must take to reopen PR #13 or create a replacement PR.
