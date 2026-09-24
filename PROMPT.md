@@ -1,26 +1,38 @@
-Correct the artifact-specific hardcoding introduced during the Nexus deployment rehearsal.
+Make the deployment-guide generator change durable in Git.
 
-The real f676277 Nexus URL and SHA-256 may appear in an artifact-specific generated deployment guide, but they must not be literals embedded in the maintained build/stage/generate_deploy_md.py generator.
+Current evidence:
+- build/stage/generate_deploy_md.py is release-independent and its focused tests pass.
+- The file is currently ignored by Git.
+- deploy.md is generated, artifact-specific, and currently untracked.
+- The validated Nexus artifact must not be rebuilt, replaced, or uploaded again.
 
-Refactor the existing generator with the smallest compatible change:
+Tasks:
 
-1. Remove the hardcoded Nexus URL, artifact filename and SHA-256 from generate_deploy_md.py.
-2. Accept the artifact identity through explicit inputs:
-   - --artifact-url
-   - --artifact-sha256
-   Alternatively, reuse an existing release-manifest input if the generator already has one. Do not introduce a second configuration mechanism unnecessarily.
-3. Validate that:
-   - the URL is HTTPS;
-   - SHA-256 is exactly 64 hexadecimal characters;
-   - required values are not silently replaced with stale defaults.
-4. Preserve the ability to generate an artifact-specific deploy.md containing the immutable real URL and checksum.
-5. When no artifact values are supplied, generate clearly named placeholders or fail with a useful message, according to the generator's existing contract. Never silently use f676277.
-6. Regenerate the current deployment guide for the already-tested f676277 artifact by passing its URL and verified SHA explicitly.
-7. Add focused tests proving:
-   - another artifact URL and checksum are rendered correctly;
-   - f676277 does not remain anywhere in the generator source;
-   - missing or malformed values are rejected or rendered as documented placeholders;
-   - the bootstrap heredoc remains byte-identical to deploy/clue-bootstrap.sh.
-8. Do not rebuild or upload any artifact, modify the validated Nexus asset, run providers, or change deployment behavior.
+1. Inspect .gitignore, repository conventions, build scripts, handoff documents, and existing tracked tooling to determine the canonical tracked location for the deployment-guide generator.
+2. Do not force-add an ignored build/stage file unless repository evidence explicitly identifies it as maintained source.
+3. If build/stage is generated workspace:
+   - move or reproduce the generator in the appropriate tracked source/tooling directory;
+   - update the existing build/deployment caller to use that canonical generator;
+   - move the focused tests to the corresponding tracked test location.
+4. Preserve these behaviors:
+   - no hardcoded artifact URL, filename, release commit, or SHA-256 in generator source;
+   - explicit --artifact-url and --artifact-sha256 inputs;
+   - HTTPS and 64-hex SHA-256 validation;
+   - both-or-neither input semantics;
+   - documented unresolved placeholders when inputs are omitted;
+   - bootstrap heredoc remains byte-identical to deploy/clue-bootstrap.sh.
+5. Decide from repository evidence whether generated deploy.md belongs in version control:
+   - if it is a release-specific delivery document, leave it untracked and explain why;
+   - if it is an official tracked document, regenerate it through the canonical generator and include it.
+6. Run the focused tests from the tracked locations and inspect git diff/status.
+7. Commit only the intended generator, caller, tests, and documentation changes. Do not use `git add .`.
+8. Do not rebuild or upload an artifact, modify the Nexus asset, run providers, merge the PR, or touch unrelated work.
 
-Report the files changed, exact generator command used for f676277, focused test results, and whether the generic source is now release-independent.
+Return:
+- canonical generator and test paths;
+- files committed;
+- commit SHA;
+- exact test command and results;
+- whether deploy.md is tracked or intentionally delivery-only;
+- proof that tracked generator source contains no f676277, a516a21, Nexus URL, artifact filename, or release SHA literal;
+- final git status, including unrelated changes left untouched.
