@@ -1,198 +1,145 @@
-I choose Option 1: commit an intentionally LF-normalized canonical copy of
-deploy/clue-bootstrap.sh, with durable Git line-ending enforcement.
-
-This decision supersedes the earlier exact-CRLF-byte-copy requirement.
-
-Rationale:
-- the raw CRLF file fails `bash -n`;
-- the generator already normalizes CRLF to LF before embedding the script;
-- the previously generated and exercised deploy.md contained the LF-normalized body;
-- therefore the LF representation is the operationally authoritative script.
-
-Do not modify the original dirty worktree. Perform all changes only in the existing isolated worktree.
-
-1. Reconfirm state before modifying anything
-
-Verify:
-
-- original worktree HEAD and file-status entries remain unchanged;
-- isolated branch is:
-  publish/clue-generator-isolated-20260924
-- isolated branch is still exactly one commit above:
-  origin/feature/clue-durable-core
-- the remote destination still resolves to:
-  2a2603fe34fc0ba4c5342e636bbcccaa1332d251
-
-If any state differs, stop.
-
-2. Create the canonical LF file in the isolated worktree
-
-Read only the original untracked:
-
-deploy/clue-bootstrap.sh
-
-Create its LF-normalized equivalent at the same relative path in the isolated worktree.
-
-The transformation must do exactly this:
-
-- replace every CRLF pair with one LF;
-- make no other byte or content change;
-- preserve UTF-8 without adding a BOM;
-- retain a final newline if the source has one.
-
-Do not change the original file.
-
-Prove that only line endings changed:
-
-- report raw CRLF SHA-256 and normalized LF SHA-256;
-- report raw and normalized byte sizes;
-- report CRLF/LF counts;
-- convert the normalized bytes back to CRLF in memory or a temporary file and confirm that the reconstructed SHA-256 equals the original raw SHA-256.
-
-Do not print the complete script.
-
-3. Enforce LF durably through Git
-
-Inspect existing attributes using:
-
-git check-attr text eol -- deploy/clue-bootstrap.sh
-
-If an existing tracked rule already enforces LF, reuse it without changing `.gitattributes`.
-
-Otherwise add the narrowest possible tracked rule:
-
-deploy/clue-bootstrap.sh text eol=lf
-
-Prefer this path-specific rule. Do not introduce a repository-wide wildcard rule unless existing repository conventions clearly require it.
-
-Do not alter any unrelated `.gitattributes` entry.
-
-4. Validate the normalized script before staging
-
-Require:
-
-- no CR bytes;
-- LF line endings only;
-- no UTF BOM;
-- `bash -n deploy/clue-bootstrap.sh` passes;
-- the earlier secret/release/TLS safety audit remains clean.
-
-Also confirm the LF-normalized SHA-256 matches the bootstrap body digest produced by the generator for deploy.md. If it differs, stop and report both digests.
-
-5. Run the focused tests before committing
-
-Run:
-
-python -m pytest tests/clue/test_generate_deploy_md.py -q -o addopts=""
-
-Require exactly:
-
-10 passed, 0 failed
-
-If any test fails, stop without amending or pushing.
-
-6. Amend the existing unpushed isolated commit
-
-Stage only:
-
-- deploy/clue-bootstrap.sh
-- `.gitattributes`, only if the LF rule had to be added or updated
-
-Stage the shell script with executable Git mode `100755`.
-
-Inspect the staged diff and file modes before amending. No other file may be staged.
-
-Amend the existing isolated commit with the message:
-
-Track generic deployment guide generator and bootstrap source
-
-This amend is allowed only because the isolated commit is local and has never been pushed.
-
-7. Verify the amended commit
-
-The amended commit must:
-
-- have parent exactly:
-  2a2603fe34fc0ba4c5342e636bbcccaa1332d251
-- contain the following functional files:
-
-  deploy/clue-bootstrap.sh
-  tools/generate_deploy_md.py
-  tests/clue/test_generate_deploy_md.py
-
-- contain `.gitattributes` only if required for the path-specific LF rule;
-- contain no other file;
-- store `deploy/clue-bootstrap.sh` with mode `100755`;
-- preserve the exact generator and test blobs from:
-  fc07ec4409a5fb1142c6d1632cd5623779735450
-- leave the isolated worktree clean.
-
-Report the new commit SHA and full diffstat.
-
-8. Prove clean-checkout behavior
-
-Create a new disposable clean linked worktree at the amended commit.
-
-In that clean checkout, verify:
-
-- `git check-attr text eol -- deploy/clue-bootstrap.sh` reports LF enforcement;
-- the script contains LF only and no CR;
-- its SHA-256 equals the canonical normalized SHA-256;
-- its Git mode is `100755`;
-- `bash -n deploy/clue-bootstrap.sh` passes;
-- the focused test command again reports 10 passed.
-
-This clean-checkout validation is mandatory because the earlier false pass was caused by an untracked working-tree dependency.
-
-Do not remove the main isolated worktree. A newly created disposable verification worktree may be removed only after confirming it is clean and recording all evidence.
-
-9. Re-run committed-content safety checks
-
-Scan the committed generator and bootstrap blobs for:
-
-- embedded credentials or private material;
-- release-specific URLs, filenames, commits or checksums;
-- unsafe TLS bypasses;
-- user-specific paths.
-
-Do not print secret-like content.
-
-10. Prove and publish the isolated range
-
-The range:
-
-2a2603fe34fc0ba4c5342e636bbcccaa1332d251..HEAD
-
-must contain exactly one amended commit.
-
-Immediately before pushing, confirm with `git ls-remote` that the remote branch still points to the recorded old tip.
-
-Then perform only a normal fast-forward push:
-
-git push origin HEAD:refs/heads/feature/clue-durable-core
-
-Do not use force or force-with-lease.
-
-Verify that the remote branch resolves exactly to the new amended commit SHA.
-
-11. Final preservation checks
-
-Confirm:
-
-- original worktree HEAD is unchanged;
-- its modified/deleted/untracked file entries are unchanged;
-- nothing in it was staged, normalized, restored, cleaned or committed;
-- no deploy.md, artifact, `.env`, handoff or unrelated file was added;
-- no Nexus, provider, application PR #6 or deployment action occurred.
+HIGH PRIORITY — Establish the CLUE Vault runtime contract while secret population is pending.
+
+Repository:
+Alpha-Universe/W001CLUEinitialRepo
+
+Current confirmed status
+
+The authoritative DEV Vault endpoint from the latest edited platform-owner message is:
+
+https://dev.vault.alpha.com
+
+Do not use the earlier vault-e.dev.azure.alpha.com address unless tracked corporate documentation explicitly proves that it is a required API endpoint or redirect.
+
+Vault configuration:
+
+* KV engine: v2
+* Mount: clue
+* Logical path: dev/w001clue/w001clueinitialrepo
+* API path: /v1/clue/data/dev/w001clue/w001clueinitialrepo
+
+Expected keys:
+
+* tungsten_primarykey
+* tungsten_secondarykey
+* symcor_cert_privatekey
+* symcor_certpublickey
+
+The platform owner has confirmed:
+
+* the Vault structure/path has been created;
+* the secret values are not currently showing;
+* she is investigating and will confirm when they become available.
+
+Therefore, all four keys currently have this operational status:
+
+NOT_READY_PENDING_POPULATION
+
+Objective
+
+Determine exactly how the corporate CD framework delivers these Vault secrets to the CLUE application on the DEV VMC2 host.
+
+This is a read-only investigation. Do not implement or modify anything yet.
+
+Safety rules
+
+* Never print, copy or retrieve any secret value.
+* Do not open the Secret tab through automation.
+* Do not use a browser session token in scripts or terminals.
+* Do not modify Vault, CD.yml, source code or deployment configuration.
+* Do not install hvac or another Vault library.
+* Do not disable TLS verification.
+* Do not use curl -k, verify=False or VAULT_SKIP_VERIFY.
+* Do not create, rotate or overwrite a secret.
+* Do not access PAT or Production.
+* Do not stage, commit, push, reset, clean, restore or stash files.
+* Leave all unrelated working-tree changes untouched.
+
+Tasks
+
+1. Record the native Git state:
+    * repository root;
+    * current branch;
+    * current HEAD;
+    * origin URL;
+    * porcelain status;
+    * latest remote head of application PR #6.
+2. Fetch remote references without changing the working tree.
+3. Inspect the tracked CD.yml and report exact line references for:
+    * deploymentParameters.dev.operation_secrets.vault;
+    * the four expected secret names;
+    * type: static;
+    * skip_modify_secrets;
+    * salt_formula;
+    * autosys/runtime configuration.
+4. Search the application source and tracked documentation for:
+    * tungsten_primarykey
+    * tungsten_secondarykey
+    * symcor_cert_privatekey
+    * symcor_certpublickey
+    * Tungsten API-key environment variables
+    * Symcor client-certificate paths
+    * Symcor private-key paths
+    * secret-loading helpers
+    * operation_secrets
+    * Vault or HashiCorp references
+5. Determine how the existing application currently receives each value:
+    * environment variable;
+    * file path;
+    * YAML/job configuration;
+    * direct application-to-Vault call;
+    * not currently implemented.
+6. Inspect available internal corporate documentation and tracked repositories using the same CD.yml schema.
+7. Establish the documented behavior of:
+    * operation_secrets.vault;
+    * type: static;
+    * skip_modify_secrets: False.
+8. Determine whether the CD framework:
+    * reads the Vault KV v2 secret;
+    * authenticates using a deployment identity;
+    * writes secrets to environment variables or files;
+    * controls target ownership and permissions;
+    * refreshes values after rotation;
+    * requires an application restart.
+9. For every conclusion, provide the supporting repository/document path and line reference. Clearly label unsupported assumptions as UNKNOWN.
+10. Classify the runtime design as exactly one of:
+    A. CD-managed Vault retrieval and runtime injection
+    B. Direct application-to-Vault retrieval
+    C. Not yet established
+11. Do not choose A or B without direct corporate evidence.
+12. If design A is established, produce a mapping table with:
+    * Vault key;
+    * injected environment-variable or file name;
+    * existing application consumer;
+    * expected Linux owner/group;
+    * expected permission mode;
+    * missing application wiring.
+13. If design B is established, report—but do not implement:
+    * authentication method;
+    * runtime role or service identity;
+    * token lifecycle;
+    * CA trust source;
+    * namespace, mount and path;
+    * retry/fail-closed behavior;
+    * audit requirements.
+14. Prepare, but do not execute, a safe post-provisioning validation procedure that will report only PRESENT, MISSING or ACCESS_DENIED for the four key names without displaying their values.
+
+Required output
 
 Return:
 
-- raw CRLF and canonical LF metadata and SHA-256 values;
-- round-trip CRLF reconstruction proof;
-- effective `.gitattributes` rule;
-- shell syntax results;
-- focused tests before amend and from the clean checkout;
-- amended commit SHA, parent, file list, modes and diffstat;
-- one-commit push-range evidence;
-- push result and final remote SHA;
-- confirmation that the original worktree remained untouched.
+1. Repository, branch, HEAD and PR #6 remote head.
+2. Final Git status proving no files were changed.
+3. CD.yml evidence with exact line references.
+4. Current application secret-consumer mapping.
+5. Corporate CD-framework evidence.
+6. Runtime classification: A, B or C.
+7. Exact injection variables/files, if established.
+8. Runtime identity/role, if established.
+9. Remaining questions for the platform owner.
+10. Minimal implementation plan to execute after the secrets are populated.
+11. Safe post-provisioning validation procedure, not executed.
+12. Explicit status:
+    VAULT_PATH_CREATED
+    SECRET_VALUES_PENDING
+    REAL_SECRET_READ_NOT_RUN
