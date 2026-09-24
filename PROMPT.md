@@ -1,23 +1,12 @@
-Continue the same CLUE session. Complete the operator handoff by automating the first-install steps with one small Bash bootstrap.
+Update the actual CLUE source code in the local Git checkout with the latest changes from origin/main before continuing the bootstrap implementation.
 
-Read the existing runbook section 2A, the actual deployment archive, and the existing shell scripts. Reuse the current verified bundle unless a concrete change requires rebuilding it.
+1. Inspect the repository path, remotes, current branch, HEAD, working-tree changes, and any unfinished Git operation.
+2. Confirm the correct application repository. Previous findings identify TD-Universe/W001CLUEinitialRepo as the application source. fcrm_clue reportedly has unrelated Git history. Verify this; update each relevant repository against its own origin. Never merge unrelated histories or change remotes to force integration.
+3. Preserve all existing local commits and staged, unstaged, and untracked work, including deployment scripts and bootstrap changes. Use a recoverable local checkpoint where necessary. Do not discard changes, run destructive reset/clean commands, or commit secrets and generated bundles.
+4. Fetch origin and compare the current branch with the freshly fetched origin/main. Actually integrate the changes into the working branch: fast-forward where possible; otherwise merge origin/main while preserving local commits. Fetching alone does not complete this task.
+5. Resolve routine conflicts carefully, preserving Natasha’s merged CI/CD changes and our intended application and deployment behavior. If a conflict requires a genuinely ambiguous product decision, report the exact conflict after completing the independent work.
+6. Run focused checks for the affected code. Verify that the fetched origin/main is an ancestor of the resulting HEAD and that intended local work remains present.
 
-The operator starts immediately after SSH login, with no Git checkout, copied files, configuration templates or deployment scripts on the server. The approved sudo/account transition can remain one explicit manual step. After that, provide one copy-paste Bash block that completes the bootstrap and invokes the existing installer.
+Report the checkout path, branch, before/after commit IDs, remaining ahead/behind counts, resolved conflicts, and checks performed.
 
-Implement this narrow flow:
-
-1. Accept the exact Nexus archive URL, expected SHA-256 and required environment values once, at the beginning.
-2. Download into a fresh writable staging directory with TLS verification enabled. Stop on download or checksum failure.
-3. Validate and extract the archive, then locate its existing installer and configuration templates.
-4. Create missing configuration from those templates and populate the required non-secret values automatically. Do not require vi or overwrite existing configuration. Point CLUE_ARTIFACT_FILE at the archive just downloaded and verified, avoiding another download.
-5. Invoke the bundled bin/clue-deploy.sh release –config . Let that existing script perform installation, virtual-environment setup, dependency installation, validation and activation. Preserve its exit status and show the resulting deployment status.
-
-Reuse an existing bootstrap if available; otherwise add only one short .sh file. Do not introduce another deployment framework, helper scripts, or duplicate the installer’s logic.
-
-The bootstrap must be usable before the package is extracted: include its copy-paste invocation and complete Bash content in the existing runbook, generated from the same script. Do not assume clue-bootstrap.sh already exists on the server or make its only copy available inside the archive.
-
-Keep Python installation, account provisioning and required directory permissions as clearly stated platform prerequisites. Use the approved non-root deployment identity. Keep credentials and certificates external.
-
-Perform focused checks of bootstrap failure handling, preservation of existing configuration and delegation to the bundled installer. Do not rerun broad application suites or live provider calls.
-
-Return the absolute Windows path to the bootstrap and the exact short operator instructions. Update the existing runbook. An unpublished Nexus URL or unresolved deployment account must remain explicitly identified; they must not prevent delivering the script, but must not be reported as a successful end-to-end deployment.
+Complete this code synchronization now. Leave the checkout ready to continue the small bootstrap script. Do not rebuild packages, upload to Nexus, deploy, or push remote changes during this task.
