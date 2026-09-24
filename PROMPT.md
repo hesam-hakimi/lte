@@ -1,40 +1,55 @@
-# CLUE active priority and deferred work
+Continue CLUE-OPS-ENV-LIFECYCLE in W001CLUEinitialRepo on the reported branch feature/clue-env-lifecycle-20260924. This instruction is self-contained: do not depend on locating the missing overnight prompt.
 
-Recorded: 2026\-09\-24\. Authority: direct owner instructions in the current conversation\. This register overlays the frozen R5 business baseline and the received deployment addendum; it does not replace their evidence or imply code execution\.
+Resolve and record the actual repository, full HEAD and local changes. Preserve existing work and keep the unrelated fcrm_clue history separate.
 
-|Item                          |Status                                                                                  |Scope                                                                                                                                                                                                |Completion evidence                                                                                                                                                     |
-|------------------------------|----------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|CLUE-OPS-ENV-LIFECYCLE        |AUTHORIZED_FOR_IMPLEMENTATION; prompt prepared; execution/result not received           |Audit and complete one YAML per environment, configured inbox/processing/output/completed paths, exclusive claim/move, recoverable processing, output publication and verified compressed completion.|Native code/commit, config examples, real CLI/package wiring, meaningful offline concurrency/restart/archive tests, and a sample workbook/archive with traceable hashes.|
-|CLUE-DEBIT-ZERO-FALLBACK-AUDIT|DEFERRED_BY_OWNER; audit not executed here; automatic fallback implementation unverified|Check whether raw-account-first then a bounded zero-prefix fallback exists in normal code and the exact executable artifact. No implementation is authorized by this deferred audit alone.           |Caller/config/commit and focused test evidence; separate checkout, package and runtime verdicts.                                                                        |
+Your report establishes reported implementation of environment YAML, claim/move, recovery and verified ZIP completion, with 722 tests passed and 4 skipped. It also says the complete original acceptance criteria were unavailable. Continue from the existing implementation; do not recreate completed components or mark full acceptance complete yet.
 
-## Latest owner requirement
+The owner already authorized local investigation, gap implementation and offline verification. Continue through fixes and verification without stopping at a plan or requesting routine permission. All engineering output must be English. Account zero-prefix fallback remains deferred.
 
-Each environment has a YAML settings file defining input, processing, output and completed/archive locations plus other environment settings\. Eligible input is moved into processing when claimed; after processing finishes, its input is retained in compressed form under completed and the result remains available in output\. The agent should inspect current implementation, plan, implement gaps and verify the result autonomously overnight\. The earlier archive/lifecycle deferral is superseded for this bounded requirement\. No execution result or guaranteed morning completion is claimed by issuing a prompt\.
+First produce:
+Requirement | Existing function/test | Evidence | Remaining gap
 
-[Overnight implementation prompt](CLUE_Overnight_Environment_YAML_And_File_Lifecycle_2026-09-24.txt)
+Inspect existing tests before adding work. Missing evidence in the previous report does not prove missing implementation.
 
-## Deferred Debit audit evidence
+Complete these acceptance checks:
 
-The owner supplied a photo of Yasim’s 2026\-09\-23 email reporting these working test variants\. This is colleague\-reported evidence, not native response inspection or proof of automatic application behavior:
+1. Configuration
+Prove that two selected environment YAML files use isolated input, processing, output and completed paths through the actual entry point. Document defaults/YAML/environment/CLI precedence, relative-path resolution and secret references. Reject missing required settings, missing inbox, environment/profile mismatch and overlapping/aliased lifecycle paths before claiming input.
 
-|Source account|Reported ISN|Reported working account|
-|--------------|------------|------------------------|
-|5224077       |4850040009  |05224077                |
-|5224069       |4850040008  |5224069                 |
-|5224050       |4850040007  |05224050                |
-|5224042       |4850040006  |05224042                |
-|5224026       |4850040005  |05224026                |
+Do not overwrite operator configuration or silently create a mistyped inbox. Document the supported YAML subset and explicitly reject unsupported syntax.
 
-The email describes a seven\-to\-eight\-character case distinct from its description of PCR\-004\. The native PCR was not inspected\. The email’s mention of code fallback supplies no function/commit/package/test trace here\. The second supplied screenshot shows a PR list, not a relevant diff\. The R5 preparation report had described identifier preservation and five unsent request arms with no production\-code change\. The new email must remain separate from that earlier preparation and from the historical batch\.
+2. Excel workflow
+Run the YAML-driven inbox workflow on an actual multi-sheet XLSX fixture. Verify original tabs/order/visibility, source A:W values, exactly one appended result sheet, the existing 41-column layout, and multi-document associations/provenance.
 
-[Deferred audit prompt](CLUE_Verify_Debit_Zero_Prefix_Fallback_2026-09-24.txt) is preserved for later selection; do not execute it during the overnight configuration/lifecycle task\.
+Show the output workbook and verified archive containing the byte-identical original XLSX. The displayed CSV archive member does not establish workbook preservation. Keep outputs available in output.
 
-## Preserved dependencies and boundaries
+3. Readiness and ownership
+Verify still-copying files and temporary/lock files are not consumed. Test same-name arrivals, established delivery/redelivery semantics and two independent worker processes competing for one delivery.
 
-- Reuse the existing application/config/state/launcher/deployment mechanisms\. Current\-source bundle and bootstrap completion are agent\-reported; Nexus publication and operational\-account deployment remain separate from local implementation\.
-- Source synchronization has separately requested work; reconcile newer native results before repeating it\. Distinct application/tooling Git histories must not be merged\.
-- Preserve the A:W input, original workbook tabs plus exactly result, 41 result columns, source bytes/values, associations, provenance, provider contracts and honest PARTIAL/failure outcomes\.
-- Configuration and lifecycle can be verified offline without resolving open Tungsten capabilities, source ISN/date mapping or business matching\. Do not convert those unresolved items to PASS\.
-- Completed compression does not authorize retention deletion or imply consumer receipt\. Real environment paths/accounts, publication, scheduler registration and service\-account acceptance must remain accurately classified if unavailable\.
+Threads alone do not establish process-level behavior. Recovery must not release a live worker's claim or adopt its input. Preserve source identity/hash and avoid overwrites.
 
-References: root 00\_START\_HERE\.md and 01\_CURRENT\_STATE\.json; CLUE\_Nexus\_EDP\_Update\_2026\-09\-24\.md; R5 16\_Debit\_Case\_Preparation\_Received\_Report\.md and 02\_IO\_Contract\_and\_Implementation\.md; the owner’s latest folder/YAML instruction; supplied email photograph IMG\_A2D9B372\-1103\-4E46\-A32F\-CA407AC7239F\.jpeg\. The old operations proposal is historical design context, not proof of current code completion\.
+4. Restart and cross-filesystem movement
+Use fresh processes reopening persisted state after interruption around claim/move, processing, output commit and archive finalization. Count fixture-provider calls and prove committed stages are not repeated.
+
+Exercise EXDEV through deterministic fault injection, including interrupted copy and verification failure. Clearly distinguish simulated checks from an actual cross-filesystem Linux/NAS test. Preserve existing handling of unknown remote completion.
+
+5. Outcomes and archive failures
+Test invalid input, output failure, finalized PARTIAL and archive permission/disk failure. Preserve distinct statuses and exit codes. Compression must not convert PARTIAL into success.
+
+After committed output and an archive failure, restart only completion/archiving with no additional provider work. Verify original input bytes and a manifest linking delivery/run, input hash, output identity and outcome before retiring the processing copy.
+
+Repeated completion must create no duplicate output/archive. Do not introduce retention deletion.
+
+6. Installed package
+Verify templates, configuration resolution and the existing launcher outside the source checkout using the current package mechanism. Preserve direct-input/export-only compatibility.
+
+A new review package must identify its actual revision and checksum. The earlier a6f3ba4 bundle does not prove this later feature is packaged. Reuse the installer; do not create another one. Report source, installed-package, Windows and Linux checks separately.
+
+7. Documentation and delivery
+Update the existing README/operator guide and handoff/backlog. Include actual validation/processing commands, folder transitions, readiness, restart, failure and PARTIAL behavior.
+
+Deliver one acceptance table, focused test results, input/output/archive paths and hashes, and focused local commits. Run broader tests only for a concrete regression risk or required repository gate.
+
+Finish with IMPLEMENTED_AND_VERIFIED_IN_STATED_SCOPE only for evidenced scope; otherwise PARTIAL_WITH_EXPLICIT_REMAINING_GAPS. External infrastructure blockers must not stop independent local work.
+
+No live provider calls or historical batch rerun are needed. Preserve live guards, retrieval/matching, source ISN/date semantics and the historical 16-source/354-row baseline. No push, merge, Nexus publication or operational deployment is requested.
