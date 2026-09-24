@@ -1,238 +1,226 @@
-Implement the runtime-environment changes requested by Muhammad on the EDP onboarding branch.
+Implement secure runtime secret retrieval from Salt pillar for the CLUE Python process.
 
-Repository:
-TD-Universe/W001CLUEinitialRepo
+Use only the existing isolated worktree created from PR #13’s remote branch:
 
-Muhammad’s remote branch:
-feature/edponboard
+* Worktree: clue-edponboard-runtime-env
+* Local branch: work/clue-edponboard-runtime-env-20260924
+* Expected starting HEAD: 471d6303840af92e8e0300f96d3ee0ffbe8ed1d8
 
-Related closed PR:
-#13
+Do not modify any other worktree or repository.
 
-Important repository boundary:
+This task implements and validates the secret wrapper locally. Do not push, merge, reopen a PR or access real secrets in this task.
 
-* This task applies only to W001CLUEinitialRepo.
-* Do not modify any fcrm_clue worktree or branch.
-* Do not copy files from a dirty fcrm_clue worktree.
-* Do not touch the separate deployment-tooling branch or fetch_wheelhouse.sh.
+Confirmed Salt secret names:
 
-Meeting-backed requirements:
+* tungsten_primarykey
+* tungsten_secondarykey
+* symcor_cert_privatekey
+* symcor_certpublickey
 
-* Preserve Muhammad’s existing POM and CI/CD onboarding changes.
-* EDP should build and copy one environment-independent tar.gz artifact.
-* AutoSys will execute the runtime shell script later under the configured NPID.
-* Python runtime configuration must be provided through environment variables.
-* Secret values must never be committed, embedded in the artifact or printed.
-* DEV does not currently have the same runtime NPID as PAT/PROD.
-* Do not guess or hardcode TSTM, TSDM, directory ownership, sudo privileges or environment-specific values.
+Confirmed application mappings:
 
-1. Verify repository and branch state
+Salt pillar	Application contract
+secrets:tungsten_primarykey	CLUE_TUNGSTEN_PRIMARY_KEY value
+secrets:tungsten_secondarykey	CLUE_TUNGSTEN_SECONDARY_KEY value
+secrets:symcor_certpublickey	securely materialized certificate file; export its path as CLUE_SYMCOR_CLIENT_CERT
+secrets:symcor_cert_privatekey	securely materialized private-key file; export its path as CLUE_SYMCOR_CLIENT_KEY
 
-Report:
+1. Reconfirm state
 
-* repository root;
-* origin URL;
-* current branch and HEAD;
-* complete porcelain Git status;
-* all linked worktrees;
-* current SHA of origin/main;
-* current SHA of origin/feature/edponboard.
+Verify:
 
-Fetch origin without modifying any working tree.
+* exact repository and origin;
+* branch and HEAD;
+* worktree is clean;
+* the four secret names are still declared in the PR #13 CD/Vault configuration;
+* Python still consumes the exact CLUE_* names above.
 
-Confirm that the remote repository is exactly:
+If the worktree is not clean or the contract changed, stop.
 
-TD-Universe/W001CLUEinitialRepo
+2. Implement a command wrapper
 
-Confirm whether feature/edponboard still exists and whether PR #13 was closed without merging.
+Create a narrowly scoped runtime wrapper under the tracked deployment directory, following existing naming conventions. A suitable name is:
 
-If the branch is missing, already merged, rewritten unexpectedly or the existing local worktree is dirty, stop and report. Do not overwrite or clean anything.
+Deliverables/deploy/clue_with_runtime_secrets.sh
 
-2. Create an isolated implementation worktree
+The wrapper must be called like:
 
-Create a new clean linked worktree from the exact current SHA of:
+clue_with_runtime_secrets.sh -- <python command and arguments>
 
-origin/feature/edponboard
+It must retrieve the secrets, export the application variables, run the supplied command as a child process, preserve its exit code and securely remove temporary certificate files afterward.
 
-Use a new local branch such as:
+Do not use eval.
 
-work/clue-edponboard-runtime-env-20260924
+3. Implement safe Salt retrieval
 
-Do not switch or modify another existing worktree.
+Use the equivalent of:
 
-Record the original remote branch SHA. It will be the expected remote tip before any later push.
+sudo -n salt-call pillar.get "secrets:${secret_name}" --out=json
 
-3. Audit Muhammad’s changes before editing
-
-Compare the branch with its merge base against origin/main.
-
-Identify and report:
-
-* pom.xml changes;
-* CI and CD workflow changes;
-* artifact build and naming logic;
-* deployment destination and ownership configuration;
-* shell scripts copied into the deployment;
-* the actual shell entry point intended for AutoSys;
-* the exact build command used by CI;
-* the expected tar.gz output;
-* whether the artifact is intended to be identical across DEV, PAT and PROD.
-
-Do not rewrite Muhammad’s POM/CD implementation unless a directly related defect prevents the requested runtime configuration.
-
-4. Derive the environment-variable contract from code
-
-Search the tracked Python and shell code for all runtime configuration access, including:
-
-* os.environ;
-* os.getenv;
-* Pydantic/BaseSettings configuration;
-* Symcor endpoint and authentication settings;
-* Tungsten endpoint and authentication settings;
-* certificate, CA, JKS or trust-store settings;
-* TLS verification settings;
-* input/output/archive paths;
-* logging and report paths;
-* environment or job configuration paths.
-
-Also inspect the EDP workflows, POM, deployment scripts and existing HashiCorp/Vault integration for the corresponding injected variable names.
-
-Produce a matrix containing:
-
-* environment-variable name;
-* Python consumer;
-* required or optional;
-* secret or non-secret;
-* environment-specific or common;
-* expected runtime provider;
-* shell mapping, if one name must be mapped to another.
-
-Do not print secret values.
-
-5. Confirm the runtime secret-delivery mechanism
-
-EDP build-time variables do not automatically persist into a later AutoSys execution.
-
-Determine from tracked repository evidence how AutoSys will receive the required runtime values:
-
-* AutoSys job environment;
-* HashiCorp/Vault runtime injection;
-* NPID profile;
-* a protected environment file created outside Git;
-* or another documented mechanism.
-
-If the branch contains only build-time secret configuration and does not establish how the later AutoSys process receives the values, stop before editing and return this exact blocker:
-
-RUNTIME_ENV_INJECTION_CONTRACT_NOT_FOUND
-
-In that case, list the exact variable names and the single question that must be answered by Muhammad/AutoSys:
-
-“How will these variables be injected into the AutoSys process at runtime after the EDP deployment has completed?”
-
-Do not solve this by hardcoding values or committing an .env file.
-
-6. Implement the minimal shell integration
-
-Only if the runtime injection contract is proven, update the actual AutoSys shell entry point and directly associated configuration example, if needed.
+Parse it with jq using normal ASCII quoting and require .local to be a non-empty string.
 
 Requirements:
 
-* consume the documented runtime variables;
-* map and export them under the exact names expected by Python;
-* fail early for missing required variables;
-* do not provide fallback values for secrets;
-* do not echo or log secret values;
-* preserve existing command arguments and exit-code propagation;
-* use safe quoting;
-* keep shell files LF-only, BOM-free and executable;
-* do not introduce sudo into the application script;
-* do not hardcode PAT/PROD users into DEV;
-* do not store secret values in POM, workflow YAML, shell files, examples or the artifact;
-* do not commit .env, certificates, keys or JKS files.
+* use $(...), not backticks;
+* use set -Eeuo pipefail;
+* disable shell xtrace before any retrieval;
+* verify sudo, salt-call and jq are available;
+* use sudo -n so AutoSys fails instead of hanging for a password;
+* treat missing, null, non-string and empty values as errors;
+* never print a secret;
+* never include a secret in an error message;
+* never write a secret to the repository;
+* never create or update .env;
+* do not use command arguments to pass secret values.
 
-Only placeholder names may be added to an example configuration file.
+Only secret names may appear in safe status or error output.
 
-7. Preserve the deployment model
+4. Handle the Tungsten keys
 
-Confirm that:
+Retrieve:
 
-* the same application artifact remains usable for all environments;
-* environment differences are supplied at runtime;
-* EDP performs file deployment;
-* AutoSys performs scheduled execution;
-* ownership and privilege configuration remain the responsibility of the documented EDP/AutoSys configuration;
-* no manual Nexus artifact ID or hardcoded test-artifact URL is introduced.
+* secrets:tungsten_primarykey
+* secrets:tungsten_secondarykey
 
-Do not add wheel files or make wheelhouse handling mandatory in this task. Report the existing dependency-installation behavior without changing it.
+Export them only as:
 
-8. Validate locally without calling providers
+* CLUE_TUNGSTEN_PRIMARY_KEY
+* CLUE_TUNGSTEN_SECONDARY_KEY
 
-Run:
+Do not export the lowercase Vault names to the child process unless existing documented code requires them.
 
-* bash -n on every changed shell script;
-* ShellCheck if already available;
-* focused configuration/runtime tests;
-* the exact build command used by Muhammad’s CI/POM;
-* a clean artifact build.
+5. Materialize Symcor files securely
 
-Use dummy non-secret values to simulate the AutoSys runtime environment and confirm:
+Create a private temporary directory using mktemp -d with umask 077.
 
-* required variables reach the Python process;
-* missing required variables fail safely;
-* secret values are not printed;
-* no Symcor, Tungsten, Nexus or external endpoint is called.
+Retrieve the certificate and key directly into files without printing their contents:
 
-Safely inspect the generated tar.gz and verify:
+* symcor_certpublickey → symcor-client-cert.pem
+* symcor_cert_privatekey → symcor-client-key.pem
 
-* expected application and deployment files are present;
-* the updated shell entry point is included with executable mode;
-* no .env, secret value, private key, certificate, JKS, user-specific path or generated test evidence is included;
-* no environment-specific secret makes the artifact different between environments.
+Requirements:
 
-9. Review the proposed change
+* temporary directory mode must be 0700;
+* secret files must be mode 0600;
+* no predictable fixed filename outside the private temporary directory;
+* export only their paths as:
+    * CLUE_SYMCOR_CLIENT_CERT
+    * CLUE_SYMCOR_CLIENT_KEY;
+* securely remove the temporary directory on normal exit, errors and handled signals;
+* guard cleanup so an empty or unexpected path can never cause a broad deletion;
+* do not store raw PEM content in environment variables.
 
-The new work above Muhammad’s remote branch must be minimal.
+If OpenSSL is available, validate without printing certificate or key content:
 
-Report:
+* the public secret is a valid X.509 certificate;
+* the private secret is a readable private key;
+* the certificate and private key public components match.
 
-* exact changed file list;
-* diffstat;
-* environment-variable matrix;
-* runtime injection evidence;
-* syntax and test results;
-* build command and result;
-* artifact filename, size and safe member summary;
-* secret scan result.
+If the private key is encrypted and requires a password, stop with:
 
-Do not include unrelated source changes merely because PR #13 already contains many files.
+SYMCOR_PRIVATE_KEY_PASSWORD_PROVIDER_REQUIRED
 
-10. Commit and safely update Muhammad’s branch
+Do not invent a password or add a fifth secret.
 
-If and only if all validation gates pass, create one focused commit, for example:
+If symcor_certpublickey is merely a public key and not an X.509 certificate, stop with:
 
-fix(deploy): pass runtime configuration to CLUE batch
+SYMCOR_PUBLIC_SECRET_IS_NOT_CLIENT_CERTIFICATE
 
-Immediately before pushing, confirm that remote feature/edponboard still resolves to the SHA recorded in step 1.
+6. Run the child process safely
 
-If it moved, stop without rebasing or force-pushing.
+Require the literal -- separator followed by at least one command argument.
 
-Otherwise perform a normal fast-forward push:
+Run the command using an argument array:
 
-git push origin HEAD:refs/heads/feature/edponboard
+"$@"
 
-Do not use force or force-with-lease.
+Do not use eval, bash -c or string concatenation.
 
-Verify with git ls-remote that the remote branch resolves to the new commit.
+Capture and return the child process exit code. Ensure cleanup occurs after the child exits.
 
-Do not merge, reopen or create a PR in this task. Note explicitly that pushing to a branch belonging to closed PR #13 does not itself reopen the PR.
+Do not use exec, because cleanup must run after Python completes.
+
+7. Add deterministic tests with mocked secrets
+
+Do not call real Salt, Vault, Nexus, Symcor or Tungsten.
+
+Add focused tests that place mocked sudo and/or salt-call executables earlier in PATH and return synthetic JSON.
+
+Tests must prove:
+
+* correct four pillar paths are requested;
+* the two exact uppercase Tungsten variables reach the child process;
+* lowercase Vault variable names are not required by Python;
+* the certificate and key paths reach the child;
+* the files exist with safe permissions while the child runs;
+* the temporary directory is removed afterward;
+* missing/null/empty secrets fail closed;
+* Salt failure propagates;
+* malformed JSON fails closed;
+* absent jq or non-interactive sudo failure does not hang;
+* no synthetic secret appears in stdout or stderr;
+* the child exit code is preserved;
+* no real provider call occurs.
+
+Tests must inspect values internally but report only pass/fail, never secret-like content.
+
+8. Preserve Linux behavior
+
+Ensure:
+
+* the wrapper is LF-only;
+* it has no UTF BOM;
+* bash -n passes;
+* Git mode is 100755;
+* a narrow .gitattributes rule enforces LF for this script if no existing rule already does.
+
+Do not renormalize unrelated files.
+
+9. Validate the artifact
+
+Run the existing Maven package command used by PR #13.
+
+Safely inspect the resulting tar.gz and confirm:
+
+* the wrapper is included at the expected deployment path;
+* its content matches the committed source;
+* no real or synthetic secret is included;
+* no .env, temporary PEM, private key or certificate is included;
+* no actual wheel files are introduced;
+* no existing POM or CD behavior is changed unnecessarily.
+
+If the archive loses the executable mode, report it explicitly and propose the smallest assembly configuration fix. Do not make a broad packaging rewrite.
+
+10. Review and commit locally
+
+The proposed change should contain only:
+
+* the secure secret wrapper;
+* directly associated focused tests;
+* a narrow .gitattributes change only if required;
+* the smallest packaging-mode correction only if proven necessary.
+
+Do not modify the existing pytest harness to become the production entry point.
+
+Do not modify the four Vault secret names.
+
+Do not modify the fixed DEV Nexus URL or solve other CD issues in this task.
+
+If all focused tests and artifact checks pass, create one local commit:
+
+feat(deploy): load CLUE runtime secrets from Salt pillar
+
+Do not push it yet.
 
 Return:
 
-* old and new remote SHAs;
-* exact implementation files;
-* variable mapping;
-* proven runtime secret-delivery mechanism;
-* test and build evidence;
-* artifact inspection result;
-* push result;
-* any action Muhammad must take to reopen PR #13 or create a replacement PR.
+* exact changed files and modes;
+* Salt-to-application mapping;
+* security controls;
+* test commands and results;
+* Maven build result;
+* artifact inspection;
+* local commit SHA;
+* the exact future AutoSys invocation pattern;
+* confirmation that no secret was read, printed, committed or packaged;
+* remaining open item: the actual Python production command that AutoSys must place after --.
