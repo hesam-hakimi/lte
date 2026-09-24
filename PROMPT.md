@@ -1,84 +1,58 @@
-Perform a read-only reconciliation of the preserved dirty fcrm_clue worktree against the current clean remote branch.
+Perform a bounded, read-only post-merge Vault readiness check.
 
-Do not edit, stage, unstage, restore, reset, stash, clean, commit, merge, rebase or push anything.
+Repository: Alpha-Universe/W001CLUEinitialRepo
+PR #6 is reported as merged.
 
-Expected repository:
-C:\repos\fcrm_clue
+Goal: determine whether the current remote main contains the required Vault-to-runtime configuration. Do not change anything yet.
 
-Previously reported local state:
-- branch: feature/clue-durable-core
-- local HEAD: fc07ec4409a5fb1142c6d1632cd5623779735450
-- one staged deletion: .github/workflows/ci.yml
-- backup: C:\temp\clue-git-backup-20260924-105343
+Rules:
 
-Expected current remote tip:
-origin/feature/clue-durable-core
-26a397d3129aaf69b01742e6ddfd8da10b2fca99
+* Do not edit files.
+* Do not create a branch or commit.
+* Do not call Vault or retrieve any secret value.
+* Do not print tokens, passwords, certificates, private keys, or secret contents.
+* Do not rebuild or publish any artifact.
+* Do not inspect or modify unrelated Nexus/deployment-generator work.
 
-1. Confirm the actual repository root, branch, HEAD, origin and all linked worktrees.
+Steps:
 
-2. Capture read-only evidence:
+1. Record the current branch and git status without changing them.
+2. Fetch the latest remote references.
+3. Record the exact origin/main commit SHA.
+4. Inspect CD.yml directly from origin/main.
+5. Inspect only the application configuration files needed to verify runtime compatibility.
+6. Check these four declared Vault keys:
+    * tungsten_primarykey
+    * tungsten_secondarykey
+    * symcor_cert_privatekey
+    * symcor_certpublickey
+7. Determine whether current origin/main provides compatible runtime injection:
+    * Tungsten secrets must reach the application as:
+        * CLUE_TUNGSTEN_PRIMARY_KEY
+        * CLUE_TUNGSTEN_SECONDARY_KEY
+    * Symcor certificate and private-key contents must be materialized as files.
+    * The application must receive the resulting file paths through:
+        * CLUE_SYMCOR_CLIENT_CERT
+        * CLUE_SYMCOR_CLIENT_KEY
+    * Raw certificate or private-key bodies must not be passed where the application expects filesystem paths.
+    * Check whether any repository-managed .env behavior would override injected runtime values.
+8. Do not assume undocumented CD/Salt behavior. Mark it as an unresolved platform question when repository evidence is insufficient.
 
-   git status --porcelain=v2 --branch -uall
-   git diff --name-status
-   git diff --cached --name-status
-   git ls-files --others --exclude-standard
-   git ls-files --others --ignored --exclude-standard
+Return:
 
-   Do not print `.env`, credentials, patches or secret values.
+* exact origin/main SHA;
+* whether the merged PR6 application changes are present;
+* a four-row evidence table containing:
+    * Vault key;
+    * declaration location;
+    * injection target;
+    * compatibility: YES, NO, or UNKNOWN;
+    * supporting file and line references;
+* one final verdict:
+    * READY_FOR_SECRET_POPULATION_AND_DEV_DEPLOY
+    * CD_CONFIGURATION_CHANGE_REQUIRED
+    * PLATFORM_CONFIRMATION_REQUIRED
+* the smallest next action required;
+* final git status, confirming the working tree was left unchanged.
 
-3. Fetch origin without modifying the working tree.
-
-4. Confirm the current remote SHA and describe the exact divergence between the local branch and remote branch.
-
-5. Classify every staged, unstaged and untracked path as:
-
-   - already durable on the clean remote branch;
-   - intentional pending source/config/test/CI/documentation work;
-   - generated artifact or evidence that should remain ignored on disk;
-   - private or machine-specific;
-   - uncertain and requiring an owner decision.
-
-6. Special reconciliation gates:
-
-   A. `.github/workflows/ci.yml`
-   - Compare its staged deletion with the current remote branch, origin/main and all proposed replacement workflows.
-   - Determine whether it is a proven intentional replacement or an unresolved deletion.
-   - Do not unstage, restore or delete anything in this task.
-
-   B. `requirements.lock.txt`
-   - Confirm whether build/package code requires it.
-   - Identify its current location, ignore rule and canonical tracked destination.
-   - Determine whether excluding it makes a clean checkout unable to build the bundle.
-   - Do not force-add it yet.
-
-   C. Generator/bootstrap files
-   - Confirm that `.gitattributes`, `deploy/clue-bootstrap.sh`,
-     `tools/generate_deploy_md.py` and
-     `tests/clue/test_generate_deploy_md.py`
-     are already durable at remote commit 26a397d...
-   - Mark any equivalent local uncommitted copies as superseded; do not recommit them.
-
-   D. Remaining tracked modifications
-   - Review `.gitignore`, `pyproject.toml`, `requirements.txt` and both handoff documents.
-   - Identify the originating task/session and whether each change is already represented remotely, still required, or obsolete.
-   - Report the mixed-line-ending condition without normalizing any file.
-
-   E. Generated delivery and artifact paths
-   - Confirm they remain on disk and are ignored by narrow rules.
-   - Do not delete, move, rebuild or upload them.
-
-7. Verify that the existing backup directory still contains the previously reported status and staged/unstaged patch evidence. Do not display patch contents.
-
-8. Return an exact disposition table with:
-
-   - path;
-   - staged/unstaged/untracked/ignored state;
-   - purpose;
-   - remote-equivalent status;
-   - KEEP / SUPERSEDED / NEEDS DECISION / GENERATED-IGNORE recommendation;
-   - proposed future clean branch or commit grouping.
-
-9. Finish by recommending the safest clean-worktree plan for the approved remaining changes.
-
-Do not perform that plan in this task. Do not modify Nexus, artifacts, PR #6 or the application repository.
+Do not implement the fix in this task.
