@@ -1,38 +1,73 @@
-Make the deployment-guide generator change durable in Git.
+Verify and safely publish the isolated deployment-guide generator commit.
 
-Current evidence:
-- build/stage/generate_deploy_md.py is release-independent and its focused tests pass.
-- The file is currently ignored by Git.
-- deploy.md is generated, artifact-specific, and currently untracked.
-- The validated Nexus artifact must not be rebuilt, replaced, or uploaded again.
+This task is verification and remote durability only. Do not edit any files.
 
-Tasks:
+Expected repository: fcrm_clue
+Expected branch: feature/clue-durable-core
+Expected local commit:
+fc07ec4409a5fb1142c6d1632cd5623779735450
 
-1. Inspect .gitignore, repository conventions, build scripts, handoff documents, and existing tracked tooling to determine the canonical tracked location for the deployment-guide generator.
-2. Do not force-add an ignored build/stage file unless repository evidence explicitly identifies it as maintained source.
-3. If build/stage is generated workspace:
-   - move or reproduce the generator in the appropriate tracked source/tooling directory;
-   - update the existing build/deployment caller to use that canonical generator;
-   - move the focused tests to the corresponding tracked test location.
-4. Preserve these behaviors:
-   - no hardcoded artifact URL, filename, release commit, or SHA-256 in generator source;
-   - explicit --artifact-url and --artifact-sha256 inputs;
-   - HTTPS and 64-hex SHA-256 validation;
-   - both-or-neither input semantics;
-   - documented unresolved placeholders when inputs are omitted;
-   - bootstrap heredoc remains byte-identical to deploy/clue-bootstrap.sh.
-5. Decide from repository evidence whether generated deploy.md belongs in version control:
-   - if it is a release-specific delivery document, leave it untracked and explain why;
-   - if it is an official tracked document, regenerate it through the canonical generator and include it.
-6. Run the focused tests from the tracked locations and inspect git diff/status.
-7. Commit only the intended generator, caller, tests, and documentation changes. Do not use `git add .`.
-8. Do not rebuild or upload an artifact, modify the Nexus asset, run providers, merge the PR, or touch unrelated work.
+Required steps:
+
+1. Identify and report:
+   - repository root;
+   - current branch;
+   - current HEAD;
+   - configured origin URL;
+   - current porcelain Git status.
+
+2. Fetch origin without modifying the working tree.
+
+3. Inspect the expected commit directly using Git, not the prior agent summary. Confirm its parent, complete file list and diff statistics.
+
+4. The commit must contain exactly these two added files:
+   - tools/generate_deploy_md.py
+   - tests/clue/test_generate_deploy_md.py
+
+   Confirm explicitly that it does not contain:
+   - .github/workflows/ci.yml;
+   - deploy.md;
+   - build/stage content;
+   - handoff files;
+   - artifact files;
+   - any other tracked or unrelated change.
+
+   If the commit contains anything else, stop without pushing.
+
+5. Re-run the focused test from the tracked location:
+
+   python -m pytest tests/clue/test_generate_deploy_md.py -q -o addopts=""
+
+6. Confirm that the tracked generator contains no release-specific URL, filename, commit SHA or checksum literal, including:
+   - f676277
+   - a516a21
+   - a6f3ba4
+   - rp.td.com
+   - the known artifact SHA-256 prefixes
+
+7. Determine whether the remote branch already exists and list the exact commits that would be introduced by the push.
+
+   If the push would publish any unrelated commit, or the remote branch has diverged, stop and report the evidence. Do not force-push.
+
+8. If and only if all checks pass, push the existing branch normally:
+
+   git push -u origin feature/clue-durable-core
+
+   Do not use --force or --force-with-lease.
+
+9. Verify using git ls-remote that the remote branch resolves exactly to:
+   fc07ec4409a5fb1142c6d1632cd5623779735450
+
+10. Leave every pre-existing modified, deleted or untracked file exactly unchanged. Do not stage, stash, reset, restore, clean or commit them.
+
+Do not rebuild or upload an artifact, modify Nexus, regenerate or commit deploy.md, call providers, create or merge a PR, or modify application PR #6.
 
 Return:
-- canonical generator and test paths;
-- files committed;
-- commit SHA;
-- exact test command and results;
-- whether deploy.md is tracked or intentionally delivery-only;
-- proof that tracked generator source contains no f676277, a516a21, Nexus URL, artifact filename, or release SHA literal;
-- final git status, including unrelated changes left untouched.
+- repository and remote identity;
+- verified commit file list and diff statistics;
+- focused test result;
+- commits evaluated for push;
+- push result;
+- remote branch SHA verification;
+- final Git status;
+- confirmation that all unrelated working-tree changes remained untouched.
