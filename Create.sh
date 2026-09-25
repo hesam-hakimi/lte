@@ -1,8 +1,1 @@
-tar -tzf /opt/clue/clue-0.2.0-test-f676277-deploy.tar.gz \
-  | grep -E '\.whl$' \
-  | sed 's#^.*/##' \
-  | sort -u
-
-printf 'WHEEL_COUNT='
-tar -tzf /opt/clue/clue-0.2.0-test-f676277-deploy.tar.gz \
-  | grep -Ec '\.whl$'
+curl -sS --proto '=https' --tlsv1.2 --cacert /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem -o /tmp/clue-nexus-repositories.json -w 'HTTP_STATUS=%{http_code}\n' 'https://rp.td.com/service/rest/v1/repositories'
