@@ -1,11 +1,13 @@
 W=/opt/clue/pr19-wheelhouse-c70b121f
-T="${W}.tools-part"
 
-if cmp -s "$T/packaging-26.3-py3-none-any.whl" "$W/packaging-26.3-py3-none-any.whl"; then
-  rm -- "$T/packaging-26.3-py3-none-any.whl" &&
-  rmdir "$T" &&
-  printf 'WHEEL_COUNT=' &&
-  find "$W" -maxdepth 1 -type f -name '*.whl' | wc -l
+if [ -e "$W/SHA256SUMS" ]; then
+  echo "STOP: SHA256SUMS already exists"
 else
-  echo "STOP: duplicate verification failed"
+  (
+    cd "$W" &&
+    sha256sum -- *.whl > SHA256SUMS &&
+    sha256sum -c SHA256SUMS
+  ) &&
+  echo "WHEELHOUSE_HASH_VERIFICATION_OK" &&
+  sha256sum "$W/SHA256SUMS"
 fi
