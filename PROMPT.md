@@ -1,226 +1,209 @@
-Implement secure runtime secret retrieval from Salt pillar for the CLUE Python process.
+Reconcile the verified Salt runtime-secret wrapper onto the latest PR #13 branch tip, fix executable modes in the Maven tar.gz, independently revalidate, and publish by normal fast-forward push.
 
-Use only the existing isolated worktree created from PR #13’s remote branch:
+Do not modify or clean the existing worktree that contains the local commit and Maven evidence.
 
-* Worktree: clue-edponboard-runtime-env
-* Local branch: work/clue-edponboard-runtime-env-20260924
-* Expected starting HEAD: 471d6303840af92e8e0300f96d3ee0ffbe8ed1d8
+Verified local source commit:
+07c096c67a0d5c3d5c5576d38d382abd6aec3400
 
-Do not modify any other worktree or repository.
+Its recorded parent:
+471d6303840af92e8e0300f96d3ee0ffbe8ed1d8
 
-This task implements and validates the secret wrapper locally. Do not push, merge, reopen a PR or access real secrets in this task.
+The remote branch backing PR #13 moved during the prior task and was last reported at a SHA beginning with:
+0b47bcb
 
-Confirmed Salt secret names:
+Resolve the exact remote branch name from Git and refs/pull/13/head; do not guess its spelling.
 
-* tungsten_primarykey
-* tungsten_secondarykey
-* symcor_cert_privatekey
-* symcor_certpublickey
+Safety requirements:
 
-Confirmed application mappings:
+* do not access real Salt pillars or secrets;
+* do not call Vault, Symcor or Tungsten;
+* do not modify any fcrm_clue repository or worktree;
+* do not clean, reset, restore, rebase or remove the existing implementation worktree;
+* do not include target/, Maven wrapper downloads or temporary evidence;
+* do not force-push;
+* do not reopen or merge PR #13.
 
-Salt pillar	Application contract
-secrets:tungsten_primarykey	CLUE_TUNGSTEN_PRIMARY_KEY value
-secrets:tungsten_secondarykey	CLUE_TUNGSTEN_SECONDARY_KEY value
-secrets:symcor_certpublickey	securely materialized certificate file; export its path as CLUE_SYMCOR_CLIENT_CERT
-secrets:symcor_cert_privatekey	securely materialized private-key file; export its path as CLUE_SYMCOR_CLIENT_KEY
+1. Verify the source commit
 
-1. Reconfirm state
+Inspect the local source commit directly.
 
-Verify:
+Confirm that it contains exactly:
 
-* exact repository and origin;
-* branch and HEAD;
-* worktree is clean;
-* the four secret names are still declared in the PR #13 CD/Vault configuration;
-* Python still consumes the exact CLUE_* names above.
+* Deliverables/deploy/clue_with_runtime_secrets.sh, Git mode 100755;
+* Deliverables/tests/clue/test_runtime_secrets_wrapper.py, Git mode 100644.
 
-If the worktree is not clean or the contract changed, stop.
+Confirm its parent, file list, modes and diffstat.
 
-2. Implement a command wrapper
+Scan the committed blobs and confirm that they contain no real credentials, keys, certificates, .env values or release-specific artifact identities.
 
-Create a narrowly scoped runtime wrapper under the tracked deployment directory, following existing naming conventions. A suitable name is:
+2. Fetch and verify the new remote tip
 
-Deliverables/deploy/clue_with_runtime_secrets.sh
+Fetch origin.
 
-The wrapper must be called like:
+Resolve:
 
-clue_with_runtime_secrets.sh -- <python command and arguments>
+* the exact remote branch backing PR #13;
+* its current complete SHA;
+* refs/pull/13/head;
+* the commit range from 471d630... to the current remote tip.
 
-It must retrieve the secrets, export the application variables, run the supplied command as a child process, preserve its exit code and securely remove temporary certificate files afterward.
+Require that:
 
-Do not use eval.
+* the remote change is a normal descendant of 471d630...;
+* no force-rewrite occurred;
+* the four Salt pillar names remain unchanged;
+* the application CLUE_* configuration contract remains unchanged;
+* the later commits do not already add an equivalent runtime-secret wrapper;
+* the Maven assembly structure is still compatible with the proposed change.
 
-3. Implement safe Salt retrieval
+Report the new intervening commits and files.
 
-Use the equivalent of:
+If the history diverged, the secret contract changed, or an equivalent implementation already exists, stop.
 
-sudo -n salt-call pillar.get "secrets:${secret_name}" --out=json
+3. Create a new clean publication worktree
 
-Parse it with jq using normal ASCII quoting and require .local to be a non-empty string.
+Create a new linked worktree and temporary local branch from the exact current remote tip.
 
-Requirements:
+Do not reuse or modify the previous implementation worktree.
 
-* use $(...), not backticks;
-* use set -Eeuo pipefail;
-* disable shell xtrace before any retrieval;
-* verify sudo, salt-call and jq are available;
-* use sudo -n so AutoSys fails instead of hanging for a password;
-* treat missing, null, non-string and empty values as errors;
-* never print a secret;
-* never include a secret in an error message;
-* never write a secret to the repository;
-* never create or update .env;
-* do not use command arguments to pass secret values.
+If the proposed branch or worktree path already exists, stop instead of deleting or overwriting it.
 
-Only secret names may appear in safe status or error output.
+4. Replay only the verified local commit
 
-4. Handle the Tungsten keys
+Cherry-pick only:
 
-Retrieve:
+07c096c67a0d5c3d5c5576d38d382abd6aec3400
 
-* secrets:tungsten_primarykey
-* secrets:tungsten_secondarykey
+Do not cherry-pick unrelated commits.
 
-Export them only as:
+If a conflict occurs, stop without resolving or pushing.
 
-* CLUE_TUNGSTEN_PRIMARY_KEY
-* CLUE_TUNGSTEN_SECONDARY_KEY
+After the cherry-pick, confirm that the wrapper and test blobs match the verified local source commit exactly and retain Git modes 100755 and 100644.
 
-Do not export the lowercase Vault names to the child process unless existing documented code requires them.
+5. Fix executable modes in the Maven archive
 
-5. Materialize Symcor files securely
+Inspect the current assembly.xml structure before editing.
 
-Create a private temporary directory using mktemp -d with umask 077.
+The existing Windows Maven build packages every .sh member as archive mode 0644, including scripts stored in Git as 100755.
 
-Retrieve the certificate and key directly into files without printing their contents:
-
-* symcor_certpublickey → symcor-client-cert.pem
-* symcor_cert_privatekey → symcor-client-key.pem
+Implement the smallest non-duplicating Maven Assembly configuration that packages maintained files under Deliverables/deploy/**/*.sh with tar mode 0755.
 
 Requirements:
 
-* temporary directory mode must be 0700;
-* secret files must be mode 0600;
-* no predictable fixed filename outside the private temporary directory;
-* export only their paths as:
-    * CLUE_SYMCOR_CLIENT_CERT
-    * CLUE_SYMCOR_CLIENT_KEY;
-* securely remove the temporary directory on normal exit, errors and handled signals;
-* guard cleanup so an empty or unexpected path can never cause a broad deletion;
-* do not store raw PEM content in environment variables.
+* do not add the same archive member through two overlapping fileSets;
+* if the general Deliverables fileSet includes deployment shell scripts, exclude those exact shell paths from it before adding the dedicated executable fileSet;
+* preserve the existing archive-root layout;
+* preserve LF bytes;
+* preserve normal non-shell file modes;
+* do not mark Python, YAML, JSON, TXT, certificate examples or documentation executable;
+* do not change artifact coordinates, Nexus publication, environment variables or CD behavior;
+* do not change the wrapper solely to compensate for packaging;
+* do not rely on Windows NTFS executable bits.
 
-If OpenSSL is available, validate without printing certificate or key content:
+The intended result is that all maintained deployment .sh files, including:
 
-* the public secret is a valid X.509 certificate;
-* the private secret is a readable private key;
-* the certificate and private key public components match.
+deploy/clue_with_runtime_secrets.sh
 
-If the private key is encrypted and requires a password, stop with:
+have tar mode 0755 exactly once.
 
-SYMCOR_PRIVATE_KEY_PASSWORD_PROVIDER_REQUIRED
+6. Add or perform an archive-mode regression check
 
-Do not invent a password or add a fifth secret.
+Use the smallest appropriate test or deterministic validation to prove:
 
-If symcor_certpublickey is merely a public key and not an X.509 certificate, stop with:
+* no duplicate archive member names;
+* every maintained deploy/**/*.sh member is 0755;
+* non-shell deployment files are not made executable;
+* the wrapper in the archive is byte-identical to the committed blob.
 
-SYMCOR_PUBLIC_SECRET_IS_NOT_CLIENT_CERTIFICATE
+If adding a tracked regression test is necessary, keep it narrowly focused. Otherwise perform and report a deterministic post-build verification.
 
-6. Run the child process safely
+7. Produce one coherent unpushed commit
 
-Require the literal -- separator followed by at least one command argument.
+Because the replayed commit remains local-only, amend it so the new branch contains exactly one commit above the current remote tip.
 
-Run the command using an argument array:
+The final commit may contain only:
 
-"$@"
+* Deliverables/deploy/clue_with_runtime_secrets.sh;
+* Deliverables/tests/clue/test_runtime_secrets_wrapper.py;
+* the minimal Maven assembly-mode correction;
+* one directly associated focused test only if required.
 
-Do not use eval, bash -c or string concatenation.
-
-Capture and return the child process exit code. Ensure cleanup occurs after the child exits.
-
-Do not use exec, because cleanup must run after Python completes.
-
-7. Add deterministic tests with mocked secrets
-
-Do not call real Salt, Vault, Nexus, Symcor or Tungsten.
-
-Add focused tests that place mocked sudo and/or salt-call executables earlier in PATH and return synthetic JSON.
-
-Tests must prove:
-
-* correct four pillar paths are requested;
-* the two exact uppercase Tungsten variables reach the child process;
-* lowercase Vault variable names are not required by Python;
-* the certificate and key paths reach the child;
-* the files exist with safe permissions while the child runs;
-* the temporary directory is removed afterward;
-* missing/null/empty secrets fail closed;
-* Salt failure propagates;
-* malformed JSON fails closed;
-* absent jq or non-interactive sudo failure does not hang;
-* no synthetic secret appears in stdout or stderr;
-* the child exit code is preserved;
-* no real provider call occurs.
-
-Tests must inspect values internally but report only pass/fail, never secret-like content.
-
-8. Preserve Linux behavior
-
-Ensure:
-
-* the wrapper is LF-only;
-* it has no UTF BOM;
-* bash -n passes;
-* Git mode is 100755;
-* a narrow .gitattributes rule enforces LF for this script if no existing rule already does.
-
-Do not renormalize unrelated files.
-
-9. Validate the artifact
-
-Run the existing Maven package command used by PR #13.
-
-Safely inspect the resulting tar.gz and confirm:
-
-* the wrapper is included at the expected deployment path;
-* its content matches the committed source;
-* no real or synthetic secret is included;
-* no .env, temporary PEM, private key or certificate is included;
-* no actual wheel files are introduced;
-* no existing POM or CD behavior is changed unnecessarily.
-
-If the archive loses the executable mode, report it explicitly and propose the smallest assembly configuration fix. Do not make a broad packaging rewrite.
-
-10. Review and commit locally
-
-The proposed change should contain only:
-
-* the secure secret wrapper;
-* directly associated focused tests;
-* a narrow .gitattributes change only if required;
-* the smallest packaging-mode correction only if proven necessary.
-
-Do not modify the existing pytest harness to become the production entry point.
-
-Do not modify the four Vault secret names.
-
-Do not modify the fixed DEV Nexus URL or solve other CD issues in this task.
-
-If all focused tests and artifact checks pass, create one local commit:
+Use the message:
 
 feat(deploy): load CLUE runtime secrets from Salt pillar
 
-Do not push it yet.
+Report the new commit SHA and its exact parent.
+
+8. Validate from another disposable clean checkout
+
+Create a separate disposable clean worktree at the final amended commit.
+
+Run all validation from that clean checkout so the publication worktree remains clean.
+
+Required validation:
+
+* bash -n on the wrapper;
+* confirm LF-only, no BOM and committed mode 100755;
+* rerun the focused WSL secret-wrapper tests;
+* rerun the existing full test suite;
+* run the Maven package command used by PR #13;
+* safely inspect the generated tar.gz;
+* verify no duplicate members;
+* verify all deploy/**/*.sh modes are 0755;
+* verify the wrapper is byte-identical to the committed blob;
+* rerun the forbidden secret/artifact scan;
+* confirm no .env, PEM, key, JKS, P12, CRT, CER, PFX, wheel or temporary secret material is packaged;
+* confirm no real provider is called.
+
+Test counts may differ if Muhammad’s intervening commits legitimately changed the suite, but there must be no new failure or unexplained regression.
+
+ShellCheck remains optional if it is unavailable; report it as unverified rather than installing unrelated software.
+
+After recording evidence, remove only the disposable verification worktree if Git confirms it is safe. Do not remove either existing implementation worktree.
+
+9. Prove the proposed push is isolated
+
+The range from the freshly recorded remote tip to the final HEAD must contain exactly one commit.
+
+Report:
+
+* parent and commit SHA;
+* complete changed-path list;
+* file modes;
+* diffstat;
+* wrapper/test blob comparison;
+* assembly change;
+* test and build results;
+* archive member and mode evidence.
+
+The publication worktree must be clean.
+
+10. Publish safely
+
+Immediately before pushing, verify with git ls-remote that the remote branch backing PR #13 still points to the recorded remote tip.
+
+If it moved again, stop.
+
+If unchanged and every gate passed, perform a normal fast-forward push:
+
+git push origin HEAD:refs/heads/<exact-remote-branch-name>
+
+Do not use force or force-with-lease.
+
+Verify that the remote branch now resolves exactly to the new commit SHA.
+
+Do not reopen or merge PR #13.
 
 Return:
 
-* exact changed files and modes;
-* Salt-to-application mapping;
-* security controls;
-* test commands and results;
+* exact remote branch spelling;
+* old and new remote SHAs;
+* intervening Muhammad commits reviewed;
+* final commit parent, files, modes and diffstat;
+* focused and full test results;
 * Maven build result;
-* artifact inspection;
-* local commit SHA;
-* the exact future AutoSys invocation pattern;
-* confirmation that no secret was read, printed, committed or packaged;
-* remaining open item: the actual Python production command that AutoSys must place after --.
+* tar.gz filename, checksum, member count and mode verification;
+* secret-safety result;
+* push result;
+* explicit remaining integration item: the real Python production command AutoSys must place after --;
+* reminder that Muhammad must reopen PR #13 or create a replacement PR.
