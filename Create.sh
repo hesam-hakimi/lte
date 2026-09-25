@@ -1,28 +1,29 @@
-ROOT=/opt/clue/pr19-c70b121f
-VENV="$ROOT/.venv"
-REPORT="$ROOT/dev_test_report_manual_c70b121f.txt"
+# STEP: SAFE EXECUTION OF THE BUNDLED DEV PREREQUISITE SCRIPT
 
-if [ ! -x "$VENV/bin/python" ]; then
-    echo "STOP: test venv is missing"
+ROOT=/opt/clue/pr19-c70b121f
+SCRIPT="$ROOT/deploy/clue_dev_prereq.sh"
+REPORT="$ROOT/dev_prereq_report_manual_c70b121f.txt"
+
+if [ ! -f "$SCRIPT" ]; then
+    echo "STOP: prerequisite script is missing"
 elif [ -e "$REPORT" ]; then
     echo "STOP: report already exists: $REPORT"
 else
     (
-        cd "$ROOT" &&
-        PYTHONPATH="$ROOT/src" \
-            "$VENV/bin/python" -m pytest \
-            tests/clue \
-            -q \
-            -p no:cacheprovider
+        SAFE_DIR=$(mktemp -d /tmp/clue-prereq.XXXXXXXX) || exit 2
+        chmod 700 "$SAFE_DIR"
+        trap 'rm -rf -- "$SAFE_DIR"' EXIT
+
+        sed \
+            -e "s|/tmp/mtls_run_|$SAFE_DIR/mtls_run_|g" \
+            -e "s|/tmp/mtls_one_|$SAFE_DIR/mtls_one_|g" \
+            "$SCRIPT" > "$SAFE_DIR/clue_dev_prereq.safe.sh" || exit 2
+
+        bash -n "$SAFE_DIR/clue_dev_prereq.safe.sh" || exit 2
+        bash "$SAFE_DIR/clue_dev_prereq.safe.sh" "$ROOT"
     ) 2>&1 | tee "$REPORT"
 
     STATUS=${PIPESTATUS[0]}
-    echo "PYTEST_EXIT_CODE=$STATUS"
+    echo "PREREQ_SCRIPT_EXIT_CODE=$STATUS"
     echo "REPORT=$REPORT"
-
-    if [ "$STATUS" -eq 0 ]; then
-        echo "DOCUMENTED_TEST_COMMAND_PASS"
-    else
-        echo "DOCUMENTED_TEST_COMMAND_FAIL"
-    fi
 fi
