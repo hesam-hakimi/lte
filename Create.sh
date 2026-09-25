@@ -1,127 +1,87 @@
-Update the existing CLUE deployment implementation and its canonical deployment documentation to support a complete administrator-led installation.
+Continue from the packaged-artifact preflight findings.
 
-Important:
-- Work in the source repository, not in /opt/clue/pr19-c70b121f or another extracted server copy.
-- Find and update the existing canonical deployment Markdown file. Do not create a duplicate deploy.md/deployment.md file.
-- Inspect the existing bin/clue-deploy.sh, packaging generator, and deployment tests before editing.
-- Prefer extending the existing deployment script. Do not create another installer unless the existing design makes that unavoidable.
-- Do not commit, push, publish, or deploy in this task.
+Do not change anything on the DEV server. Work only in the source repository.
+Do not commit, push, publish, or deploy.
 
-Confirmed deployment model:
-- An administrator with root/sudo access performs installation.
-- DEV runtime account: TCLUE999DEVS.
-- Target root: /opt/td/clue.
-- AutoSys later executes the application under the runtime account.
-- HKV/Salt secrets are retrieved only at runtime, never during installation.
-- Runtime group is not yet confirmed and must remain an explicit validated input.
+First:
+1. List the three currently changed files.
+2. Explain why each file changed during the previous read-only task.
+3. Show a concise diff summary and remove any unrelated or accidental change.
 
-Update the canonical deployment documentation with these ordered phases:
+Then update the existing canonical deployment documentation and existing
+installer implementation for an administrator-led, two-phase installation.
 
-1. Prerequisites
-   - Administrator/root access.
-   - Python and OS dependencies.
-   - Deployment artifact and authoritative SHA-256.
-   - Runtime account and group confirmation.
-   - Required disk space.
-   - No runtime secrets required.
+Confirmed facts:
+- Target root: /opt/td/clue
+- /opt/td/clue already exists as root:root mode 0755.
+- Existing directories archive/, clue_staging/, outputs/, and rejects/ must not
+  be removed, recursively chowned, or otherwise modified.
+- Required new directories are releases/, conf/, logs/, and work/.
+- DEV runtime NPID: TCLUE999DEVS.
+- Expected group: vmc2_clue_dev, but validate it explicitly.
+- The deployer intentionally refuses to run as root.
+- The administrator performs the complete procedure but must execute the
+  non-privileged deployment phase as the configured deployment owner.
+- Installation retrieves no Salt/HKV secrets and contacts no providers.
 
-2. Administrator preflight
-   - Confirm the current identity and sudo/root capability.
-   - Validate the exact target path.
-   - Verify that the runtime user and group exist.
-   - Reject an empty, root-level, relative, or unexpected installation path.
-   - Verify artifact checksum and archive safety before extraction.
+Account validation:
+- Use direct account resolution:
+  getent passwd "$CLUE_RUNTIME_USER"
+  id "$CLUE_RUNTIME_USER"
+- Do not infer account absence from `getent passwd | grep`.
+- Validate the configured group with direct getent group lookup.
 
-3. Initial filesystem bootstrap
-   Create the layout idempotently using explicit owner and mode settings:
+Document these exact phases in the existing canonical deployment Markdown file:
 
-   /opt/td/clue/
-   /opt/td/clue/releases/
-   /opt/td/clue/conf/
-   /opt/td/clue/logs/
-   /opt/td/clue/work/
+Phase A — Administrator bootstrap
+- Log in using an approved administrator account.
+- Validate the exact target path and runtime identity.
+- Create only the missing required subdirectories using install -d.
+- Apply explicit ownership and secure setgid modes.
+- Do not recursively modify the existing /opt/td/clue tree.
+- Create conf as runtime-readable and administrator-controlled.
+- Create releases, logs, and work with the ownership required by the existing
+  installer.
+- Populate clue-deploy.conf from the packaged example without any secrets.
+- Set the DEV values:
+    CLUE_RUNTIME_USER=TCLUE999DEVS
+    CLUE_OWNER_USER=TCLUE999DEVS
+    CLUE_OWNER_GROUP=vmc2_clue_dev
+    CLUE_APP_ROOT=/opt/td/clue
+  Keep these configurable; do not hardcode them in generic installer logic.
 
-   Baseline ownership model:
-   - installation root and releases: root:<runtime-group>
-   - conf: root:<runtime-group>, runtime read-only
-   - logs and work: TCLUE999DEVS:<runtime-group>, runtime writable
-   - release contents: administrator-owned and runtime read/execute
-   - current activation link: administrator-managed
+Phase B — Drop privileges and install
+- The administrator must invoke preflight and release as the configured owner,
+  for example through approved `sudo -u`, rather than executing the deployer
+  as root.
+- Document the exact preflight command.
+- Document the exact offline release command using --artifact-file,
+  --artifact-sha256, and an empty --artifact-url.
+- Do not retrieve secrets or call AutoSys, Salt, HKV, Symcor, or Tungsten.
 
-   Use secure explicit modes. Never use chmod 777.
-   Do not run broad recursive chmod/chown outside the validated CLUE root.
+Phase C — Verify and hand off
+- Verify release layout, wheel installation, pip check, entry points,
+  ownership, permissions, and activation.
+- Record installation success separately from runtime validation.
+- State that AutoSys/HKV validation remains pending under TCLUE999DEVS.
 
-4. Release installation
-   - Install into a unique versioned release directory.
-   - Use the packaged application wheel and offline wheelhouse.
-   - Create the release virtual environment.
-   - Run pip check and non-secret installation smoke checks.
-   - Keep release contents immutable to the runtime account.
-   - Never overwrite an existing release directory.
+Correct the installer dry-run contract:
+- --dry-run must create no directories, temp artifact copies, virtual
+  environments, logs, activation links, or other files.
+- --dry-run must perform no network access.
+- Ensure fetch and validate also honor dry-run.
+- Add regression tests proving the filesystem is byte-for-byte unchanged.
 
-5. Configuration
-   - Copy example configuration only when the destination does not exist.
-   - Never overwrite an existing environment configuration automatically.
-   - Do not put passwords, private keys, certificates, or HKV values in conf,
-     .env files, command arguments, reports, or logs.
-
-6. Atomic activation
-   - Activate the new release only after all installation checks pass.
-   - Use the existing supported activation mechanism or an atomic current
-     symlink if that is already the intended design.
-   - Preserve the previous release for rollback.
-
-7. Post-install verification
-   - Verify ownership and modes.
-   - Verify the installed wheel and console entry points.
-   - Run help/import/pip-check smoke tests without provider calls.
-   - Do not invoke AutoSys, Salt, HKV, Symcor, or Tungsten.
-   - Clearly report that runtime validation remains pending.
-
-8. AutoSys handoff
-   - Document that AutoSys must run under TCLUE999DEVS in DEV.
-   - Document the wrapper command without secret values.
-   - State that non-interactive Salt/HKV access must be validated separately
-     under the actual AutoSys identity.
-
-9. Rollback
-   - Restore the previous activated release atomically.
-   - Do not delete the failed release automatically.
-   - Include verification after rollback.
-
-Installer requirements:
-- Add a genuinely non-mutating --dry-run mode to the existing installer.
-- Dry-run must perform no writes, directory creation, extraction, network
-  access, secret retrieval, provider calls, or AutoSys invocation.
-- Initial installation and repeated execution must be idempotent.
-- Fail closed on ownership, permissions, checksum, archive safety, missing
-  runtime identity, or target-path problems.
-- Never print secret values.
-- Preserve existing configuration and releases.
-
-Testing:
-- Add/update tests for:
-  - first-time bootstrap;
-  - repeated idempotent execution;
-  - dry-run causing zero filesystem changes;
-  - unsafe target rejection;
-  - missing runtime user/group;
-  - existing configuration preservation;
-  - release collision;
-  - failed installation without activation;
-  - activation and rollback;
-  - expected ownership and permission plan.
-- Run the focused deployment tests and relevant regression tests.
-
-Packaging:
-- Ensure the updated canonical documentation, installer, configuration
-  examples, application wheel, offline wheelhouse, and manifest are included
-  in the generated deployment artifact.
+Preserve:
+- atomic activation and rollback;
+- idempotency;
+- existing configuration;
+- existing unrelated /opt/td/clue directories;
+- fail-closed checksum, archive, identity, ownership, and permission checks.
 
 Return:
-- files changed;
-- concise design decisions;
-- exact documented administrator command sequence;
-- test commands and results;
-- remaining platform inputs, especially the runtime group;
-- confirmation that no server installation, publishing, commit, or push occurred.
+- changed files and diff summary;
+- exact administrator commands added to the documentation;
+- tests executed and results;
+- confirmation that no DEV-server mutation occurred;
+- any unresolved platform input.
