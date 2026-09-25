@@ -12,13 +12,15 @@ else
         "$VENV/bin/python" -m pip install \
         --no-index \
         --find-links "$W" \
+        --only-binary=:all: \
         --disable-pip-version-check \
-        --upgrade \
-        pip==26.2.1 \
-        setuptools==84.0.0 \
-        wheel==0.48.0 \
-        packaging==26.3 &&
+        requests==2.34.2 \
+        Pillow==12.3.0 \
+        openpyxl==3.1.5 \
+        pytest==9.1.1 \
+        cryptography==50.0.1 &&
+    "$VENV/bin/python" -m pip check &&
     "$VENV/bin/python" -c \
-        'from importlib.metadata import version; [print(f"{n}={version(n)}") for n in ("pip","setuptools","wheel","packaging")]' &&
-    echo "OFFLINE_TOOLING_INSTALL_OK"
+        'from importlib.metadata import version; [print(f"{n}={version(n)}") for n in ("requests","Pillow","openpyxl","pytest","cryptography")]' &&
+    echo "OFFLINE_DEPENDENCIES_INSTALL_OK"
 fi
