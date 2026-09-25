@@ -1,45 +1,57 @@
-Continue from the current state. Do not deploy, publish, commit, push, or modify the DEV server.
+Stop expanding the runbook. Preserve the current installer and dry-run test changes, but rewrite the canonical docs/handoff/clue/deploy/CLUE_DEPLOYMENT_RUNBOOK.md as a concise, operator-first deployment procedure.
 
-New host evidence:
+Do not deploy, publish, build, commit, push, or modify the DEV server. Do not create another deployment document.
 
-- `id TCLUE999DEVS` succeeds on the DEV host and resolves to the canonical account `tclue999devs`.
-- The earlier passwd checks were mistyped as `getnet password` and `getent password`; therefore `getent passwd TCLUE999DEVS` still needs to be recorded as the exact check.
-- The visible `id` output does not prove membership in `vmc2_clue_dev`.
-- Membership in `unix_sudo_svc_clue` does not by itself prove narrowly scoped NOPASSWD authorization for the required Salt pillar commands.
-- The application retrieves secrets through `sudo -n salt-call pillar.get`; it does not call Vault/HKV directly.
+Required structure:
 
-Before asking me to keep the changes:
+1. Purpose, roles and required inputs
+2. One-time administrator bootstrap
+3. First installation
+4. Verification and handoff
+5. Rollback
+6. Runtime/AutoSys gate
+7. Short troubleshooting reference
 
-1. Remove the two temporary harness files from the pending change set. Exactly these three repository files should remain:
-   - deploy/clue-deploy.sh
-   - docs/handoff/clue/deploy/CLUE_DEPLOYMENT_RUNBOOK.md
-   - tests/clue/test_clue_deploy_dry_run.py
+The happy path must fit in approximately two pages and contain no more than three copy/paste command blocks:
 
-2. Show `git status --short`, `git diff --stat`, and `git diff --check`.
+* Administrator bootstrap
+* Dry-run plus real release
+* Verification/status
 
-3. Review the runbook and ensure its identity checks use exactly:
-   - `getent passwd "$CLUE_RUNTIME_USER"`
-   - `id "$CLUE_RUNTIME_USER"`
-   - `getent group "$CLUE_OWNER_GROUP"`
-   - an exact, directory-service-safe group-membership assertion.
+Use these DEV values only as a clearly labelled environment example, not as generic hard-coded installer logic:
 
-4. Make the runbook self-contained starting from the `.tar.gz`.
-   If `/opt/clue/clue-0.2.0-test-f676277/bin/clue-deploy.sh` requires prior extraction, document the checksum verification and safe bootstrap extraction explicitly. Do not assume that directory already exists.
+* CLUE_RUNTIME_USER=TCLUE999DEVS
+* CLUE_OWNER_USER=TCLUE999DEVS
+* CLUE_OWNER_GROUP=vmc2_clue_dev
+* CLUE_APP_ROOT=/opt/td/clue
 
-5. Verify that the administrator phase creates only:
-   - /opt/td/clue/releases
-   - /opt/td/clue/conf
-   - /opt/td/clue/logs
-   - /opt/td/clue/work
+Correct the current content as follows:
 
-   It must not recursively chown/chmod `/opt/td/clue` and must not alter:
-   - archive
-   - clue_staging
-   - outputs
-   - rejects
+* Record that id TCLUE999DEVS resolves successfully. The exact getent passwd TCLUE999DEVS check remains to be captured because the previous commands were mistyped.
+* Do not create a local user or group with useradd, groupadd or usermod. The NPID and group are centrally managed.
+* The administrator may create only releases, conf, logs, and work.
+* Never recursively chown or chmod /opt/td/clue.
+* Explicitly preserve archive, clue_staging, outputs, and rejects.
+* The installer must run as the configured non-root owner.
+* Installation requires no application secrets.
+* Runtime secrets come through clue_with_runtime_secrets.sh using non-interactive Salt pillar retrieval backed by HKV. Do not document permanent Symcor PEM files, local secret copies, .env secrets, or direct Vault calls.
+* Remove uploader NPID/Vault details, repository-search history, Maven/PyPI investigations, raw test logs and old execution narratives from the operator path.
+* Remove stale a6f3ba4, PROPOSED_NOT_PUBLISHED, and “no CLUE account exists” claims.
+* Do not hard-code the test release as the canonical release. Use <artifact-url>, <artifact-sha256> and <release-id>, with at most one clearly labelled current DEV example.
+* The operator must not manually repeat artifact inspection already performed by clue-deploy.sh. TLS download, outer SHA-256, archive safety, manifest/internal checksums, extraction, configuration validation, offline installation, validation and atomic activation belong to the deployment script.
+* If a minimal bootstrap extraction is unavoidable because clue-deploy.sh is inside the archive, keep only the smallest verified download/checksum/extraction block and explain why.
+* Replace manual vi editing with deterministic configuration rendering or explicit variable substitution, followed by checks for remaining __SET_ME__ placeholders and final ownership/mode.
+* Keep --dry-run zero-mutation and zero-network.
+* Separate INSTALLATION_COMPLETE from AUTOSYS_HKV_RUNTIME_VALIDATED.
 
-6. Verify the generated configuration has no `__SET_ME__` placeholders and ends with the intended owner, group and mode. Avoid any root-side in-place edit that accidentally changes ownership.
+Historical validation evidence should be reduced to a small summary table and a reference to the existing execution evidence; do not paste detailed logs into the runbook.
 
-7. Re-run the dry-run tests and the relevant existing deployment tests.
+After rewriting:
 
-8. Report the final three-file diff and any remaining platform prerequisites. Do not perform installation or runtime secret retrieval.
+1. Show the final heading outline.
+2. Show the exact three happy-path command blocks.
+3. Report the before/after line count.
+4. Run git diff --check.
+5. Run the relevant deployment and dry-run tests.
+6. Confirm that only the three intended repository files remain changed and that temporary harness files are absent.
+7. Do not ask to install anything yet.
