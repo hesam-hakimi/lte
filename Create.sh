@@ -1,2 +1,10 @@
 
-python3.12 -c 'import json; d=json.load(open("/tmp/clue-nexus-repositories.json")); r=[x for x in d if str(x.get("format","")).lower()=="pypi"]; print("\n".join("{} | type={} | {}".format(x.get("name"),x.get("type"),x.get("url")) for x in r) or "NO_PYPI_REPOSITORY")'
+NEXUS_PYPI='https://rp.td.com/repository/tdu-pypi-group/simple'
+
+for pkg in pytest cryptography; do
+  status=$(curl -sS --proto '=https' --tlsv1.2 \
+    --cacert /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem \
+    -o /dev/null -w '%{http_code}' \
+    "$NEXUS_PYPI/$pkg/")
+  printf '%-15s HTTP %s\n' "$pkg" "$status"
+done
