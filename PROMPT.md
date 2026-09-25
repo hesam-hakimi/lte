@@ -1,50 +1,123 @@
-One remaining acceptance check only. Do not add unrelated features.
+Prepare the CLUE deployment changes for commit, push and Pull Request.
 
-Verify whether Muhammad's confirmed AutoSys/Salt runtime contract is
-actually present in the newly built bundle.
+Safety rules:
+- Do not push directly to main/master.
+- Do not force-push.
+- Do not deploy, publish to Nexus, call Salt/HKV, AutoSys, Symcor or Tungsten.
+- Do not commit archives, handoff folders, .env files, PEM/key files,
+  credentials, temporary files or generated test output.
+- Stage files explicitly; do not use "git add .".
+- Preserve unrelated changes from other sessions.
 
-The contract is:
+1. Accept and inspect the current changes:
 
-- AutoSys runtime account: TCLUE999DEVS
-- Expected group: vmc2_clue_dev
-- Secrets are retrieved only at runtime through:
+   git status --short --untracked-files=all
+   git diff --name-status
+   git diff --check
 
-  sudo -n salt-call pillar.get "secrets:<name>" --out=json
+2. Verify that the intended PR contains only the CLUE deployment work:
 
-- Approved secret names:
+   - deploy/clue-deploy.sh
+   - deploy/clue-prepare-host.sh
+   - deploy/clue_with_runtime_secrets.sh
+   - tools/build_deployment_bundle.py
+   - tests/clue/test_clue_deploy_dry_run.py
+   - tests/clue/test_runtime_secrets_wrapper.py
+   - docs/handoff/clue/deploy/CLUE_OPERATIONAL_DEPLOYMENT.md
+   - docs/handoff/clue/deploy/CLUE_DEPLOYMENT_ENGINEERING_REFERENCE.md
+   - the intentional removal, rename or short redirect of
+     CLUE_DEPLOYMENT_RUNBOOK.md
 
-  tungsten_primarykey
-  tungsten_secondarykey
-  symcor_certpublickey
-  symcor_cert_privatekey
+   If any unrelated tracked or untracked file would be included, stop and
+   report it instead of staging it.
 
-Perform the following:
+3. Re-run the focused verification:
 
-1. Inspect bin/clue-batch-run.sh and every packaged shell script.
-2. Identify the exact packaged runtime wrapper used by AutoSys.
-3. Show evidence that it:
-   - retrieves all four approved secret names;
-   - uses sudo -n;
-   - rejects missing/empty/null values;
-   - creates private 0600 temporary certificate/key files;
-   - cleans those files on exit and signals;
-   - never logs secret values;
-   - passes the child command exit status unchanged.
-4. Show the exact AutoSys command that invokes the wrapper.
-5. Confirm there is no .env or packaged-secret fallback.
+   - bash -n on every deployment shell script
+   - runtime-wrapper tests
+   - deployment dry-run tests
+   - deployment-document generation tests, if present
+   - git diff --check
 
-If bin/clue-batch-run.sh already implements the complete contract,
-do not create another wrapper. Add only the missing operational
-documentation and evidence.
+4. Confirm that no secret value, .env file, certificate, private key,
+   deployment archive or handoff directory is staged.
 
-If the contract is absent, implement the smallest runtime wrapper,
-include it in the bundle and operational guide, add focused tests,
-and rebuild the release candidate with a new SHA-256.
+5. Confirm the current branch is a feature branch. If currently on main or
+   master, create a new feature branch named:
 
-Do not call Salt/HKV, deploy, commit, push or publish.
+   feature/clue-operational-deployment
 
-Return a concise PASS/FAIL report with:
-- wrapper path inside the archive;
-- four secret names;
-- AutoSys command;
-- final release ID and SHA-256.
+   If that name already exists, report the existing branch and do not
+   overwrite it.
+
+6. Stage only the intended source, test and documentation files explicitly.
+
+7. Create one commit:
+
+   feat(clue): add operational deployment and Salt runtime wrapper
+
+8. Confirm the worktree state and record the new commit SHA.
+
+9. Rebuild the deployment bundle from that committed source so the new
+   release ID is clean and does not contain a ".dirty." suffix.
+
+   Keep the generated archive and handoff files outside Git.
+   Re-run the checksum, archive-safety, wrapper and dry-run validations.
+   Do not run the two deferred Linux CPython 3.12 tests.
+
+10. Fetch the remote without merging or rebasing:
+
+    git fetch origin
+
+    Report whether the feature branch has unexpected divergence from its
+    intended PR base. Do not guess the PR base if repository configuration
+    and existing PR conventions do not identify it.
+
+11. Push the feature branch normally:
+
+    git push -u origin <feature-branch>
+
+12. Create a Pull Request using the repository's established target branch
+    and PR mechanism. If automatic PR creation is unavailable, provide the
+    exact branch names and URL/instructions needed to open it manually.
+
+PR title:
+
+CLUE: operational deployment and AutoSys/Salt runtime secrets
+
+PR description must include:
+
+Summary
+- Adds the administrator host-preparation script.
+- Adds the offline deployment bundle and dependency-wheel mechanism.
+- Adds the operator guide and separate engineering reference.
+- Packages the AutoSys runtime wrapper for TCLUE999DEVS.
+- Retrieves the four approved secrets through narrowly scoped
+  sudo -n salt-call pillar.get.
+- Adds provenance handling for modified and untracked bundle inputs.
+
+Verified
+- Runtime-wrapper tests: 14/14 on POSIX.
+- Deployment dry-run tests: 26/26.
+- Internal checksums: 34/34.
+- Archive/member safety and shell syntax passed.
+- No secrets or secret files are packaged.
+
+Deferred
+- Clean-room offline installation on Linux CPython 3.12.
+- Missing-wheel negative test.
+- Real TCLUE999DEVS AutoSys/Salt entitlement validation.
+
+External prerequisites
+- Narrowly scoped NOPASSWD authorization for the four approved pillar names.
+- Non-secret clue.env placement.
+- AutoSys job definition and execution under TCLUE999DEVS.
+
+Finally report:
+- branch name;
+- commit SHA;
+- clean release ID and SHA-256;
+- pushed remote branch;
+- PR URL or manual PR creation link;
+- exact files committed;
+- tests passed and deferred.
