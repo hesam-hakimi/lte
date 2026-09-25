@@ -1,262 +1,196 @@
-Finalize, commit, push and open the CLUE deployment Pull Request.
+Continue from the existing STOPPED report. Do not repeat the completed audit.
 
-Authorization:
-- The GitHub token is stored locally in the repository .env file.
-- Use it only for this push and PR operation.
-- Never print, echo, log, display or include the token in a command-line URL.
-- Never commit the .env file.
-- Do not persist the token in Git configuration or a remote URL.
-- Disable command tracing before reading it.
-- Unset the token from the process environment when finished.
+The objective is now explicitly to test the complete release process:
 
-Do not deploy, publish to Nexus, call Salt/HKV, AutoSys, Symcor or Tungsten.
-Do not push directly to main/master and do not force-push.
+source commit -> CI build -> RC publication -> download -> DEV deployment
 
-1. Repository and remote safety
+Decisions and authorization
 
-Run:
+1. Target repository:
+   TD-Universe/fcrm_clue
 
-git status --short --untracked-files=all
-git diff --name-status
+2. PR base:
+   Use the GitHub default branch returned by:
+
+   gh repo view TD-Universe/fcrm_clue --json defaultBranchRef
+
+   Do not guess the branch name. If GitHub cannot return it, stop and report the exact failure.
+
+3. GitHub credential:
+   I confirm that the exact variable named GH in the repository-local ignored .env file contains the GitHub token.
+
+   You are authorized to read only that exact key and map it transiently in the current process to GH_TOKEN for gh CLI authentication.
+
+   Requirements:
+   - never print, echo, log, diff, or persist the value;
+   - never put it in a Git URL or Git configuration;
+   - never commit .env;
+   - unset the process variable after GitHub operations;
+   - do not read any other .env values.
+
+4. Divergence:
+   Integrate the upstream-only commit before creating the PR.
+   Do not force-push.
+
+5. Existing dirty worktree:
+   Another session owns the currently staged deletion of
+   .github/workflows/ci.yml
+   and modifications to .gitignore, pyproject.toml, requirements.txt,
+   CLUE_HANDOFF.md, and CLUE_SOLUTION_REVIEW.md.
+
+   Do not alter, unstage, commit, restore, or overwrite any of those
+   entries in the original worktree.
+
+Isolation procedure
+
+Create a separate Git worktree and a new release branch so the original
+working tree and its index remain byte-for-byte unchanged.
+
+Base the isolated worktree on the latest:
+
+origin/feature/clue-durable-core
+
+Then bring in the four local-ahead commits in chronological order using
+cherry-pick. This is the selected divergence resolution.
+
+If a cherry-pick conflicts:
+- do not guess;
+- show the conflicting files and both commit subjects;
+- stop without aborting or discarding either side.
+
+Transfer only the deployment files owned by this session from the
+original worktree into the isolated worktree. Before copying, print the
+path-only ownership list.
+
+Do not copy the other session's files listed above. Preserve executable
+modes, additions, deletions, and renames.
+
+Release version
+
+pom.xml is an authoritative version source and MUST be updated.
+
+Inspect:
+- root pom.xml;
+- module/parent POMs;
+- pyproject.toml and Python package metadata;
+- deployment bundle generator;
+- MANIFEST.json generation;
+- CI/CD release variables;
+- Nexus artifact naming.
+
+Follow the repository’s existing RC/test-version convention. If no
+convention exists, use:
+
+0.2.0-rc.1
+
+Update only the CLUE project version. Do not change dependency versions
+or an external parent version accidentally.
+
+Prove that these values agree:
+
+- Maven effective project version;
+- Python distribution version;
+- application wheel version;
+- deployment release ID;
+- MANIFEST.json version;
+- archive filename;
+- Nexus version/path.
+
+Use Maven’s effective value where applicable, for example:
+
+mvn help:evaluate -Dexpression=project.version -q -DforceStdout
+
+CI/CD release integration
+
+Because the purpose is to test the full release process, inspect and
+make the minimum necessary changes to the existing GitHub CI/CD
+workflows.
+
+The pipeline must:
+
+- build from a committed, clean checkout;
+- reject a dirty source state;
+- run deployment and runtime-wrapper tests;
+- run shell syntax and archive-safety checks;
+- build the application wheel;
+- include the complete offline wheelhouse;
+- build the deployment archive;
+- generate the SHA-256 sidecar and MANIFEST.json;
+- include both deployment documents;
+- publish an RC only to the existing approved DEV/test Nexus location;
+- record the Git commit SHA and Maven/project version;
+- retain the published artifacts as CI run artifacts where supported.
+
+Do not delete or replace the existing CI workflow merely to create a
+special deployment workflow. Preserve existing CI behavior and add the
+smallest release integration required.
+
+Do not bypass branch protection. If publication requires PR approval,
+merge, a tag, or manual workflow approval, stop at that gate and report
+the exact human action required.
+
+Validation
+
+Run all applicable checks, including:
+
+- deployment dry-run tests;
+- runtime-secret wrapper tests;
+- bash syntax;
+- outer and internal checksum verification;
+- archive member/path safety;
+- version-consistency validation;
+- Linux CPython 3.12 clean-room offline installation;
+- missing-wheel negative test.
+
+A deferred test must remain DEFERRED, not PASS.
+
+Commit and PR
+
+Before committing, show:
+
+git status --short
 git diff --check
-git branch --show-current
-git remote get-url origin
-git remote show origin
+git diff --stat
+git diff -- pom.xml
+git diff -- .github/workflows
 
-Confirm that origin is a GitHub or GitHub Enterprise remote before using
-the GitHub token. If it is Bitbucket or another provider, stop and report
-the remote host; do not try the GitHub token against it.
+Confirm explicitly that none of these are included:
 
-Identify the repository's established PR target branch from the remote
-default branch and existing conventions. Do not guess if it is ambiguous.
+- .env or tokens;
+- certificates or private keys;
+- generated handoff directories;
+- locally generated archives;
+- unrelated files from the other session.
 
-2. Protect the .env file
-
-Preserve all existing .gitignore content and ensure these rules exist:
-
-.env
-.env.*
-!.env.example
-
-Then verify:
-
-git check-ignore -v .env
-git ls-files --error-unmatch .env
-git log --all -- .env
-
-Expected:
-- git check-ignore confirms .env is ignored.
-- .env is not tracked.
-- .env has never been committed.
-
-If .env is merely staged but has never been committed, remove it from the
-index while preserving the local file, then verify it is ignored.
-
-If .env or its token was committed in any Git history, STOP:
-- do not push;
-- do not expose the token;
-- report that the token must be revoked/rotated before proceeding.
-
-Do not add .env.example if it contains a real credential.
-
-3. Validate the intended PR scope
-
-The PR should contain only the intended CLUE deployment source,
-documentation and tests, including as applicable:
-
-- .gitignore
-- deploy/clue-deploy.sh
-- deploy/clue-prepare-host.sh
-- deploy/clue_with_runtime_secrets.sh
-- tools/build_deployment_bundle.py
-- tests/clue/test_clue_deploy_dry_run.py
-- tests/clue/test_runtime_secrets_wrapper.py
-- docs/handoff/clue/deploy/CLUE_OPERATIONAL_DEPLOYMENT.md
-- docs/handoff/clue/deploy/CLUE_DEPLOYMENT_ENGINEERING_REFERENCE.md
-- the intentional removal, rename or short redirect of
-  CLUE_DEPLOYMENT_RUNBOOK.md
-
-Do not include:
-
-- .env or other local environment files
-- PEM, key, P12, JKS or credential files
-- deployment archives, SHA sidecars or handoff directories
-- test captures, scratch files or temporary harnesses
-- unrelated files belonging to another session
-
-If unrelated changes cannot be isolated safely, stop and report them.
-
-4. Re-run final verification
-
-Run the relevant repository commands for:
-
-- bash -n on all four deployment shell scripts
-- tests/clue/test_runtime_secrets_wrapper.py
-- tests/clue/test_clue_deploy_dry_run.py
-- deployment-document generation tests, if present
-- git diff --check
-
-Confirm that the established results remain:
-
-- runtime-wrapper tests: 14/14 on POSIX;
-- deployment dry-run tests: 26/26;
-- AutoSys/Salt runtime contract: PASS;
-- no secret values or credential files are included.
-
-Do not perform a real Salt/HKV call.
-
-5. Prepare the feature branch
-
-If the current branch is main or master, create:
-
-feature/clue-operational-deployment
-
-If already on an appropriate feature branch, keep that branch.
-
-If the requested branch already exists with different work, stop rather
-than overwriting it.
-
-Fetch remote state without merging, rebasing or changing files:
-
-git fetch origin
-
-If the branch has unexpected divergence or conflicts with its intended
-PR base, stop and report the exact divergence. Do not rebase, merge or
-force-push automatically.
-
-6. Stage and inspect
-
-Stage only the intended files by explicit path. Do not use:
-
-git add .
-git add -A
-
-After staging, run:
-
-git diff --cached --name-status
-git diff --cached --check
-
-Perform a staged-content secret scan without printing matching secret
-values. Report only filenames and rule names if anything suspicious is
-found.
-
-Verify again that .env and all build artifacts are absent from the index.
-
-7. Commit
-
-Create one commit with:
-
-feat(clue): add operational deployment and Salt runtime wrapper
-
-Record the resulting commit SHA and confirm the source worktree is clean,
-excluding ignored local files.
-
-8. Build a clean release candidate
-
-Rebuild the deployment bundle from the new commit.
-
-Requirements:
-
-- the Release ID must be based on the new commit;
-- it must not contain a ".dirty." suffix;
-- generated archives and handoff files must remain outside Git;
-- rerun outer/internal checksums, archive safety, shell syntax,
-  runtime-wrapper tests and deployment dry-run tests;
-- do not pretend to run unavailable Linux CPython 3.12 tests.
-
-Report these as DEFERRED:
-
-- clean-room offline installation on Linux CPython 3.12;
-- missing-wheel negative test;
-- real TCLUE999DEVS AutoSys/Salt entitlement validation.
-
-If rebuilding changes a tracked source file, stop and report it instead
-of creating another automatic commit.
-
-9. Authenticate safely
-
-Read only GH_TOKEN or GITHUB_TOKEN from .env without printing its value.
-
-If both exist and differ, stop and report only the variable names.
-
-Determine the GitHub hostname from origin. Use the token as an ephemeral
-process environment variable for the GitHub CLI. Do not:
-
-- place it in the remote URL;
-- save it in plaintext credentials;
-- run commands with tracing enabled;
-- print the environment;
-- display the .env file.
-
-Verify authentication using the appropriate GitHub/GitHub Enterprise
-hostname without exposing the token.
-
-10. Push
-
-Push the feature branch normally:
-
-git push -u origin <feature-branch>
-
-Never use --force or --force-with-lease.
-
-11. Create the Pull Request
-
-Use the repository's established PR base branch.
+Commit the isolated release branch, push it without force, and open a PR
+to the verified default branch.
 
 PR title:
 
-CLUE: operational deployment and AutoSys/Salt runtime secrets
+CLUE: add operational deployment and RC release workflow
 
-PR description:
+After PR creation, run the repository’s approved RC release workflow
+only as permitted by its normal gates. Do not locally upload an artifact
+to bypass CI/CD.
 
-## Summary
+The old candidate containing ".dirty" is superseded and must not be
+published.
 
-- Adds the administrator host-preparation script.
-- Adds the offline deployment bundle and dependency wheelhouse.
-- Adds the concise Operational Deployment guide.
-- Adds the separate Deployment Engineering Reference.
-- Packages the AutoSys runtime wrapper for TCLUE999DEVS.
-- Retrieves the four approved secrets using narrowly scoped
-  `sudo -n salt-call pillar.get`.
-- Adds provenance handling for all bundle inputs.
-
-## Verified
-
-- AutoSys/Salt runtime contract: PASS.
-- Runtime-wrapper tests: 14/14 on POSIX.
-- Deployment dry-run tests: 26/26.
-- Bundle checksums and archive/member safety: PASS.
-- No secret values, .env files or credential material are packaged.
-
-## Deferred environment validation
-
-- Clean-room offline installation on Linux CPython 3.12.
-- Missing-wheel negative test.
-- Real TCLUE999DEVS AutoSys/Salt entitlement validation.
-
-## External prerequisites
-
-- Narrowly scoped NOPASSWD authorization for the four approved
-  Salt pillar names.
-- Placement of the non-secret runtime configuration.
-- AutoSys job definition and execution under TCLUE999DEVS.
-
-Do not attach the old dirty archive to the PR.
-
-12. Final report
+Final report
 
 Return:
 
-- branch name;
+- isolated branch name;
 - commit SHA;
-- clean Release ID and SHA-256;
-- exact committed file list;
-- pushed remote branch;
 - PR URL;
-- tests passed and deferred;
-- confirmation that .env is ignored and untracked;
-- confirmation that the token was never printed, committed or stored in
-  the remote URL;
-- confirmation that no deployment or provider call occurred.
-
-Finally remove GH_TOKEN/GITHUB_TOKEN from the current process environment.
+- changed files;
+- old and new pom.xml versions;
+- resolved Maven/Python/deployment versions;
+- CI workflow used;
+- CI run URL and result;
+- clean RC release ID;
+- Nexus artifact URL, if publication completed;
+- artifact SHA-256;
+- tests passed, failed, and deferred;
+- any remaining approval, merge, tag, or runtime gate;
+- confirmation that the original worktree and its staged index were not modified.
