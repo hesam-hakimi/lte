@@ -1,6 +1,7 @@
-python3.12 --version
-
-python3.12 -c 'import venv, ensurepip; print("venv/ensurepip: OK")'
-
-printf 'wheel count: '
-find /opt/clue/pr19-c70b121f -type f -name '*.whl' | wc -l
+grep -RInE 'nexus|index-url|extra-index-url|wheel-dir|wheelhouse|\.whl' \
+  /opt/clue/pr19-c70b121f/deploy \
+  /opt/clue/pr19-c70b121f/docs \
+  /opt/clue/pr19-c70b121f/config \
+  /opt/clue/pr19-c70b121f/pyproject.toml \
+  /opt/clue/pr19-c70b121f/requirements.txt \
+  2>/dev/null | head -100
