@@ -1,22 +1,28 @@
 ROOT=/opt/clue/pr19-c70b121f
-W=/opt/clue/pr19-wheelhouse-c70b121f
 VENV="$ROOT/.venv"
+REPORT="$ROOT/dev_test_report_manual_c70b121f.txt"
 
-(cd "$W" && sha256sum -c SHA256SUMS >/dev/null) &&
-echo "STARTING_APPLICATION_DEPENDENCIES" &&
-env -u PIP_INDEX_URL -u PIP_EXTRA_INDEX_URL \
-    PIP_CONFIG_FILE=/dev/null \
-    "$VENV/bin/python" -m pip install \
-    --no-index \
-    --find-links "$W" \
-    --only-binary=:all: \
-    --disable-pip-version-check \
-    requests==2.34.2 \
-    Pillow==12.3.0 \
-    openpyxl==3.1.5 \
-    pytest==9.1.1 \
-    cryptography==50.0.1 &&
-"$VENV/bin/python" -m pip check &&
-"$VENV/bin/python" -c \
-    'import requests, PIL, openpyxl, pytest, cryptography; print("IMPORT_SMOKE_OK")' &&
-echo "APPLICATION_DEPENDENCIES_OK"
+if [ ! -x "$VENV/bin/python" ]; then
+    echo "STOP: test venv is missing"
+elif [ -e "$REPORT" ]; then
+    echo "STOP: report already exists: $REPORT"
+else
+    (
+        cd "$ROOT" &&
+        PYTHONPATH="$ROOT/src" \
+            "$VENV/bin/python" -m pytest \
+            tests/clue \
+            -q \
+            -p no:cacheprovider
+    ) 2>&1 | tee "$REPORT"
+
+    STATUS=${PIPESTATUS[0]}
+    echo "PYTEST_EXIT_CODE=$STATUS"
+    echo "REPORT=$REPORT"
+
+    if [ "$STATUS" -eq 0 ]; then
+        echo "DOCUMENTED_TEST_COMMAND_PASS"
+    else
+        echo "DOCUMENTED_TEST_COMMAND_FAIL"
+    fi
+fi
