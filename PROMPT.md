@@ -1,82 +1,69 @@
-Time-box this work. The immediate objective is to produce one reviewable CLUE DEV deployment candidate and two clearly separated installation documents. Do not expand the scope.
+Finalization only. Do not add new features.
 
-Required deliverables:
+Do not deploy to /opt/td/clue, contact Nexus, HKV/Salt, AutoSys,
+Symcor or Tungsten, and do not commit, push or publish anything.
 
-1. A new local deployment candidate:
-    * clue-<release-id>-deploy.tar.gz
-    * matching .sha256
-    * generated from the current intended source changes
-    * includes the CLUE application wheel, complete offline dependency wheelhouse, lock file, manifests, installer scripts and both documents below
-2. CLUE_OPERATIONAL_DEPLOYMENT.md
-    * short, administrator/operator-facing
-    * approximately two pages of happy-path instructions
-    * exact commands to verify and extract the archive
-    * exact command to prepare the host
-    * exact command to install
-    * status and rollback commands
-    * concise PASS/FAIL examples and remediation
-    * no design history, test logs, Nexus investigation, Maven/PyPI research or long explanations
-3. CLUE_DEPLOYMENT_ENGINEERING_REFERENCE.md
-    * preserve useful technical design, security controls, failure semantics, dry-run contract and advanced troubleshooting
-    * link to the operational guide
-    * do not duplicate the operational happy-path commands
-    * move/rename the existing long runbook using git mv where appropriate to preserve history
+1. Inspect the finalized workspace with:
 
-Operator contract:
+   git status --short --untracked-files=all
+   git diff --check
+   git diff --stat
 
-* The operator logs in using an approved sudo-capable account.
-* The downloaded archive is verified before any packaged script is executed.
-* After extraction, the operator invokes only simple scripts from the package.
-* Keep the existing clue-deploy.sh as the non-root deployment engine.
-* Add only the smallest necessary privileged host-preparation script if an equivalent does not already exist.
-* Do not redesign unrelated deployment code.
+2. Confirm that no temporary harness or file from %TEMP%, WSL /tmp,
+   or another scratch directory is included in the repository or bundle.
 
-The privileged preparation script must:
+3. Resolve the provenance inconsistency:
+   the current bundle is labelled only with commit a516a21 even though
+   modified/untracked deployment inputs exist.
 
-* verify TCLUE999DEVS resolves
-* verify vmc2_clue_dev resolves and validate membership
-* create only /opt/td/clue/releases, /opt/td/clue/conf, /opt/td/clue/logs, and /opt/td/clue/work
-* never recursively chown or chmod /opt/td/clue
-* never alter archive, clue_staging, outputs, or rejects
-* render only non-secret configuration
-* reject unresolved placeholders
-* print named PASS/FAIL stages and an actionable failure reason
+   Any tracked, staged, modified or untracked file used as a bundle input
+   must participate in the dirty-state digest. The generator must never
+   report a clean source state when untracked files are packaged.
 
-The deployment engine must continue to:
+   Do not create a commit. If necessary, fix the generator and rebuild
+   with an explicit dirty source identifier.
 
-* verify the artifact and internal checksums
-* create a release-specific virtual environment
-* install the exact CLUE wheel and all dependencies offline using --no-index --find-links
-* never install the unrelated public PyPI package named clue
-* run pip check
-* validate both entry points
-* run the existing smoke validation
-* activate only after all checks pass
-* remain idempotent and fail closed
+4. Rebuild exactly one release candidate containing:
+   - bin/clue-prepare-host.sh
+   - bin/clue-deploy.sh
+   - bin/clue-batch-run.sh
+   - the application wheel
+   - the complete offline wheelhouse
+   - CLUE_OPERATIONAL_DEPLOYMENT.md
+   - CLUE_DEPLOYMENT_ENGINEERING_REFERENCE.md
+   - MANIFEST.json
+   - SHA256SUMS
+   - requirements.lock.txt
 
-Minimum candidate verification:
+5. Repeat only the non-runtime verification:
+   - outer SHA-256
+   - all internal SHA256SUMS
+   - archive path and member safety
+   - bash -n on all packaged shell scripts
+   - application-wheel digest against MANIFEST.json
+   - no bare "pip install clue"
+   - deployment uses --no-index, --find-links and the explicit app wheel
+   - zero-network/zero-mutation dry-run tests
 
-* outer SHA-256 matches
-* all internal SHA256SUMS entries pass
-* archive path-safety checks pass
-* required scripts and both documents are present
-* complete installation succeeds in a clean temporary application root with network access disabled and pip cache disabled
-* pip check exits 0
-* expected package versions and entry points are present
-* removing one required wheel causes installation to fail before activation
-* dry-run remains zero-mutation and zero-network
+6. Do not attempt to fake the Linux CPython 3.12 clean-room test.
+   Report these two checks as DEFERRED:
+   - clean-room offline installation
+   - missing-wheel negative test
 
-Do not deploy to DEV, retrieve runtime secrets, call AutoSys, Symcor or Tungsten, publish to Nexus, commit, or push.
+7. Create one handoff directory containing:
+   - the final deployment archive
+   - its SHA-256 sidecar
+   - its manifest sidecar
+   - CLUE_OPERATIONAL_DEPLOYMENT.md
+   - CLUE_DEPLOYMENT_ENGINEERING_REFERENCE.md
 
-If the artifact generator requires a clean Git commit, do not bypass provenance checks or invent a commit. Stop with READY_TO_COMMIT_AND_BUILD and list the exact intended files.
-
-At completion report:
-
-* exact artifact and checksum paths
-* release ID and SHA-256
-* archive contents summary
-* dependency/wheel count
-* verification results
-* the two documentation paths
-* changed-file list
-* any blocker preventing generation of the candidate
+8. In the final response show only:
+   - absolute paths of those five deliverables
+   - final release ID and SHA-256
+   - a compact PASS/DEFERRED table
+   - the exact operator commands for:
+       A. verify and extract
+       B. administrator host preparation
+       C. dry-run and installation as TCLUE999DEVS
+       D. status and rollback
+   - confirmation that nothing was deployed, committed, pushed or published
