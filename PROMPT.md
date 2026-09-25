@@ -1,57 +1,82 @@
-Stop expanding the runbook. Preserve the current installer and dry-run test changes, but rewrite the canonical docs/handoff/clue/deploy/CLUE_DEPLOYMENT_RUNBOOK.md as a concise, operator-first deployment procedure.
+Time-box this work. The immediate objective is to produce one reviewable CLUE DEV deployment candidate and two clearly separated installation documents. Do not expand the scope.
 
-Do not deploy, publish, build, commit, push, or modify the DEV server. Do not create another deployment document.
+Required deliverables:
 
-Required structure:
+1. A new local deployment candidate:
+    * clue-<release-id>-deploy.tar.gz
+    * matching .sha256
+    * generated from the current intended source changes
+    * includes the CLUE application wheel, complete offline dependency wheelhouse, lock file, manifests, installer scripts and both documents below
+2. CLUE_OPERATIONAL_DEPLOYMENT.md
+    * short, administrator/operator-facing
+    * approximately two pages of happy-path instructions
+    * exact commands to verify and extract the archive
+    * exact command to prepare the host
+    * exact command to install
+    * status and rollback commands
+    * concise PASS/FAIL examples and remediation
+    * no design history, test logs, Nexus investigation, Maven/PyPI research or long explanations
+3. CLUE_DEPLOYMENT_ENGINEERING_REFERENCE.md
+    * preserve useful technical design, security controls, failure semantics, dry-run contract and advanced troubleshooting
+    * link to the operational guide
+    * do not duplicate the operational happy-path commands
+    * move/rename the existing long runbook using git mv where appropriate to preserve history
 
-1. Purpose, roles and required inputs
-2. One-time administrator bootstrap
-3. First installation
-4. Verification and handoff
-5. Rollback
-6. Runtime/AutoSys gate
-7. Short troubleshooting reference
+Operator contract:
 
-The happy path must fit in approximately two pages and contain no more than three copy/paste command blocks:
+* The operator logs in using an approved sudo-capable account.
+* The downloaded archive is verified before any packaged script is executed.
+* After extraction, the operator invokes only simple scripts from the package.
+* Keep the existing clue-deploy.sh as the non-root deployment engine.
+* Add only the smallest necessary privileged host-preparation script if an equivalent does not already exist.
+* Do not redesign unrelated deployment code.
 
-* Administrator bootstrap
-* Dry-run plus real release
-* Verification/status
+The privileged preparation script must:
 
-Use these DEV values only as a clearly labelled environment example, not as generic hard-coded installer logic:
+* verify TCLUE999DEVS resolves
+* verify vmc2_clue_dev resolves and validate membership
+* create only /opt/td/clue/releases, /opt/td/clue/conf, /opt/td/clue/logs, and /opt/td/clue/work
+* never recursively chown or chmod /opt/td/clue
+* never alter archive, clue_staging, outputs, or rejects
+* render only non-secret configuration
+* reject unresolved placeholders
+* print named PASS/FAIL stages and an actionable failure reason
 
-* CLUE_RUNTIME_USER=TCLUE999DEVS
-* CLUE_OWNER_USER=TCLUE999DEVS
-* CLUE_OWNER_GROUP=vmc2_clue_dev
-* CLUE_APP_ROOT=/opt/td/clue
+The deployment engine must continue to:
 
-Correct the current content as follows:
+* verify the artifact and internal checksums
+* create a release-specific virtual environment
+* install the exact CLUE wheel and all dependencies offline using --no-index --find-links
+* never install the unrelated public PyPI package named clue
+* run pip check
+* validate both entry points
+* run the existing smoke validation
+* activate only after all checks pass
+* remain idempotent and fail closed
 
-* Record that id TCLUE999DEVS resolves successfully. The exact getent passwd TCLUE999DEVS check remains to be captured because the previous commands were mistyped.
-* Do not create a local user or group with useradd, groupadd or usermod. The NPID and group are centrally managed.
-* The administrator may create only releases, conf, logs, and work.
-* Never recursively chown or chmod /opt/td/clue.
-* Explicitly preserve archive, clue_staging, outputs, and rejects.
-* The installer must run as the configured non-root owner.
-* Installation requires no application secrets.
-* Runtime secrets come through clue_with_runtime_secrets.sh using non-interactive Salt pillar retrieval backed by HKV. Do not document permanent Symcor PEM files, local secret copies, .env secrets, or direct Vault calls.
-* Remove uploader NPID/Vault details, repository-search history, Maven/PyPI investigations, raw test logs and old execution narratives from the operator path.
-* Remove stale a6f3ba4, PROPOSED_NOT_PUBLISHED, and “no CLUE account exists” claims.
-* Do not hard-code the test release as the canonical release. Use <artifact-url>, <artifact-sha256> and <release-id>, with at most one clearly labelled current DEV example.
-* The operator must not manually repeat artifact inspection already performed by clue-deploy.sh. TLS download, outer SHA-256, archive safety, manifest/internal checksums, extraction, configuration validation, offline installation, validation and atomic activation belong to the deployment script.
-* If a minimal bootstrap extraction is unavoidable because clue-deploy.sh is inside the archive, keep only the smallest verified download/checksum/extraction block and explain why.
-* Replace manual vi editing with deterministic configuration rendering or explicit variable substitution, followed by checks for remaining __SET_ME__ placeholders and final ownership/mode.
-* Keep --dry-run zero-mutation and zero-network.
-* Separate INSTALLATION_COMPLETE from AUTOSYS_HKV_RUNTIME_VALIDATED.
+Minimum candidate verification:
 
-Historical validation evidence should be reduced to a small summary table and a reference to the existing execution evidence; do not paste detailed logs into the runbook.
+* outer SHA-256 matches
+* all internal SHA256SUMS entries pass
+* archive path-safety checks pass
+* required scripts and both documents are present
+* complete installation succeeds in a clean temporary application root with network access disabled and pip cache disabled
+* pip check exits 0
+* expected package versions and entry points are present
+* removing one required wheel causes installation to fail before activation
+* dry-run remains zero-mutation and zero-network
 
-After rewriting:
+Do not deploy to DEV, retrieve runtime secrets, call AutoSys, Symcor or Tungsten, publish to Nexus, commit, or push.
 
-1. Show the final heading outline.
-2. Show the exact three happy-path command blocks.
-3. Report the before/after line count.
-4. Run git diff --check.
-5. Run the relevant deployment and dry-run tests.
-6. Confirm that only the three intended repository files remain changed and that temporary harness files are absent.
-7. Do not ask to install anything yet.
+If the artifact generator requires a clean Git commit, do not bypass provenance checks or invent a commit. Stop with READY_TO_COMMIT_AND_BUILD and list the exact intended files.
+
+At completion report:
+
+* exact artifact and checksum paths
+* release ID and SHA-256
+* archive contents summary
+* dependency/wheel count
+* verification results
+* the two documentation paths
+* changed-file list
+* any blocker preventing generation of the candidate
