@@ -1,74 +1,69 @@
-Proceed with the real isolated DEV deployment rehearsal using the
-already verified staged candidate.
+Preserve the current DEV rehearsal exactly as it is. Do not rebuild,
+reinstall, retry, clean up, or modify any source or installed script.
 
-This is MANUAL TEST ONLY.
+The core deployment succeeded. Reconcile only the two remaining
+acceptance findings using read-only evidence.
 
-Verified values:
+1. SECOND_RUN_FILESYSTEM_CHANGED
 
-RID='0.2.0-a516a21.dirty.917b244b'
-STAGE='/opt/clue/manual-rehearsal/0.2.0-a516a21.dirty.917b244b'
-BUNDLE="$STAGE/clue-0.2.0-a516a21.dirty.917b244b"
-ARCHIVE="$STAGE/clue-0.2.0-a516a21.dirty.917b244b-deploy.tar.gz"
-TEST_ROOT='/opt/td/clue-rehearsal/0.2.0-a516a21.dirty.917b244b'
-GROUP='unix_sudo_svc_clue'
-NPID='TCLUE999DEVS'
-SHA256='27c6b7e23054c33f1d624bcaf4c06779466d416362429dc9a847a7e6541c879b'
+Produce the exact changed-path manifest that caused this result. For
+every changed path include:
 
-Requirements:
+- absolute path
+- created, removed, or modified
+- file type
+- owner/group/mode
+- size and mtime
+- SHA-256 where applicable
+- which command created or modified it, based on the execution timeline
 
-1. Take a read-only before-snapshot of:
-   - `/opt/td/clue`
-   - `$TEST_ROOT`
-   - staged bundle and archive
+Separate the paths into:
 
-2. Run the real `clue-prepare-host.sh` as root for `$TEST_ROOT`, using:
-   - NP ID `TCLUE999DEVS`
-   - group `unix_sudo_svc_clue`
-   - the packaged config template
+- deployment product state
+- deployment logs
+- validation/fixture-smoke artifacts
+- test-harness artifacts
 
-   Interactive sudo is allowed. Let me enter the password directly in
-   the terminal. Never capture, print, pipe, log, or store the password.
+Do not merely state that validation caused the changes; prove it using
+the exact path list and timestamps.
 
-3. Verify the resulting directories, ownership, modes, and rendered
-   config. Confirm that `tclue999devs` can traverse and write only where
-   required.
+2. Controlled idempotency check
 
-4. As `tclue999devs`, run in this order:
-   - preflight
-   - release --dry-run
-   - real release using the existing local archive and exact SHA-256
+After all previous validation commands have finished, take a fresh
+baseline snapshot of the complete isolated rehearsal root.
 
-5. The installation must be fully offline:
-   - no package index
-   - no HTTP download
-   - use only the packaged wheelhouse
-   - do not call Nexus
+Run the exact same `release` command one additional time as
+`tclue999devs`, without running any fixture-smoke or validation command
+during the before/after window.
 
-6. Verify:
-   - `pip check`
-   - application entry-point `--help` checks
-   - release status
-   - `current` symlink
-   - installed release metadata
-   - second-run idempotency
-   - post-install dry-run with zero mutation
+Take an immediate after-snapshot and report separately:
 
-7. Do not execute:
-   - `clue_with_runtime_secrets.sh`
-   - Salt/HKV
-   - AutoSys
-   - Symcor
-   - Tungsten
-   - CI/CD or Nexus publication
+- release/current/config/venv changes
+- log changes
+- work or fixture changes
+- any other changes
 
-8. Compare `/opt/td/clue` before and after. It must remain unchanged.
-   Do not clean up the staging or rehearsal installation yet.
+Do not exclude paths silently. If only expected logging changes, state
+that explicitly and cite the documented contract.
 
-Report either:
+3. Status exit-code contract
+
+Run `status` once and capture exact stdout, stderr, and exit code.
+
+Read the packaged `clue-deploy.sh` implementation and both packaged
+deployment guides to determine whether an active healthy first release
+with no previous rollback target is documented to return exit 0 or
+exit 1.
+
+Do not patch it on DEV.
+
+4. Final reconciliation
+
+Report one of:
 
 - PRIVILEGED_RUNTIME_REHEARSAL_PASS
-- PRIVILEGED_RUNTIME_REHEARSAL_FAILED
+- PASS_WITH_STATUS_CONTRACT_ISSUE
+- FAILED
 
-Include every command, exit code, installed path, ownership/modes,
-offline-install evidence, idempotency evidence, and the `/opt/td/clue`
-before/after comparison.
+The verdict must distinguish an actual deployment mutation from a test
+harness artifact. Preserve all evidence and perform no cleanup.
