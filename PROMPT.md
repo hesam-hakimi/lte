@@ -1,33 +1,23 @@
-Implement the concrete integration fixes identified in your review. All responses, code, tests, and documentation must be in English.
+Make the completed local integration branch durable on the remote under its own branch name. Do not modify main or feature/edponbaord, and do not create or merge a PR.
 
-Repository: TD-Universe/W001CLUEinitialRepo
-Publication worktree: C:\repos\clue-edp-publish-20260924
-Last reported published tip: e846755
-Onboarding branch: feature/edponbaord
+Expected state:
 
-Prepare a reviewable local integration result. Do not push, create a PR, or merge into local or remote main.
+* Repository: TD-Universe/W001CLUEinitialRepo
+* Worktree: C:\repos\clue-edp-integrate-20260924
+* Local branch: integration/edponbaord-main-20260924
+* Expected local HEAD: c70b121f397736e4a0e65f903f80547fd1f1ab16
+* Expected origin/main: a69970eaeb8a762ef3734e182f5955c823bfcb80
+* Expected origin/feature/edponbaord: e846755dc0ca9007f0a5e1a3a2cbdb1691d2e5ba
 
-1. Fetch and record the latest main and onboarding tips. Preserve the original implementation and publication worktrees, including their target/ directories. Create or safely reuse an isolated local integration worktree based on the onboarding tip. Do not access fcrm_clue.
-2. Merge origin/main into the integration branch. Resolve the reported file-location conflicts by preserving both main’s environment-lifecycle functionality and the onboarding layout. Place application files, tests, config/environments, and tools/dev_checks under their correct Deliverables paths. Inspect configuration discovery and path references; do not merely move files and assume compatibility. Do not resolve wholesale with “ours” or “theirs”.
-3. Fix runtime-secret precedence without changing the established behavior of ordinary local runs:
-    * Add a narrowly scoped, explicit runtime-secrets mode enabled by the existing wrapper.
-    * In that mode, the four canonical environment variables supplied by the wrapper must take precedence over env-file values and aliases throughout the actual configuration-loading path.
-    * Missing required injected values must fail clearly without falling back to stale file secrets.
-    * Outside that mode, preserve the existing documented precedence.
-    * Keep non-secret environment configuration working.
-    * Use synthetic tests to prove both modes, including stale file aliases and certificate/key paths. Never print secret values.
-4. Remove the unrelated sudo -n true prerequisite. Retain non-interactive sudo -n for the actual Salt retrieval commands and fail safely when they fail. Do not modify sudoers or request broader privileges.
-    Add focused tests showing:
-    * Salt retrieval succeeds when sudo permits the required commands but denies true.
-    * Denied or failed Salt retrieval prevents the child from running and does not expose secret material.
-5. Validate the integrated result:
-    * Run relevant runtime/configuration/lifecycle tests and the merged regression suite, with POSIX wrapper tests actually executed on Linux/WSL.
-    * Build the Maven archive.
-    * Confirm that the relocated lifecycle modules, environment YAML files, tests, and intended tools are included.
-    * Confirm deploy shell scripts retain 0755, archive paths are unique, and no real secrets or local build outputs are packaged.
-    * Check the evidenced clue-batch entry point using help or synthetic tests; do not process real input or contact live providers.
-6. Commit the integration and fixes on the local integration branch using explicit paths. Preserve published history. Update only the relevant existing deployment documentation with the runtime-secrets behavior and evidenced invocation pattern.
+1. Verify repository identity, branch, HEAD, merge parents, and working-tree status. Generated target/ files may remain untracked but must not be staged.
+2. Fetch origin and verify that both expected remote tips are unchanged. If either main or feature/edponbaord has advanced, stop without pushing and report the new SHAs.
+3. Confirm the integration branch contains:
+    * the published onboarding commit history unchanged;
+    * the merge of the recorded main SHA;
+    * the focused integration-fix commit;
+    * no temporary helpers, target outputs, credentials, secrets, or unrelated files.
+4. Perform a normal push:
+    git push -u origin integration/edponbaord-main-20260924
+5. Verify with git ls-remote that the remote integration branch resolves exactly to the local HEAD.
 
-Return the branch/worktree, source SHAs, local commits, conflict resolutions, changed files, actual test/build results, and remaining deployment inputs. Distinguish historical documentation about DEV Python from freshly verified server facts.
-
-Complete the local work without waiting for AutoSys details. Stop only for a concrete conflict or decision that cannot be resolved from the code and established contracts.
+Do not force-push. Do not push to feature/edponbaord or main. Do not create, reopen, or merge a pull request. Return the local and remote SHAs, the remote-tip checks, working-tree status, and push result.
