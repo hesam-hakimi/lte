@@ -1,1 +1,3 @@
-Yes, I mean the account that the AutoSys job will run under. I do not have that account information yet. Could you please confirm the AutoSys job owner/runtime user ID? Once confirmed, we can verify whether that identity can retrieve the required Salt pillar secrets non-interactively.
+For now, the DEV NPID TCLUE999DEVS is sufficient for lower-environment installation and runtime smoke testing. We only need a separate AutoSys-specific account if the AutoSys job will run under a different identity.
+
+Could you please confirm whether TCLUE999DEVS will be configured as the AutoSys job owner/runtime account? If yes, no separate account is required.
