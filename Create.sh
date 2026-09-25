@@ -1,7 +1,28 @@
-grep -RInE 'nexus|index-url|extra-index-url|wheel-dir|wheelhouse|\.whl' \
-  /opt/clue/pr19-c70b121f/deploy \
-  /opt/clue/pr19-c70b121f/docs \
-  /opt/clue/pr19-c70b121f/config \
-  /opt/clue/pr19-c70b121f/pyproject.toml \
-  /opt/clue/pr19-c70b121f/requirements.txt \
-  2>/dev/null | head -100
+python3.12 - <<'PY'
+import os
+import subprocess
+from urllib.parse import urlsplit
+
+sources = []
+
+for name in ("PIP_INDEX_URL", "PIP_EXTRA_INDEX_URL"):
+    value = os.environ.get(name)
+    if value:
+        sources.append((name, value))
+
+for key in ("global.index-url", "global.extra-index-url"):
+    result = subprocess.run(
+        ["python3.12", "-m", "pip", "config", "get", key],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0 and result.stdout.strip():
+        sources.append((key, result.stdout.strip()))
+
+if not sources:
+    print("NO_PIP_INDEX_CONFIGURED")
+else:
+    for name, value in sources:
+        parsed = urlsplit(value if "://" in value else "//" + value)
+        print(f"{name}: host={parsed.hostname or 'UNPARSEABLE'}")
+PY
