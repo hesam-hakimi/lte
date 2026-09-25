@@ -1,3 +1,5 @@
+# STEP: INSTALL APPLICATION AND TEST DEPENDENCIES
+
 ROOT=/opt/clue/pr19-c70b121f
 W=/opt/clue/pr19-wheelhouse-c70b121f
 VENV="$ROOT/.venv"
