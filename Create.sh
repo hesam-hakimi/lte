@@ -1,28 +1,24 @@
-ROOT=/opt/clue/pr19-c70b121f
-WRAPPER="$ROOT/deploy/clue_with_runtime_secrets.sh"
-
-echo "=== CURRENT EXECUTION IDENTITY ==="
-id
-
-echo
-echo "=== REQUIRED COMMANDS ==="
-for cmd in sudo salt-call jq openssl mktemp shred; do
-    if command -v "$cmd" >/dev/null 2>&1; then
-        printf '%-12s FOUND %s\n' "$cmd" "$(command -v "$cmd")"
-    else
-        printf '%-12s MISSING\n' "$cmd"
-    fi
-done
-
-echo
-echo "=== SECRET FETCH IMPLEMENTATION — SOURCE ONLY ==="
-nl -ba "$WRAPPER" | sed -n '100,145p'
-
-echo
-echo "=== NON-INTERACTIVE SUDO POLICY — NO SECRET RETRIEVAL ==="
+set +x
 set +e
-sudo -n -l 2>&1 | sed -n '1,200p'
-SUDO_STATUS=${PIPESTATUS[0]}
-set -e
 
-echo "SUDO_POLICY_EXIT_CODE=$SUDO_STATUS"
+sudo salt-call pillar.get "secrets:tungsten_primarykey" \
+  --out=json 2>/tmp/clue-salt-error.$$ |
+jq -r '
+  if (.local | type) == "string" and (.local | length) > 0
+  then "TUNGSTEN_PRIMARYKEY_PRESENT"
+  else "TUNGSTEN_PRIMARYKEY_MISSING_OR_INVALID"
+  end
+'
+
+SALT_STATUS=${PIPESTATUS[0]}
+JQ_STATUS=${PIPESTATUS[1]}
+
+echo "SALT_EXIT_CODE=$SALT_STATUS"
+echo "JQ_EXIT_CODE=$JQ_STATUS"
+
+if [ "$SALT_STATUS" -ne 0 ]; then
+    sed -n '1,40p' /tmp/clue-salt-error.$$
+fi
+
+rm -f /tmp/clue-salt-error.$$
+set -e
