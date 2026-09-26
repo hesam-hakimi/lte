@@ -45,7 +45,7 @@ The practical effect is that clue-batch --environment dev on the DEV host cannot
 
 The integration branch has already corrected this: the files are inside Deliverables/. It also adds the regression guard Deliverables/tests/clue/test_deliverables_layout.py, which fails the build if any application file is left at the repository root.
 
-origin/main additionally tracks 17 target/site/** files—committed Maven site output, including surefire-report.html. The integration branch deletes them.
+origin/main additionally tracks 16 target/site/** files—committed Maven site output, including surefire-report.html. The integration branch deletes them.
 
 REQUESTED DECISION
 
