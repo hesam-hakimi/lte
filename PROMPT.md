@@ -1,219 +1,176 @@
-VERSION AND NEXUS ENDPOINT DECISION — EVIDENCE-BASED AUDIT
+CLUE — apply the authorized 1.1.1-SNAPSHOT candidate realignment and rerun local gates
 
-Before committing, pushing, opening a PR, or triggering CI/XLR, perform this read-only audit.
+Continue the active CLUE engineering work. This is not a project restart.
 
-1. Identify the historical wrapper commit
+All responses, implementation notes, code comments, test summaries, and
+documentation in the development environment must be in English. Do not use
+personal names unless an identity is technically required.
 
-Find the exact historical commit where this file was first added:
+Read these documents completely, in this order, before taking repository
+action:
 
-Deliverables/deploy/wrapper.sh
+1. CLUE_Implementation_Reference_2026-09-26.md, R3
+2. CLUE_Implementation_Phases_and_Acceptance_2026-09-26.md, R3
+3. CLUE_Implementation_Journal_2026-09-26.md, R4
+4. CLUE_Deployment_Package_Truth_and_Stepwise_Validation_2026-09-25.md,
+   R7 controlling checkpoint only; older sections are historical evidence
 
-Search all available local and remote Git refs. The meeting evidence shows that it was pushed from a feature branch, but obtain the exact branch spelling and commit SHA from Git rather than relying on the screenshot.
+Current source checkpoint
 
-Report:
+- Isolated worktree: clue-rc-20260926
+- Candidate branch: release-candidate/clue-app-clue-20260926
+- The merge was last reported uncommitted.
+- The earlier local artifact was
+  clue-code-1.1.0-SNAPSHOT.tar.gz, 676,308 bytes, SHA-256
+  8873CF22535AF5E5B620CF9A9E05492D1ED89B972B15FD8494E8C00849CD2BC3.
+- That artifact remains valid only for its recorded pre-realignment source
+  state. Do not rename or reuse it as 1.1.1-SNAPSHOT evidence.
 
-* Exact commit SHA
-* Exact branch/ref name
-* Commit timestamp
-* Commit subject
-* Whether the commit is reachable from origin/main
+Superseding owner decision
 
-Do not checkout, reset, merge, cherry-pick, stage, or modify anything during this audit.
+The uncommitted candidate must use 1.1.1-SNAPSHOT. This is an intentional
+candidate-identity decision that separates the new build from the existing
+1.1.0-SNAPSHOT Nexus lineage. Do not state that Nexus technically requires a
+logical version bump for each Snapshot build.
 
-2. Inspect the historical CI/CD contract
+Authorization boundary for this run
 
-Using git show <commit>:<path> or an equivalent read-only command, inspect these files exactly as they existed in the historical wrapper commit:
+Authorized:
 
-* CI.yml
-* CD.yml
-* pom.xml
-* assembly/pom.xml, if present
-* assembly.xml, if relevant to artifact naming
-* .github/workflows/edp_xl_caller.yml
+- read-only live Git and repository checks;
+- local uncommitted version alignment described below;
+- the already authorized active CD basename /app/clue;
+- local tests, official Maven build, archive validation, and documentation.
 
-First report the literal values without interpretation.
+Not authorized:
 
-Historical producer configuration
+- commit or push;
+- PR creation, update, or merge;
+- CI/XLR execution or Nexus publication;
+- server access, deployment, or promotion;
+- any endpoint-host change;
+- any CI.yml edit, including deployableArtifact.type;
+- credentials, repository, owner, environment, packaging-plugin, or unrelated
+  configuration changes.
 
-From CI.yml and the POM files, extract:
+Step 1 — re-establish live state before editing
 
-* Nexus publish endpoint and hostname
-* Repository name
-* groupId
-* artifactId
-* Packaging/type
-* Effective Maven version
-* Expected artifact filename
-* distributionManagement source, including inherited values when applicable
+1. Confirm the exact repository, sanitized remote, worktree, branch, HEAD,
+   origin/main, merge state, and upstream state.
+2. Fetch without merging or pruning, then confirm whether remote movement
+   invalidates the recorded integration.
+3. Run git status and report staged, unstaged, and untracked paths.
+4. Identify the two pending-file changes previously visible in the UI, if they
+   still exist. Do not keep, discard, or overwrite them without identifying
+   their exact paths and relation to the candidate.
+5. Before the version edit, prove CI.yml, pom.xml, assembly/pom.xml,
+   assembly.xml, and .gitignore match current origin/main byte-for-byte.
+   Prove CD.yml differs from origin/main only by the active /opt/clue to
+   /app/clue basename change.
+6. Confirm no generated, cache, credential, secret, key, .env, target/,
+   archive, or package-output path is staged.
 
-Historical consumer configuration
+If these gates fail, stop without changing repository state and report the
+exact failure.
 
-From CD.yml, extract:
+Step 2 — apply only the authorized version alignment
 
-* Complete batch_url
-* Download endpoint and hostname
-* Repository name
-* Logical SNAPSHOT version in the URL
-* Expected artifact filename
-* basename or installation root
-* Batch name
+1. Inspect all active and historical occurrences of 1.1.0-SNAPSHOT,
+   1.1.1-SNAPSHOT, and 0.2.0-test-f676277 before editing.
+2. Change the authoritative Maven version in the root pom.xml from
+   1.1.0-SNAPSHOT to 1.1.1-SNAPSHOT.
+3. Inspect assembly/pom.xml and the effective Maven reactor. Change only an
+   exact parent/reactor version reference that must match the root version.
+   Do not change packaging, plugins, repositories, groupId, artifactId, or any
+   unrelated POM content.
+4. In the active CD.yml batch_url, change both the logical version directory
+   and artifact filename from 1.1.0-SNAPSHOT to 1.1.1-SNAPSHOT.
+5. Retain the active basename /app/clue.
+6. Retain the configured CD host and repository exactly as they are. Do not
+   replace repo.td.com with rp.td.com.
+7. Do not add a version to CI.yml and do not hardcode a timestamped Nexus
+   member.
+8. Do not rewrite commented historical blocks merely to remove old versions.
 
-3. Correlate the historical configuration with Nexus evidence
+Step 3 — prove the exact semantic diff
 
-The known historical Nexus artifact is:
+1. Show sanitized git status, staged/unstaged path lists, diffstat, and diffs
+   for pom.xml, assembly/pom.xml, CD.yml, and CI.yml.
+2. Prove CI.yml, assembly.xml, and .gitignore remain byte-identical to current
+   origin/main.
+3. Prove POM differences are limited to the required 1.1.1-SNAPSHOT version
+   alignment.
+4. Prove active CD.yml differences are limited to:
+   - /opt/clue to /app/clue; and
+   - 1.1.0-SNAPSHOT to 1.1.1-SNAPSHOT in the logical directory and filename.
+5. Prove active effective coordinates are
+   com.td.clue:clue-code:1.1.1-SNAPSHOT and that no rehearsal ID or timestamped
+   Snapshot name entered the Maven/CI/CD contract.
 
-Group: com.td.clue
-Artifact: clue-code
-Logical version: 1.0.5-SNAPSHOT
-Stored artifact:
-clue-code-1.0.5-20260924.233625-2.tar.gz
+Step 4 — rerun local qualification
 
-Determine:
+1. Rerun the targeted layout, version, CD-contract, and affected-module tests.
+2. Rerun the complete applicable test suite and record commands, exit codes,
+   pass/skip/fail counts, and duration.
+3. Use the repository Maven wrapper and official Assembly path to run a clean
+   package build.
+4. Require BUILD SUCCESS and the output
+   clue-code-1.1.1-SNAPSHOT.tar.gz.
+5. Record the new artifact path, exact byte count, and SHA-256.
+6. Repeat all safe archive-member, path, type, permission, secret, cache,
+   generated-output, tracked-input, and extracted-content smoke checks.
+7. Confirm the five packaged deploy shell scripts retain mode 0755 and pass
+   syntax checks.
+8. Confirm tests and the build did not add prohibited staged files.
 
-1. Which historical file supplied 1.0.5-SNAPSHOT.
-2. Which endpoint was configured to publish it.
-3. Whether CI.yml contained a literal version or obtained it from pom.xml.
-4. Whether CD.yml used repo.td.com or rp.td.com.
-5. Whether the CD download URL was actually exercised or only the CI upload is proven by the Nexus artifact.
+Step 5 — record, but do not change, the EDP artifact-type issue
 
-Do not conclude that the historical CD endpoint worked merely because the artifact reached Nexus. Upload and download are separate paths.
+1. Extract the literal current deployableArtifact.type from CI.yml.
+2. Record the meeting evidence separately: the observed deployment remained
+   pom, the expected application package was stated to be tar.gz, and the
+   intended automated server deployment did not occur.
+3. Do not infer the current correct value solely from the historical meeting.
+4. If current CI.yml is pom, classify the publication/deployment contract as
+   BLOCKED_EXTERNAL_EVIDENCE pending current EDP/XLR template or platform-team
+   confirmation. Do not edit CI.yml in this run.
 
-4. Compare with the current release candidate
+Step 6 — endpoint evidence rule
 
-Compare the historical values with both current origin/main and the staged release candidate.
+The supplied rp.td.com screenshot shows only:
 
-Produce this exact table:
+  wget https://rp.td.com/ -O file.tar.gz
+  HTTP 200
+  Length: 8172 (8.0K) [text/html]
 
-Field	Historical wrapper commit	Current origin/main	Current staged candidate
-CI publish host			
-CD download host			
-Repository			
-groupId			
-artifactId			
-Maven version			
-CD logical version			
-Artifact filename			
-basename			
+This is a web-root HTML response saved under a misleading filename. It is not
+artifact-download evidence. Do not use it to change CD.yml.
 
-The expected current version is:
+Because 1.1.1-SNAPSHOT is not published yet, its exact candidate URL cannot be
+proven before publication. If authorized Nexus read access already exists,
+validate the configured resolver contract using an existing known logical
+Snapshot path or Maven metadata on repo.td.com, with TLS verification enabled.
+Record requested URL, final URL, redirects, HTTP status, content length/type,
+and checksum metadata without displaying credentials. After a separately
+authorized candidate publication, the exact 1.1.1-SNAPSHOT URL must be tested
+again before claiming NEXUS_DOWNLOADABLE_BUILD_VERIFIED.
 
-1.1.0-SNAPSHOT
+Documentation and stop condition
 
-The previous 1.0.5-SNAPSHOT was a valid historical pipeline version. The required version increase from 1.0.5-SNAPSHOT to 1.1.0-SNAPSHOT has already occurred.
+Update CLUE_Implementation_Journal_2026-09-26.md with every sanitized command,
+exit code, literal value, changed path, test/build result, artifact size/hash,
+and unresolved external item.
 
-Do not increment the candidate to 1.1.1-SNAPSHOT.
-
-The rehearsal identifier:
-
-0.2.0-test-f676277
-
-belongs only to the separate manual rehearsal artifact. It must not be treated as the official Maven or CI version.
-
-5. Verify version alignment
-
-Confirm all of the following:
-
-* Effective root POM version is 1.1.0-SNAPSHOT.
-* Effective assembly POM version is compatible with the root POM.
-* Local artifact is clue-code-1.1.0-SNAPSHOT.tar.gz.
-* CD.yml references the logical version 1.1.0-SNAPSHOT.
-* Artifact coordinates are com.td.clue:clue-code.
-* No current official contract file was reverted to 1.0.5-SNAPSHOT.
-* No official contract file contains 0.2.0-test-f676277.
-* Nexus-generated timestamps or build numbers are not hardcoded in the repository.
-
-Preserve CI.yml from origin/main unless direct evidence proves an authorized correction is required.
-
-6. Classify the endpoint evidence
-
-The current Nexus banner states that the cutover from:
-
-repo.td.com
-
-to:
-
-rp.td.com
-
-has completed and that EDP pipelines now upload artifacts to rp.td.com.
-
-Classify every endpoint conclusion as one of:
-
-* HISTORICALLY_CONFIGURED
-* HISTORICALLY_PROVEN_FOR_UPLOAD
-* CURRENTLY_CONFIGURED
-* CURRENTLY_PROVEN_FOR_DOWNLOAD
-* UNRESOLVED
-
-If historical CI used rp.td.com while historical or current CD.yml uses repo.td.com, report this as an upload/download endpoint mismatch.
-
-Do not silently treat the two hostnames as aliases. Alias behaviour must be proven through configuration, redirect evidence, or an authorized platform source.
-
-Do not modify CI.yml, CD.yml, or any POM during this audit.
-
-7. Safely validate the configured download URL
-
-If the environment already has authorized Nexus read access, validate the exact current CD.yml URL without changing it.
-
-1. Attempt a HEAD request or equivalent metadata request.
-2. If HEAD is unsupported, perform a controlled GET without displaying binary content.
-3. Record:
-    * Requested URL
-    * Final URL after redirects
-    * HTTP status
-    * Redirect chain
-    * Content length
-    * Content type
-    * Checksum header, if supplied
-4. Do not display credentials, cookies, tokens, or authorization headers.
-5. Do not manually upload or replace any artifact.
-6. Do not weaken TLS validation.
-
-Test the exact configured URL first. Do not silently substitute a different hostname.
-
-If the configured URL fails but the equivalent rp.td.com URL succeeds, report both results and stop for authorization before editing CD.yml.
-
-If Nexus access is unavailable, record the validation as UNRESOLVED; do not claim failure or success.
-
-8. Confirm the publication trigger before opening a PR
-
-Inspect the repository workflow in read-only mode and determine whether:
-
-* A branch push triggers anything.
-* Opening a normal or Draft PR triggers XLR.
-* The XLR process performs build/publish only or may continue into DEV deployment.
-* A documented build-only control exists.
-
-Repository evidence may prove the GitHub trigger but may not reveal downstream XLR behaviour. Clearly separate documented facts from unresolved platform behaviour.
-
-Do not open a PR until the trigger boundary is known and separately authorized.
-
-9. Final report
+Stop after the local report. Do not commit, push, open or merge a PR, trigger
+XLR, publish, access a server, or deploy.
 
 End with exactly one of:
 
-VERSION_AND_ENDPOINT_CONTRACT_PASS
+LOCAL_VERSION_REALIGNMENT_PASS
 
-or:
+or
 
-VERSION_AND_ENDPOINT_CONTRACT_BLOCKED
+LOCAL_VERSION_REALIGNMENT_BLOCKED
 
-PASS requires:
-
-* Version alignment at 1.1.0-SNAPSHOT.
-* Correct coordinates for com.td.clue:clue-code.
-* Historical and current endpoints reported separately.
-* CI upload evidence and CD download evidence not conflated.
-* Exact current download URL proven reachable, or the platform-owned resolution mechanism documented with evidence.
-* PR/XLR trigger boundary understood.
-* No unauthorized file modification.
-
-If blocked, report:
-
-* Exact unresolved item
-* Evidence already collected
-* Smallest required decision
-* Responsible team or system owner, without naming individuals unless technically necessary
-
-Stop after producing the report.
-
-Do not commit, push, open a PR, trigger CI/XLR, publish, deploy, promote, change a version, or change an endpoint.
+PASS requires all live gates, tests, official build, archive checks, and exact
+1.1.1-SNAPSHOT POM/CD alignment to pass. The EDP artifact-type and endpoint
+questions may still block Phase 7 even when the local realignment passes.
