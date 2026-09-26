@@ -1,228 +1,302 @@
-Continue in the current C:\repos\clue-rc-20260926 worktree and correct the existing operational runbook. Perform the edits; do not merely propose them.
 
-Scope
+Authoritative deployment flow
 
-Primary file:
+The complete deployment implementation, documentation and wrapper must be included inside the Maven-produced CLUE package.
 
-Deliverables/docs/CLUE_OPERATIONAL_DEPLOYMENT.md
+There is no separately transferred bootstrap wrapper.
 
-You may modify these supporting files only if required to keep the documented command identical to the real wrapper interface:
+The flow is:
 
-Deliverables/deploy/clue_operational_wrapper.sh
-Deliverables/tests/clue/test_operational_wrapper.py
+1. CI builds the complete CLUE tar.gz from Deliverables/.
+2. CI publishes that package to Nexus.
+3. On the DEV server, Root downloads the package from Nexus into /tmp.
+4. Root performs all existing integrity and archive-safety checks.
+5. Root safely extracts the rootless package into /app/clue.
+6. Root assigns the extracted installation to the supplied NPID and approved group.
+7. Root exits.
+8. The packaged wrapper is executed as the NPID from:
 
-Do not modify, restore, stage or unstage any POM, Maven Assembly, CI/CD, Git configuration or workflow file. Do not commit, push, upload, open a PR, run deployment commands or change the DEV server.
+/app/clue/deploy/clue_operational_wrapper.sh
 
-Defect to correct
+The archive itself remains in /tmp; the extracted application files go into /app/clue.
 
-The current runbook checks for:
+Remove the incorrect design
+
+Remove all active documentation, code and tests that assume any of the following:
 
 /tmp/clue_operational_wrapper.sh
+/app/clue/bin/clue_operational_wrapper.sh
+a separately copied bootstrap wrapper
+a wrapper that downloads or extracts its own containing archive
+manual use of /opt/clue
 
-without first explaining how that bootstrap wrapper reaches /tmp.
+Do not restore any previously reverted implementation.
 
-Do not solve this by extracting the complete application archive before A3. That would duplicate the wrapper’s responsibility and break the Root/NPID boundary.
+Allowed files
 
-The correct lifecycle is:
+Create or update only:
 
-1. The operator or Orchestrator stages only the reviewed bootstrap wrapper in /tmp.
-2. Root validates the host, identity, group and wrapper.
-3. Root prepares /app/clue and installs the bootstrap wrapper.
-4. Root exits.
-5. The wrapper runs as the supplied NPID.
-6. The wrapper resolves the requested release from Nexus, downloads it, verifies SHA-256, inspects it, extracts it and continues the validated application sequence.
+Deliverables/deploy/clue_operational_wrapper.sh
+Deliverables/docs/CLUE_OPERATIONAL_DEPLOYMENT.md
+Deliverables/tests/clue/test_operational_wrapper.py
+
+Everything must remain under Deliverables/ so the existing Maven Assembly packages it automatically.
+
+Do not modify:
+
+pom.xml
+assembly/pom.xml
+assembly.xml
+CI.yml
+CD.yml
+.gitignore
+.gitattributes
+.mvn/**
+mvnw
+mvnw.cmd
+.github/**
+
+Do not alter the existing Maven/POM/Assembly structure. Do not stage, unstage, commit, push, upload to Nexus or open a PR.
 
 Fixed DEV contract
 
-Use these current DEV values:
-
 Host: crcluesbdzwnk0.dev.vmc2.td.com
-Operator account: tag5916
-Runtime NPID example: tclue999devs
+Example NPID: tclue999devs
 Owner group: users
 Application root: /app/clue
-Installed wrapper: /app/clue/bin/clue_operational_wrapper.sh
-Bootstrap wrapper: /tmp/clue_operational_wrapper.sh
+Archive staging root: /tmp
+Packaged wrapper source: Deliverables/deploy/clue_operational_wrapper.sh
+Installed wrapper: /app/clue/deploy/clue_operational_wrapper.sh
 Nexus host: https://rp.td.com
-Repository: td-maven-snapshots
+Nexus repository: td-maven-snapshots
 Maven group: com.td.clue
-Artifact: clue-code
+Artifact ID: clue-code
 Extension: tar.gz
 Release example: 1.1.1-SNAPSHOT
 
-The only variable operational inputs are:
+The two operator-selected values are:
 
---release
---npid
+RELEASE
+NPID
 
-The wrapper must verify that id -un exactly equals the supplied --npid. It must never switch identity internally.
+The exact Nexus asset URL and trusted SHA-256 must come from Nexus/CI evidence for that release. They must never be guessed or derived from the downloaded archive itself.
 
-Required runbook structure
+Rewrite the runbook in this order
 
-Rewrite the preparation and execution sequence in this exact order.
+Phase 0 — Producer prerequisite
 
-A0 — Stage the bootstrap wrapper
+Document that CI must:
 
-Add a Windows PowerShell section that transfers only:
+1. use the repository’s existing Maven Assembly producer;
+2. include all tracked Deliverables/ content;
+3. produce clue-code-<release>.tar.gz;
+4. preserve deploy/*.sh as executable;
+5. verify package contents;
+6. publish the exact bytes to Nexus;
+7. publish or record an independently trusted SHA-256.
 
-Deliverables/deploy/clue_operational_wrapper.sh
+Deployment must stop if no Nexus asset and trusted SHA-256 exist.
 
-to:
+This section documents the producer contract only. Do not modify CI or Maven files.
 
-/tmp/clue_operational_wrapper.sh
+Phase 1 — Become Root and validate the target
 
-Use scp with tag5916 and the fixed DEV hostname.
-
-The instructions must:
-
-* calculate the local SHA-256;
-* transfer the wrapper;
-* calculate the remote SHA-256;
-* require the hashes to match;
-* confirm it is a regular file and not a symlink;
-* run bash -n remotely;
-* stop on any mismatch.
-
-State explicitly that A0 uses the wrapper from the exact release-candidate source being tested.
-
-A1 — Become Root
-
-Keep:
+The runbook must start server-side preparation with:
 
 sudo -i
+set -Eeuo pipefail
+umask 027
 
-Immediately prove Root with:
+Define:
 
-test "$(id -u)" -eq 0
+RELEASE='1.1.1-SNAPSHOT'
+NPID='tclue999devs'
+OWNER_GROUP='users'
+APP_ROOT='/app/clue'
+ARCHIVE="/tmp/clue-code-${RELEASE}.tar.gz"
 
-The runbook must tell the operator not to continue unless the prompt and id -u confirm Root.
+Then verify:
 
-A2 — Validate DEV identity and bootstrap input
-
-Validate:
-
-* exact hostname;
-* Root identity;
-* tclue999devs exists;
+* the exact DEV hostname;
+* effective UID is 0;
+* NPID exists;
 * group users exists;
-* tclue999devs belongs to users;
-* /tmp/clue_operational_wrapper.sh exists;
-* it is a regular file;
-* it is not a symbolic link;
-* it passes bash -n.
+* NPID belongs to users;
+* /app is a normal directory and not a symlink;
+* /app/clue is a normal directory and not a symlink;
+* an existing /app/clue installation is not silently overwritten.
 
-Any failure must stop the procedure.
+Phase 2 — Download the archive from Nexus into /tmp
 
-A3 — Prepare /app/clue and install the wrapper
+Root downloads the exact Nexus asset to:
 
-Root may perform only these mutations:
+/tmp/clue-code-<release>.tar.gz.part
 
-* create /app as root:root mode 0755 when absent;
-* refuse /app or /app/clue if either is an unsafe symlink or non-directory;
-* prepare /app/clue as tclue999devs:users mode 2750;
-* prepare /app/clue/bin as tclue999devs:users mode 2750;
-* install the bootstrap wrapper as:
+Requirements:
 
-/app/clue/bin/clue_operational_wrapper.sh
+* HTTPS only;
+* TLS verification enabled;
+* no curl -k;
+* no credentials embedded in the URL or printed in logs;
+* redirects handled safely;
+* HTTP failure is fatal;
+* rename .part to the final archive name only after a complete successful download;
+* reject HTML or other non-archive responses.
 
-with owner tclue999devs, group users and mode 0750.
+The final archive location is:
 
-If /app/clue already exists, inspect it first. Do not delete or overwrite existing application content. Stop if unexpected content is present.
+/tmp/clue-code-<release>.tar.gz
 
-Verify ownership, group and modes after installation.
+Do not download it into /app/clue, /app/clue/bin, /app/clue/deploy or /opt/clue.
 
-Root must not download, verify, extract or execute the CLUE application archive.
+Phase 3 — Integrity and archive validation
 
-A4 — Leave Root
+Before extraction, Root must:
 
-Add an explicit:
+1. compare the downloaded bytes with the independently trusted SHA-256;
+2. run gzip -t;
+3. inspect every archive member;
+4. reject absolute paths and .. traversal;
+5. reject backslash paths;
+6. reject symlinks, hardlinks, devices, FIFOs and sockets;
+7. reject setuid, setgid and world-writable members;
+8. reject credentials, keys, .env, caches and build-output directories;
+9. verify the archive is rootless;
+10. verify required members exist, including:
+
+deploy/clue_operational_wrapper.sh
+deploy/clue_with_runtime_secrets.sh
+pyproject.toml
+requirements.txt
+src/clue/__init__.py
+environments/dev.yaml
+
+11. verify required deployment scripts are packaged with executable mode 0755.
+
+Any failure must stop before /app/clue is modified.
+
+Phase 4 — Extract into /app/clue
+
+Root prepares /app/clue as:
+
+owner: <NPID>
+group: users
+mode: 2750
+
+The package is rootless, so extract its contents directly from the archive in /tmp into:
+
+/app/clue
+
+After extraction:
+
+* recursively assign ownership to <NPID>:users;
+* preserve required executable modes;
+* reject unexpected owners or groups;
+* reject world-writable content;
+* verify all required package members;
+* run bash -n against packaged shell scripts;
+* verify /app/clue/deploy/clue_operational_wrapper.sh exists and is executable.
+
+Do not create or use /app/clue/bin.
+
+Phase 5 — Leave Root
+
+The runbook must explicitly execute:
 
 exit
 
-Then confirm the interactive operator is no longer Root.
+No application process may be started while Root is active.
 
-B1 — Execute the wrapper as the runtime NPID
+Phase 6 — Execute the packaged wrapper as NPID
 
-Use this exact current example:
+Use the current DEV example:
 
 sudo -H -u tclue999devs -- \
-  /app/clue/bin/clue_operational_wrapper.sh \
+  /app/clue/deploy/clue_operational_wrapper.sh \
   --release 1.1.1-SNAPSHOT \
   --npid tclue999devs
 
-Also provide the parameterized Orchestrator form:
+Also include the parameterized form:
 
-CLUE_RELEASE='1.1.1-SNAPSHOT'
-CLUE_NPID='tclue999devs'
-sudo -H -u "$CLUE_NPID" -- \
-  /app/clue/bin/clue_operational_wrapper.sh \
-  --release "$CLUE_RELEASE" \
-  --npid "$CLUE_NPID"
+RELEASE='1.1.1-SNAPSHOT'
+NPID='tclue999devs'
+sudo -H -u "$NPID" -- \
+  /app/clue/deploy/clue_operational_wrapper.sh \
+  --release "$RELEASE" \
+  --npid "$NPID"
 
-State clearly that the wrapper, while running as the NPID, owns the following sequence:
+Packaged wrapper responsibilities
 
-1. resolve the exact Nexus asset for the requested release;
-2. obtain an independently trusted SHA-256;
-3. download into a fresh staging directory under /app/clue;
-4. verify the digest before reading archive contents;
-5. inspect every archive member;
-6. reject unsafe paths, links, devices, credentials and prohibited content;
-7. validate the rootless Maven Assembly layout;
-8. extract under /app/clue;
-9. validate ownership, group, modes and required files;
-10. continue only through the execution chain proven by the packaged scripts.
+Implement a small post-extraction wrapper at:
 
-Do not document any unimplemented wrapper option.
+Deliverables/deploy/clue_operational_wrapper.sh
 
-Legacy/manual artifact warning
+It must:
 
-Add a concise warning:
+* require --release and --npid;
+* support --help;
+* optionally support --dry-run;
+* reject Root execution;
+* verify id -un exactly equals the supplied NPID;
+* validate safe argument syntax;
+* verify /app/clue is a normal directory;
+* verify the installed package layout;
+* verify required packaged scripts are present and executable;
+* use the existing packaged runtime-secrets boundary;
+* execute only the application call chain proven by the existing scripts and repository evidence;
+* fail closed if the supported entry point cannot be proven;
+* never use sudo, su, runuser, chown, curl, tar or Nexus APIs;
+* never download, verify or extract the archive;
+* never create a second release-management implementation.
 
-* /opt/clue is a superseded rehearsal location.
-* The manually copied /opt/clue/clue-code-1.1.1-SNAPSHOT.tar.gz is outside this deployment flow.
-* It must not be moved, extracted, renamed or treated as release evidence.
-* The known local archive was created before the current wrapper/runbook changes because Maven could not rebuild without JDK 21.
-* The production flow must obtain the artifact through Nexus.
-* Do not delete existing /opt/clue content as part of this runbook.
+Before implementing the execution chain, inspect these existing scripts:
 
-Documentation consistency
+Deliverables/deploy/clue_dev_prereq.sh
+Deliverables/deploy/clue_dev_probe.sh
+Deliverables/deploy/clue_dev_integration.sh
+Deliverables/deploy/clue_dev_run.sh
+Deliverables/deploy/clue_with_runtime_secrets.sh
 
-Inspect the real wrapper usage/help text. The document and wrapper must agree exactly on:
+Do not invent arguments or commands. If the existing supported execution chain cannot be proven, implement all safe validation behavior but stop with a precise unresolved-contract error before application execution.
 
---release <version>
---npid <runtime-account>
---dry-run
---help
+Tests
 
-If the required --release and --npid interface is not yet implemented, make only the minimum supporting wrapper and focused-test changes required to implement it. Do not expand deployment scope.
+Create or update focused tests covering:
 
-Verification
+* wrapper is located under Deliverables/deploy;
+* documentation invokes it from /app/clue/deploy;
+* no bootstrap-wrapper path exists;
+* no /app/clue/bin assumption exists;
+* no active /opt/clue command exists;
+* Root performs download, validation and extraction;
+* wrapper refuses Root;
+* wrapper requires --release and --npid;
+* wrapper rejects an actual-user/NPID mismatch;
+* wrapper contains no download or extraction implementation;
+* archive checks occur before extraction;
+* wrapper execution occurs only after Root exits;
+* documentation and wrapper --help agree.
 
-Run only focused, non-destructive checks:
+Run only focused non-destructive tests. Do not run a full test suite.
 
-* Markdown command review;
-* wrapper bash -n if Bash is available;
-* the focused operational-wrapper test;
-* a search confirming the active instructions never use /opt/clue;
-* a search confirming no manual full-archive extraction occurs before A3;
-* a check that every /tmp/clue_operational_wrapper.sh reference is preceded by A0.
-
-Do not run Maven packaging because this workstation currently has no JDK 21. Do not install a JDK or change JAVA_HOME.
+This workstation currently lacks JDK 21. Do not install a JDK, change JAVA_HOME or claim that a new Maven artifact was built. Statically confirm that the existing Assembly configuration includes Deliverables/ and gives deploy/*.sh executable mode, without modifying that configuration.
 
 Final report
 
 Report:
 
-1. exact files changed;
-2. exact runbook sections added or corrected;
-3. focused verification results;
-4. whether wrapper help and runbook now agree;
-5. any remaining external dependency, without claiming it was verified.
+1. exact files created or changed;
+2. exact final deployment sequence;
+3. focused-test results;
+4. whether the existing packaged script call chain was proven;
+5. static evidence that the wrapper will be included by Maven Assembly;
+6. limitations caused by the missing local JDK;
+7. unresolved external Nexus/Salt evidence, if any.
 
 Finish with exactly one status:
 
-RUNBOOK_BOOTSTRAP_FLOW_CORRECTED
+PACKAGED_OPERATIONAL_FLOW_IMPLEMENTED
 
 or:
 
-RUNBOOK_CORRECTION_BLOCKED: <exact reason>
+PACKAGED_OPERATIONAL_FLOW_BLOCKED: <exact reason>
