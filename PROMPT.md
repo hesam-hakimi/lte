@@ -1,78 +1,47 @@
-Continue from your latest “§2 Adjudication Against Step 1 Repository
-Evidence” report.
+15. Ordered closure plan — one gate at a time
 
-That report is accepted only as a Step 1 addendum. Step 1 is now complete.
-Do not repeat or rewrite Step 1, and do not remain at the Step 1 gate.
+Gate 0 — select the repository baseline
 
-Execute CLUE Step 2 now: resolve the producer/consumer artifact contract.
+Before asking an agent to edit anything, the CLUE owner and EDP owner must decide whether the authoritative source is:
 
-This remains read-only:
-- no repository edits;
-- no generated files;
-- no build or package;
-- no CI execution;
-- no server access or deployment;
-- no commit, push, or PR action;
-- do not read or print credentials.
+1. the merged origin/main / PR #24 model;
+2. the current integration branch model; or
+3. a documented third model.
 
-Required work:
+The answer must cover Maven layout, release version, deployableArtifact.type, CD.yml owner block, batch_url, and .gitignore behavior as one coherent contract. Individual values must not be cherry-picked independently.
 
-1. Using existing authorized read-only access, inspect:
-   TD-Universe/edp-xl-actions/.github/workflows/edp-xl-workflow.yml@main
+Paste-ready question:
 
-   Report the immutable commit and exact:
-   - Maven command, goals, profiles, and properties;
-   - test commands;
-   - artifact-discovery pattern;
-   - Nexus upload implementation;
-   - checksum/signing/provenance generation;
-   - resolution of env.nexus_url.
+Subject: CLUE deployment baseline decision required before packaging changes
 
-2. Locate authorized source or documentation for the Salt java_batch formula
-   referenced by CD.yml. Determine:
-   - download and extraction destinations;
-   - expected archive root shape;
-   - direct versus versioned extraction;
-   - ownership and permissions;
-   - venv/dependency handling;
-   - invoked application entry point;
-   - activation, status, idempotency, and rollback behavior.
+Read-only comparison found that integration/edponboard-main-20260924 is
+9 commits ahead of and 6 commits behind origin/main (which contains merged
+PR #24). The two lines define incompatible deployment contracts:
 
-3. Keep these classifications separate:
-   - external source repository/workflow;
-   - Maven dependency retrieved from Nexus;
-   - deploy-time Platform Salt formula.
-   Do not call all three “a second repository.”
+- main: multi-module Maven, clue-code 1.1.0-SNAPSHOT,
+  deployableArtifact.type=pom, active java_batch owner
+  TCLUE999DEVS:users, batch_url for 1.1.0-SNAPSHOT, target/ ignored;
+- integration branch: single-module Maven, clue-code 1.0.5-SNAPSHOT,
+  deployableArtifact.type=tar.gz, owner block commented, batch_url for
+  1.0.5-SNAPSHOT, target/ no longer ignored.
 
-4. Incorporate these corrected facts:
-   - four divergent version values exist;
-   - /opt/clue is the tracked install root;
-   - ${CLUE_DEV_ROOT} is a separate scheduler-provided lifecycle-data root;
-   - work/ and output/ may change during a valid run;
-   - the repository implements narrow sudo only for salt-call secret retrieval;
-   - absence of rehearsal scripts proves CI cannot reproduce that bundle, but
-     does not independently prove the contents of a server-side artifact.
+Please identify the authoritative baseline for CLUE and approve one coherent
+set of values for Maven layout, Maven version, deployableArtifact.type,
+java_batch owner, batch_url, and target/ ignore behavior. Until this is
+recorded, we will not edit, build, package, or run CI.
 
-5. Produce decision register D01-D14 with columns:
-   ID | Decision | Evidence-backed options | Recommended option |
-   Required owner/approver | Approval evidence | Status
+Gate 1 — obtain EDP/XLR producer evidence
 
-6. Produce:
-   - Model A member map: preserve current Maven/Salt model;
-   - Model B member map: adopt rehearsal release-manager model;
-   - end-to-end deployment sequence for each viable model;
-   - paste-ready questions for EDP, Platform/Salt, Identity/Unix, and CLUE owners.
+After Gate 0, obtain the exact Maven invocation, tests, artifact-discovery glob, upload/promotion behavior, publish endpoint, checksum/provenance behavior, EDPProjectKey status, accepted deployableArtifact.type, and immutable workflow/parent pins.
 
-If external evidence is unavailable, do not guess. Mark the affected rows
-BLOCKED_EXTERNAL_EVIDENCE and continue all other tasks.
+Gate 2 — obtain Platform/Salt consumer evidence
 
-End with exactly one marker:
+Obtain the exact accepted archive format/root, extraction layout, default semantics, ownership/modes, Python runtime and dependency policy, AutoSys entry point, status/convergence behavior, and rollback mechanism.
 
-STEP_2_ARTIFACT_CONTRACT_APPROVED
+Gate 3 — obtain Identity/Unix evidence
 
-only if D01-D14 are all explicitly approved with evidence; otherwise:
+Verify canonical DEV/PAT/PROD accounts and memberships, the approved application-owner group, and the exact narrow sudoers rule. Do not grant NOPASSWD: ALL, and do not use a sudo-capability group as the filesystem owner unless Identity explicitly approves that design.
 
-STEP_2_ARTIFACT_CONTRACT_BLOCKED
+Gate 4 — close D01–D14, then authorize Step 3
 
-Return the complete text report, not screenshots alone. Do not propose or
-execute Step 3 changes.
+Only after the answers are captured in the canonical register may Step 3 propose repository changes. Step 3 must begin with a file-by-file change plan and tests; it must not start by generating another deployment archive.
